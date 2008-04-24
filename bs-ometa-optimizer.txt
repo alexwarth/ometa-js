@@ -1,0 +1,35 @@
+ometa BSNullOptimization {
+  setHelped = !($elf._didSomething = true),
+  helped    = ?$elf._didSomething,
+  trans     = [:t ?$elf.hasProperty(t) apply(t):ans] -> ans
+            | anything,
+  optimize  = trans:x helped     -> x,
+
+  Or        trans*:xs            -> [#Or].concat(xs),
+  And       trans*:xs            -> [#And].concat(xs),
+  Many      trans:x              -> [#Many,  x],
+  Many1     trans:x              -> [#Many1, x],
+  Set       :n trans:v           -> [#Set, n, v],
+  Not       trans:x              -> [#Not, x],
+  Lookahead trans:x              -> [#Lookahead, x],
+  Form      trans:x              -> [#Form, x],
+  Rule      :name :ls trans:body -> [#Rule, name, ls, body]
+}
+BSNullOptimization.initialize = function() { this._didSomething = false }
+
+ometa BSAndOrOptimization <: BSNullOptimization {
+  And trans:x end          setHelped -> x,
+  And transInside(#And):xs           -> [#And].concat(xs),
+  Or  trans:x end          setHelped -> x,
+  Or  transInside(#Or):xs            -> [#Or].concat(xs),
+
+  transInside :t = [exactly(t) transInside(t):xs] transInside(t):ys setHelped -> xs.concat(ys)
+                 | trans:x                        transInside(t):xs           -> [x].concat(xs)
+                 |                                                            -> []
+}
+
+ometa BSOMetaOptimizer {
+  optimizeGrammar = [#Grammar :n :sn optimizeRule*:rs]                 -> [#Grammar, n, sn].concat(rs),
+  optimizeRule    = :r (foreign(BSAndOrOptimization, #optimize, r):r)* -> r
+}
+

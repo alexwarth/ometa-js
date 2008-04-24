@@ -1,0 +1,161 @@
+<!--
+  Copyright (c) 2007, 2008 Alessandro Warth <awarth@cs.ucla.edu>
+
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation
+  files (the "Software"), to deal in the Software without
+  restriction, including without limitation the rights to use,
+  copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+  OTHER DEALINGS IN THE SOFTWARE.
+!-->
+
+<html>
+  <head>
+    <title>OMeta/JS 2.0 Workspace</title>
+    <script src="prototype.js"></script>
+    <script src="prototype-fix.js"></script>
+    <script src="workspace.js"></script>
+    <script src="lib.js"></script>
+    <script src="ometa-base.js"></script>
+    <script src="parser.js"></script>
+    <script src="bs-js-compiler.js"></script>
+    <script src="bs-ometa-compiler.js"></script>
+    <script src="bs-ometa-optimizer.js"></script>
+    <script src="bs-ometa-js-compiler.js"></script>
+    <script src="bs-project-list-parser.js"></script>
+    <script src="wiki.js"></script>
+    <script>
+
+function toggleVisible(id) {
+  var style = document.getElementById(id).style
+  style.visibility = style.visibility == "hidden" ? "visible" : "hidden"
+  style.display    = style.display    == "block"  ? "none"    : "block"
+}
+
+function initializeThisPage() {
+  $('workspaceForm').source.onkeydown = onShortCutKey
+  var makeProjectSelector = function(id) {
+    $(id + "Home").innerHTML =
+      "<select id=" + id +
+      " onChange='loadProject(this.options[this.selectedIndex].value)'><option value=''>(nevermind)</option></select>"
+  }
+  var addOption = function(toId, x) {
+    var option = document.createElement("option")
+    option.innerHTML = x.replace(/_/g, " ")
+    option.value     = x
+    $(toId).options.add(option)
+  }
+  makeProjectSelector('infoSelector')
+  addOption('infoSelector', 'Sample_Project')
+  addOption('infoSelector', 'Not_Quite_JS')
+  addOption('infoSelector', 'Things_You_Should_Know')
+  addOption('infoSelector', 'OMeta_Tutorial')
+  addOption('infoSelector', 'Project_Listing')
+  makeProjectSelector('projectSelector')
+  var ps = $('projectSelector')
+  try {
+    var projects = ProjectListParser.matchAll(readFile("Project_Listing"), "projs")
+    for (var idx = 0; idx < projects.length; idx++)
+      addOption('projectSelector', projects[idx])
+  }
+  catch (e) { }
+  $('workspaceForm').source.value      = $('workspaceForm').source.origValue = ''
+  $('workspaceForm').translation.value = ''
+  $('workspaceForm').transcript.value  = ''
+  loadProject()
+}
+
+saveIt = saveProject
+
+if (!document.location.hash)
+  document.location.hash = "#Sample_Project"
+titleRest = " - <span title='In case you are wondering, this is\n" +
+                            "(OMeta/JS) 2.0, not OMeta/(JS 2.0).\n" +
+                            "In other words, it has nothing to do\n" +
+                            "with JS 2 / EcmaScript 2.'>OMeta/JS 2.0</span> Workspace"
+
+function translateCode(s) {
+  var translationError = function(m, i) { alert("Translation error - please tell Alex about this!"); throw fail },
+      tree             = BSOMetaJSParser.matchAll(s, "topLevel", undefined, function(m, i) { throw fail.delegated({errorPos: i}) })
+  return BSOMetaJSTranslator.match(tree, "trans", undefined, translationError)
+}
+
+    </script>
+  </head>
+  <body onLoad="initializeThisPage()">
+    <table border=0 align=right>
+      <tr><td align=right><b>important info: </b></td><td><span id=infoSelectorHome></span></td></tr>
+      <tr><td align=right><b>go to project: </b></td><td><span id=projectSelectorHome></span></td></tr>
+      <tr><td colspan=2 align=right><input type=button value="previous versions of this project" onClick="document.location = 'http://jarrett.cs.ucla.edu/websvn/log.php?repname=ometa-js-projects&path=%2F' + document.location.hash.substring(1) + '.txt&rev=0&sc=0&isdir=0'"><br>
+      </td></tr>
+   </table>
+    <table border=0><tr><td><h2 id=title>OMeta/JS 2.0 Workspace <small><font color=lightgray>(not to be confused with JS 2 / EcmaScript 4)</font></small></h2></td></tr></table>
+
+
+    <b>Instructions</b>
+    <input type=button value="+/-" onClick="toggleVisible('instructions')">
+    <br>
+    <div id=instructions style="visibility: visible; display: block">
+      <table bgcolor=#f9f9f9 cellpadding=4
+             style="border: 1px solid #333333; padding: .2em .2em .2em .2em; margin-bottom: .4em; margin-top: .1em">
+        <tr><td>
+        The text area below (<b>source</b>) works like a Smalltalk workspace:
+        <bl><li>
+        To evaluate some code, just select it and press the <input type=button value="do it" onClick="doIt()"> button.
+        </li><li>
+        Pressing <input type=button value="do it" onClick="doIt()"> without a selection evaluates the line that the cursor is on.
+        </li><li>
+        <input type=button value="print it" onClick="printIt()"> is like <input type=button value="do it" onClick="doIt()">,
+        but it also prints the result.
+        </li></bl>
+        Also, you can press <input type=button value="save it" onClick="saveIt()"> to save the current project.
+      </td></tr></table>
+    </div>
+    <b><span title="A useful place to add new HTMLElements - see Canvas project for an example">Play Area</span></b>
+    <input type=button value="+/-" onClick="toggleVisible('playArea')">
+    <br>
+    <div id=playArea style="visibility: visible; display: block"></div>
+    <form id=workspaceForm>
+      <b>Source</b>
+      <input type=button value="+/-" onClick="toggleVisible('source')">
+      <br>
+      <div id=source style="visibility: visible; display: block">
+        <textarea cols=132 rows=24 name=source style="font-family:monaco, monospace; font-size: 10pt"></textarea><br>
+        <input type=button value="print it (ctrl+p)"  onClick="printIt()"     style="margin-bottom: .4em">
+        <input type=button value="do it (ctrl+d)"     onClick="doIt()"        style="margin-bottom: .4em">
+        <input type=button value="save it (ctrl + s)" onClick="saveProject()" style="margin-bottom: .4em"><br>
+      </div>
+      <b><span title="Shows the JavaScript translation of the last thing that was evaluated above">Translation</span></b>
+      <input type=button value="+/-" onClick="toggleVisible('translation')">
+      <br>
+      <div id=translation style="visibility: hidden; display: none">
+        <textarea cols=132 rows=4 name=translation style="font-family:monaco, monospace; font-size: 10pt; margin-bottom: .4em">
+        </textArea>
+      </div>
+
+      <b>Transcript</b>
+      <input type=button value="+/-" onClick="toggleVisible('transcript')">
+      <br>
+      <div id=transcript style="visibility: hidden; display: none">
+        <textarea cols=132 rows=4 name=transcript
+                  style="font-family:monaco, monospace; font-size: 10pt; margin-bottom: .4em"></textArea>
+      </div>
+    </form>
+    To learn more about OMeta, click <a href=http://www.cs.ucla.edu/~awarth/ometa/>here</a>.<br>
+  </body>
+</html>
+

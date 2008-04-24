@@ -1,0 +1,5 @@
+ometa ProjectListParser <: BSJSParser {
+  proj  = spaces iName,
+  projs = proj:x (spaces ',' proj)*:xs -> [x].concat(xs)
+}
+

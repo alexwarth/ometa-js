@@ -1,0 +1,9 @@
+ometa BSOMetaJSParser <: BSJSParser {
+  srcElem = spaces foreign(BSOMetaParser, #grammar):r sc -> r
+          | super(#srcElem)
+}
+
+ometa BSOMetaJSTranslator <: BSJSTranslator {
+  Grammar = foreign(BSOMetaTranslator, #Grammar)
+}
+

@@ -1,0 +1,86 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../yui/assets/yui.css" >
+<style>
+/*Supplemental CSS for the YUI distribution*/
+#custom-doc { width: 95%; min-width: 950px; }
+#pagetitle {background-image: url(../yui/assets/bg_hd.gif);}
+#pagetitle h1 {background-image: url(../yui/assets/title_h_bg.gif);}
+</style>
+
+<link rel="stylesheet" type="text/css" href="../yui/assets/dpSyntaxHighlighter.css">
+<!--Script and CSS includes for YUI dependencies on this page-->
+<link rel="stylesheet" type="text/css" href="../yui/build/editor/assets/skins/sam/simpleeditor.css" />
+<link rel="stylesheet" type="text/css" href="../yui/build/button/assets/skins/sam/button.css" />
+
+<script type="text/javascript" src="../yui/build/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="../yui/build/event/event-min.js"></script>
+<script type="text/javascript" src="../yui/build/dom/dom-min.js"></script>
+<script type="text/javascript" src="../yui/build/element/element-beta-min.js"></script>
+<script type="text/javascript" src="../yui/build/container/container_core-min.js"></script>
+<script type="text/javascript" src="../yui/build/editor/simpleeditor-beta-min.js"></script>
+<script type="text/javascript" src="../yui/build/button/button-min.js"></script>
+</head>
+
+
+<body class=yui-skin-sam>
+<form method="post" action="#" id="form1"> 
+<textarea id="editor" name="editor" rows="20" cols="75"> 
+This is some more test text.<br>This is some more test text.<br>This is some more test text.<br> 
+This is some more test text.<br>This is some more test text.<br>This is some more test text. 
+</textarea> 
+</form> 
+
+
+
+<script>
+
+(function() {
+    var Dom = YAHOO.util.Dom,
+        Event = YAHOO.util.Event;
+
+    var myConfig = {
+        height: '300px',
+        width: '530px',
+        dompath: true,
+        focusAtStart: true
+    };
+
+    YAHOO.log('Create the Editor..', 'info', 'example');
+    myEditor = new YAHOO.widget.SimpleEditor('editor', myConfig);
+    myEditor.render();
+
+})();
+</script>
+
+<!--
+<script>
+(function() { 
+    //Setup some private variables 
+    var Dom = YAHOO.util.Dom, 
+        Event = YAHOO.util.Event, 
+        status = null; 
+ 
+        //The Editor config 
+        var myConfig = { 
+            height: '300px', 
+	            width: '530px', 
+	            animate: true, 
+	            dompath: true, 
+	            focusAtStart: true 
+	        }; 
+	 
+	    //Now let's load the Editor.. 
+	    var myEditor = new YAHOO.widget.Editor('editor', myConfig); 
+	    myEditor.render(); 
+	})(); 
+
+//myEditor._getSelection().toString()
+//myEditor.getEditorHTML()
+
+</script>
+-->
+
+<input type=button value="do something" onclick='javascript:myEditor.execCommand("insertHTML", "<center><h1>hello</h1></center>")'>
+</body>
+</html>

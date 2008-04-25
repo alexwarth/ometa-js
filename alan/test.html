@@ -32,54 +32,59 @@ This is some more test text.<br>This is some more test text.<br>This is some mor
 </form> 
 
 
+<style>
+.yui-skin-sam .yui-toolbar-container .yui-toolbar-doit span.yui-toolbar-icon {
+  background-image: url(http://www.cs.ucla.edu/~awarth/images/new.gif);
+  background-position: 1px 0px; 
+} 
+.yui-skin-sam .yui-toolbar-container .yui-button-doit-selected span.yui-toolbar-icon {
+  background-image: url(http://www.cs.ucla.edu/~awarth/images/new.gif);
+  background-position: 1px 0px; 
+}
+
+.yui-skin-sam .yui-toolbar-container .yui-toolbar-printit span.yui-toolbar-icon {
+  background-image: url(http://www.cs.ucla.edu/~awarth/images/new.gif);
+  background-position: 1px 0px; 
+} 
+.yui-skin-sam .yui-toolbar-container .yui-button-printit-selected span.yui-toolbar-icon {
+  background-image: url(http://www.cs.ucla.edu/~awarth/images/new.gif);
+</style>
 
 <script>
-
-(function() {
-    var Dom = YAHOO.util.Dom,
-        Event = YAHOO.util.Event;
-
-    var myConfig = {
-        height: '300px',
-        width: '530px',
-        dompath: true,
-        focusAtStart: true
-    };
-
-    YAHOO.log('Create the Editor..', 'info', 'example');
-    myEditor = new YAHOO.widget.SimpleEditor('editor', myConfig);
-    myEditor.render();
-
-})();
-</script>
-
-<!--
-<script>
-(function() { 
-    //Setup some private variables 
-    var Dom = YAHOO.util.Dom, 
-        Event = YAHOO.util.Event, 
-        status = null; 
+var Dom   = YAHOO.util.Dom, 
+    Event = YAHOO.util.Event, 
+    status = null
  
-        //The Editor config 
-        var myConfig = { 
-            height: '300px', 
-	            width: '530px', 
-	            animate: true, 
-	            dompath: true, 
-	            focusAtStart: true 
-	        }; 
+var myConfig = {
+  height:      '300px', 
+  width:       '98%', 
+  animate:      true, 
+  dompath:      true, 
+  focusAtStart: true,
+}
 	 
-	    //Now let's load the Editor.. 
-	    var myEditor = new YAHOO.widget.Editor('editor', myConfig); 
-	    myEditor.render(); 
-	})(); 
+myEditor = new YAHOO.widget.SimpleEditor('editor', myConfig); 
 
-//myEditor._getSelection().toString()
-//myEditor.getEditorHTML()
+myEditor.on('toolbarLoaded', function() {
+  var doitConfig    = {type:  'push', label: 'do it',    value: 'doit'},
+      printitConfig = {type:  'push', label: 'print it', value: 'printit'}
+  var workspaceConfig = {
+    group: 'workspacebuttons',
+    label: 'Workspace',
+    buttons: [doitConfig, printitConfig]
+  }
+  this.toolbar.addSeparator()
+  this.toolbar.addButtonGroup(workspaceConfig)
+  myEditor.toolbar.on('doitClick', function() {
+    console.log("the whole thing, as html:\n\n" + myEditor.getEditorHTML())
+  }, myEditor, true)
+  myEditor.toolbar.on('printitClick', function() {
+    console.log("selection, as plain text:\n\n" + myEditor._getSelection().toString())
+  }, myEditor, true)
+})
 
+myEditor.render()
 </script>
--->
 
 <input type=button value="do something" onclick='javascript:myEditor.execCommand("insertHTML", "<center><h1>hello</h1></center>")'>
 </body>

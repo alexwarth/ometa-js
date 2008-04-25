@@ -32,7 +32,7 @@ Wiki.prototype.init = function () {
   this.intervalId = setInterval(hashChangedHandler, 1000)
 
   window.onbeforeunload = function() {
-    if (this.isDirty()) return dirtyAreYouSureMessage
+    if (self.isDirty()) return dirtyAreYouSureMessage
   }
 
   if (!document.location.hash)
@@ -125,32 +125,6 @@ Wiki.prototype.loadProject = function() {
       projData = this.readFile(projName)
   this._title = projName
   this.contentsChanged(projData);
-}
-
-Wiki.prototype._loadProject = function() {
-  if (arguments.length > 0) {
-    if (arguments[0] == "" || "#" + arguments[0] == document.location.hash)
-      return
-    document.location.hash = this.oldHash = "#" + arguments[0]
-  }
-  if (this.isDirty() && !confirm(this.dirtyAreYouSureMessage))
-    return
-  var projName = document.location.hash.substring(1),
-      projData = this.readFile(projName)
-  $('workspaceForm').source.value     = projData
-  $('workspaceForm').source.origValue = projData
-  $('title').innerHTML = "<font color=#000088>" + projName.replace(/_/g, " ") + "</font>"
-
-  if (projData) {
-    myEditor.setEditorHTML(projData);
-  } else {
-    myEditor.setEditorHTML("hello");
-  }
-}
-
-Wiki.prototype.saveProject = function() {
-    var projData = $('workspaceForm').source.value
-    this.save(projData)
 }
 
 Wiki.prototype.save = function(aString) {

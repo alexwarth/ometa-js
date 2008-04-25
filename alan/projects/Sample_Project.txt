@@ -1,4 +1,4 @@
-
+<span style="font-size: 11pt;" lang="EN-US">alert(3 + 4)</span>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><b style=""><span style="font-size: 14pt;" lang="EN-US">Basic
 Programming of a Basic Computer</span></b><span style="font-size: 11pt;" lang="EN-US"><o:p></o:p></span></p>
@@ -97,7 +97,7 @@ example<o:p></o:p></span></p>
  </tr>
  <tr>
   <td><br></td>
-  <td style="border: 0.75pt solid black; background: white none repeat scroll 0%; vertical-align: top; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;" bgcolor="white" height="201" width="753"><!--[endif]--><!--[if !mso]--><span style="position: absolute; z-index: 1;">
+  <td style="border: 0.75pt solid black; background: white none repeat scroll 0% 50%; vertical-align: top; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;" bgcolor="white" height="201" width="753"><!--[endif]--><!--[if !mso]--><span style="position: absolute; z-index: 1;">
   <table cellpadding="0" cellspacing="0" width="100%">
    <tbody><tr>
     <td><!--[endif]-->
@@ -190,11 +190,11 @@ we will need to do a little arithmetic when me write our program to do the
 copying of the picture into the display region.<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">So our picture will actually look like this
-in memory &.<o:p></o:p></span></p>
+in memory &amp;.<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">& and our display region will look like this:<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">&amp; and our display region will look like this:<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
 
@@ -263,7 +263,7 @@ thinking it through) commands to do the copy.<o:p></o:p></span></p>
 the most usual case in programming is to make errors of many different kinds,
 some of them easy to find, and some can be quite pernicious. So, Im
 oversimplifying what this kind of programming is like by leading you through (and
-to) a program that simply works. Plenty of time to play with errors later &.).<o:p></o:p></span></p>
+to) a program that simply works. Plenty of time to play with errors later &amp;.).<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Especially: since our little computer has no
 idea of how to look at this pseudocode and carry it out. To get it to run a

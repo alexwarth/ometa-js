@@ -3,14 +3,29 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <title>Active Essays</title>
+
+<!-- OMeta libraries -->
+<script type="text/javascript" src="../prototype.js"></script>
+<script type="text/javascript" src="../prototype-fix.js"></script>
+<script type="text/javascript" src="../lib.js"></script>
+<script type="text/javascript" src="../ometa-base.js"></script>
+<script type="text/javascript" src="../parser.js"></script>
+<script type="text/javascript" src="../bs-js-compiler.js"></script>
+<script type="text/javascript" src="../bs-ometa-compiler.js"></script>
+<script type="text/javascript" src="../bs-ometa-optimizer.js"></script>
+<script type="text/javascript" src="../bs-ometa-js-compiler.js"></script>
+
+<!-- YUI -->
 <link rel="stylesheet" type="text/css" href="../yui/build/assets/skins/sam/skin.css"/>
 <script type="text/javascript" src="../yui/build/yahoo-dom-event/yahoo-dom-event.js"></script> 
 <script type="text/javascript" src="../yui/build/element/element-beta-min.js"></script> 
 <script type="text/javascript" src="../yui/build/container/container_core-min.js"></script>
 <script type="text/javascript" src="../yui/build/editor/simpleeditor-beta-min.js"></script>
-<script type="text/javascript" src="../prototype.js"></script>
+
+<!-- Wiki and others -->
 <script type="text/javascript" src="wiki.js"></script>
-<script type="text/javascript" src="essay.js"></script>
+<script type="text/javascript" src="essays.js"></script>
+
 <style type="text/css">
 #workspaceForm {
   position: fixed;
@@ -21,6 +36,9 @@
   overflow: hidden;
   background: #fff;
 }
+
+.yui-editor-container {  height: 80%; }
+.first-child {  height: 100%; }
 </style>
 
 </head>
@@ -28,7 +46,7 @@
 <body class="yui-skin-sam"> 
 <h1 id="title">Active Essays</h1>
 <form id="workspaceForm" action="">
-<p>
+<p style="height: 100%;">
 <textarea name="source" id="source" cols="50" rows="10">
 </textarea>
 </p>

@@ -58,36 +58,54 @@ var toolbar = {
 
 var myEditor = new YAHOO.widget.SimpleEditor('source', {
   width: '100%',
-  height: '500px',
-  dompath: false, //Turns on the bar at the bottom
-  //  autoHeight: true,
-//  toolbar: toolbar
+  height: '100%',
+  dompath: true, //Turns on the bar at the bottom
+  toolbar: toolbar
 });
 myEditor.render();
 
 myEditor.on("toolbarLoaded", function() {
   
-  this.toolbar.addSeparator();
-  this.toolbar.addButtonGroup({ group: 'file', label: 'File',
-    buttons: [
-      { type: 'push', label: 'Save CTRL + S', value: 'save'},
-      { type: 'push', label: 'Do It CTRL + D', value: 'doit' }
-    ]
-  });
+//   this.toolbar.addSeparator();
+//   this.toolbar.addButtonGroup({ group: 'file', label: 'File',
+//     buttons: [
+//       { type: 'push', label: 'Save CTRL + S', value: 'save'},
+//       { type: 'push', label: 'Do It CTRL + D', value: 'doit' }
+//     ]
+//   });
 
   myEditor.toolbar.on("saveClick", save);
-  myEditor.toolbar.on("doitClick", function(ev) { console.log(myEditor._getSelection().toString()) });
+  myEditor.toolbar.on("doitClick", doit);
+});
+
+myEditor.on("editorContentLoaded", function() {
   wiki.init();
 });
 
 function save() {
   wiki.save(myEditor.getEditorHTML())
+  return false
+}
+
+function doit() {
+  if (!myEditor._hasSelection())
+    return
+  var sel = myEditor._getSelection().toString()
+  eval(translateCode(sel))
+  return false
+}
+
+function translateCode(s) {
+  var translationError = function(m, i) { alert("Translation error - please tell Alex about this!"); throw fail },
+      tree             = BSOMetaJSParser.matchAll(s, "topLevel", undefined, function(m, i) { throw fail.delegated({errorPos: i}) })
+  return BSOMetaJSTranslator.match(tree, "trans", undefined, translationError)
 }
 
 var wiki = new Wiki()
+// wiki.isDirty = function() { return myEditor.editorDirty }
 wiki.contentsChanged = function(aString) {
   if (aString == undefined) { aString = "" }
-  myEditor.setEditorHTML(aString);
+  myEditor.setEditorHTML(aString)
   $('title').innerHTML = "<font color=#000088>" + wiki.title() + "</font>"
 }
 

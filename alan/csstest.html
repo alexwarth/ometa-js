@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>draft</title>
+<style type="text/css">
+
+body{
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  height: 100%; 
+  max-height: 100%; 
+}
+
+#framecontent{
+  position: absolute;
+  top: 0;
+  bottom: 0; 
+  right: 0;
+  width: 200px; /*Width of frame div*/
+  height: 100%;
+  overflow: hidden; /*Disable scrollbars. Set to "scroll" to enable*/
+  background: #B5CFB9;
+  color: black;
+}
+
+#maincontent{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 200px; /*Set right value to WidthOfFrameDiv*/
+  bottom: 0;
+  overflow: auto; 
+  background: #fff;
+}
+
+* html body{ /*IE6 hack*/
+padding: 0 200px 0 0; /*Set value to (0 WidthOfFrameDiv 0 0)*/
+}
+
+* html #maincontent{ /*IE6 hack*/
+height: 100%; 
+width: 100%; 
+}
+</style>
+</head>
+<body>
+
+<div id="framecontent">
+  <h1>[ Tools ]</h1>
+  <h1>[ Canvas ]</h1>
+  <h1>[ Controls, etc. ]</h1>
+</div>
+
+<div id="maincontent">
+
+<h1>"Basic Programming" of a "Basic Computer"</h1>
+<p>
+Alan Kay, Alex Warth, Takashi Yamamiya
+</p>
+<p>
+Physical computers come in many shapes, sizes and configurations, and all can do something called "computation". Part of what this means is that they can all be programmed to simulate each other's (and any other computer's or mechanism's) operations. 
+</p>
+<p>
+So, despite being different in physical and internal detail, they are all similar in their ability to simulate the same kinds of things. These and other issues are covered more completely in the article on "Computing". A short companion article, "Computer Elements", discusses some of the many ways to make physical devices that can remember patterns of "information", transform the patterns, and be able to represent patterns that will direct the computer what to do.
+</p>
+
+<p>
+Here we will look at a very simple computer (that can still do all of "computing") and how it is programmed. This computer - as with most computers - is almost completely made from "memory" - which simply holds patterns - and a simple but very fast "processor" that can do a few things with the patterns in memory, and which is directed by patterns in memory.
+</p>
+<p>		****** picture</p>
+<p>
+An analogy that might be helpful: the computer memory is like marks on an enormous sheet of paper which will persist until erased and changed. The processor would be a human being with a pencil (with an eraser) who can only follow directions also written on the paper. In practice, the marks are much more humble and elementary than those we usually write on paper, and the kinds of instructions that the processor can follow are dog-simple, quite below the kinds of instructions that humans can follow.
+</p>
+<p>
+		******* maybe an animation
+</p>
+<p>
+The elementary patterns in the memory of a typical computer are made from elements that can hold a mark or a non-mark. Each one of these is called a "bit". The bits are organized in memory in sequential groupings, called "words", and are usually a fixed size of 32 or 64 bits wide.
+</p>
+		******* pictures
+ The words are sequentially ordered (like houses on a street, or mailboxes in a post office) and each is given an number that can be used as an address. The first word will have address 1, the second will have address 2. And so forth.
+		******** pictures
+Part of the computer memory will be used to hold a program: a sequence of words whose patterns can be interpreted by the processor as instructions for what operation to do next. Other parts of the memory will hold patterns that represent other kinds of descriptions, such as numbers, text characters, pictures, and all the familiar stuff that we are used to seeing when we use a computer. One section  of the memory will be used to hold an assembly of words that represent the picture elements (or pixels) that will be moved to the screen on your computer.
+		******* picture of sections of memory
+
+Let's suppose we want to animate a picture to move across your computer screen. So that it will look like this.
+		******* example
+
+We can write an informal plan to do this.
+
+
+
+
+
+
+
+
+
+
+If the erasure and recopy are done fast enough (and they will be) we won't see a flash, but instead will see a new display image every 30th of a second in which our picture seems to be moving from left to right.
+First, let's look at how a picture might be stored. A standard way to represent a single color pixel is as a mixture of three primary colors. Each of the primaries needs to have a range of intensity from 0 (no contribution) through several hundred shades to "full" (as completely "that primary" as possible). If "several hundred shades" for each color works well, then we can chose 8 bits (from 0 to 255) to represent the shade. Three primary colors will consume 24 bits in our of our words. 
+		******
+There are 8 bits left over, and these are sometimes used to indicate the degree of translucency of this color (we will - almost - ignore these 8 bits for now). So a single pixel will be represented as a single word in our memory that looks like this.
+******
+Since the color "white" comes from an equal mixture of the three primaries, and "black" will result if we show none of the primaries, we might guess that the shades of grey could be represented by the cases in which the intensity of the primaries are equal. And this is the case. There are 0 to 255 of these, and so 0 to 255 shades of grey are also available.
+		******
+For convenience in copying, we will represent a picture as pixels inside its enclosing rectangle. Pictures with irregular boundaries will thus need transparent pixels to occupy the non-picture parts of the rectangle. We'll use our 4th 8 bit region to indicate transparency if the 8 bits are zero and not-transparent if the 8 bits are non-zero.
+		*******
+Since computer storage on our little computer is laid out in one-dimension, and pictures and the display are two-dimensional, we will need to do a little arithmetic when me write our program to do the copying of the picture into the display region.
+So our picture will actually look like this in memory Åc.
+		******
+Åc and our display region will look like this:
+		*******
+Let's first figure out how to copy our picture into the display region so we can see it - and this will help us think about how to animate it.
+We know there are explicit patterns of bits that represent the instructions this computer can interpret, but before we worry about these, it will help if we just sketch out our strategy using simple informal language or diagrams (as we did in English above, but now a little more detailed.) We'll call this informal language a pseudocode and make it up as we go along. (We just want to keep it roughly as simple as the underlying computer for now.)
+First, let's just copy a rectangle into the display region, and then animate it. We can use some of our computer words to hold useful properties of the rectangle. A word can hold the address of the pixels of the rectangle. Another word can hold its width and height. Etc. Similarly, the display region can use the same conventions, so there will be a word for where it starts in memory, and for its width and height.
+		******
+The key here is that we have to deal with the widths of both the rectangle and the display area when we are calculating where to get a pixel from the rectangle and where to put that pixel in the display area. There are a variety of ways to do this (and this is worth noting in passing). We have a single goal here, but there are quite a few ways to accomplish it. This will almost always be the case when we are trying to write programs for pretty much anything.
+One way to do this that will help us keep track of where we are would be to set up a looping program that will pick up each element in a row. We'll use some more words in memory for the properties that this program uses, such as: currentElement, etc.
+		******
+We can put this inside a very similar looping program that will move to the next row down after a row has been traversed.
+		******
+This program will get us all the elements of our rectangle in order.
+To copy them into our display region, we have to take heed of the width of the display, and just where in the display region we want to position our rectangle. The vertical and horizontal positions of the rectangle can be part of the properties of our rectangle:
+		******
+Now we can add to our traversal program a few more properties that will keep track of where in the display region we are so far (and thus where the next pixel should be copied to).
+		*******
+And we can add the very simple (after all this thinking it through) commands to do the copy.
+		*******
+This will work. (I should point out here that the most usual case in programming is to make errors of many different kinds, some of them easy to find, and some can be quite pernicious. So, I'm oversimplifying what this kind of programming is like by leading you through (and to) a program that simply works. Plenty of time to play with errors later Åc.).
+Especially: since our little computer has no idea of how to look at this pseudocode and carry it out. To get it to run a program, we have to make one in the terms that the processor can interpret. This will be both straightforward, but still tricky because the representation is not in the terms we are used to reading.
+Let's now look at what the processor is like, and what it is actually willing and able to do. The processor can do simple arithmetic on the contents of words in memory and put the result back in memory. It can compare two words to see if they contain the same patterns. It can follow the sequence of instructions, or it can obey a "jump" instruction that will take the processor to some different place in memory to get its next instruction.
+We will make a second pseudocode for the elementary operations, and then show the actual bits that the processor uses.
+So the "loop" construct in our pseudocode would be mapped into:
+		********
+The "if" statement that tests and takes one branch or another would look like:
+		********
+Arithmetic would look like:
+		********
+Tests look like:
+		*********
+And finally here is the translation from our first pseudocode that we used to think things through, to the second pseudocode that is much closer to what the computer can deal with.
+		********
+This is already much harder to read, even for this simple program. Our computer cannot directly deal with this second pseudocode either: it can only directly deal with patterns of bits in memory. So let's now reveal what each of our pseudocode conventions looks like:
+		********
+		********
+And this is what our program will actually look like in memory:
+		********
+Yikes! But let's run it and see if it works. Yay! That we can get programs to do something neat for us is a nice feeling, but there's a certain walking on eggshells (if not jagged glass) feeling to having to program like this. But this is way computers were originally programmed in the 40s and 50s.
+Because the computer "just compares, transforms and moves", people realized that they could use the computer to translate from useful pseudocodes into actualcode. And this happened in the reverse order of our examples. The second kind of pseudocode (called "assembly code") was the first to be translated (and this form of coding persisted for decades, and is still sometimes done today).
+The first (and much more handy) kind of pseudocode started to be handled by computer programs in the 50s, and has resulted in widely used programming languages today, e.g. C, and its brethren. However, this way of programming also has severe limitations for most of the kinds of programs we want to write. The article "Computer Languages" will show how programs can be written to to make many kinds of useful pseudocodes actually work.
+For now, let's finish off our example using the first kind of pseudocode. We next want to animate the rectangle. To do this we need to have another loop that will clear the display area, do our copy program, pause for 1/30th of a second, and then this again, until the rectangle moves all the way to the right of the display area.
+		********
+We won't bother to go through the process to translate by hand to actualcode, but here it is:
+		********
+We try it and it works.
+Finally, we want to do this with any picture. We now need to add the test for transparency of a pixel, and not do the copy when we find one.
+		*********
+This gives us a nice simple animation, and also a sense of what a computer is actually doing at its most elemental levels.
+Quite a bit of behavior can be added to our simple framework. For example, the (Galilean) acceleration of gravity can be represented by the following changes to the vertical coordinate of the animated object.
+		*********
+Try this program and now the picture will fall at an ever increasing rate. Now let's test to see when the "ground" is hit, and change the direction of the velocity (notice that the acceleration of gravity is always the same and directed "downward" in the negative direction).
+		*******
+The picture will now "bounce".. We can add some "friction" (that will reduce the velocity a little on each bounce), and the result looks pretty natural.
+		********
+Finally, let's kick the picture off a table, so that it has some horizontal velocity to start.
+		********
+Here we have combined a simple (but fast) computer, with a simple physical model that gives rise to simple mathematics, and these allow a simple program to be written that will carry out the model.
+Notice that the "simple program" is the pseudocode program that the computer hardware can't deal with directly. In the next article, we want to see how to use this same computer to translate from useful pseudocodes into codes that the computer can carry out (and the programmer does not have to deal with).
+
+</div>
+
+</body>
+</html>

@@ -105,7 +105,10 @@ var wiki = new Wiki()
 wiki.contentsChanged = function(aString) {
   if (aString == undefined) { aString = "" }
   myEditor.setEditorHTML(aString)
-  $('title').innerHTML = "<font color=#000088>" + wiki.title() + "</font>"
+//  $('title').innerHTML = "<font color=#000088>" + wiki.title() + "</font>"
+
+  myEditor.toolbar._titlebar.firstChild.firstChild.innerHTML = wiki.title()
+  document.title = wiki.title()
 }
 
 function println(string) {

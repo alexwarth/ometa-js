@@ -57,8 +57,7 @@ var toolbar = {
 }
 
 var myEditor = new YAHOO.widget.SimpleEditor('source', {
-  width: '100%',
-  height: '100%',
+  // Width and height are specified by the textarea
   dompath: true, //Turns on the bar at the bottom
   toolbar: toolbar
 });
@@ -91,7 +90,7 @@ function doit() {
   if (!myEditor._hasSelection())
     return
   var sel = myEditor._getSelection().toString()
-  eval(translateCode(sel))
+  println(eval(translateCode(sel)))
   return false
 }
 
@@ -109,3 +108,6 @@ wiki.contentsChanged = function(aString) {
   $('title').innerHTML = "<font color=#000088>" + wiki.title() + "</font>"
 }
 
+function println(string) {
+  $("transcript").value += string + "\n";
+}

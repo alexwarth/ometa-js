@@ -27,27 +27,71 @@
 <script type="text/javascript" src="essays.js"></script>
 
 <style type="text/css">
-#workspaceForm {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 200px; /*Set right value to WidthOfFrameDiv*/
-  bottom: 0;
-  overflow: hidden;
-  background: #fff;
+body{
+  margin: 0;
+  padding: 0;
+  border: 0;
+/*  overflow: hidden; */
+  height: 100%; 
+  max-height: 100%;
 }
 
-.yui-editor-container {  height: 80%; }
-.first-child {  height: 100%; }
+#workspaceForm {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 300px;
+  bottom: 10px;
+/*  overflow: hidden; */
+  background: #fff;
+/*  border: 1px solid #808080;*/
+}
+
+#canvasPane {
+  position: absolute;
+  top: 10px;
+  right: 10px; /*Set right value to WidthOfFrameDiv*/
+  width: 280px;
+  height: 280px;
+/*  overflow: hidden; */
+  background: #EFE7C2;
+  border: 1px solid #808080;
+}
+
+#transcriptPane {
+  position: absolute;
+  top: 300px;
+  width: 280px;
+  right: 10px; /*Set right value to WidthOfFrameDiv*/
+  bottom: 10px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #808080;
+}
+
+#transcript {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
 </style>
 
 </head>
-
 <body class="yui-skin-sam"> 
-<h1 id="title">Active Essays</h1>
+
+<div id="canvasPane">
+canvas pane
+</div>
+
+<div id="transcriptPane">
+<textarea rows="4" cols="50" id="transcript"></textarea>
+</div>
+
+<!-- h1 id="title">Active Essays</h1 -->
 <form id="workspaceForm" action="">
-<p style="height: 100%;">
-<textarea name="source" id="source" cols="50" rows="10">
+<p style="margin: 0">
+<textarea name="source" id="source" cols="50" rows="10" style="width: 100%; height: 480px">
 </textarea>
 </p>
 </form>

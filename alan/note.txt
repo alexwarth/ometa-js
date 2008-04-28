@@ -1,0 +1,18 @@
+= To do
+
+todo done: The title bar should be changed as document's title.
+todo: Proper layout (fixed size at first, toolbar should be taken out to keep one line in 
+
+= About icon
+
+Button icons are stored one file named icons.png. Each size of a
+picture is 18 x 18 and position is (0, n * 18). Position is specifies
+with background-position: directive in css. icons.png is also a
+Fireworks file.
+
+= references
+
+frame in css
+- http://www.dynamicdrive.com/style/layouts/category/C11/P0/
+- http://www.webreference.com/programming/css_frames/
+

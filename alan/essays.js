@@ -50,7 +50,8 @@ var toolbar = {
     { group: 'Workspace', label: 'Workspace',
       buttons: [
         { type: 'push', label: 'Save CTRL + S', value: 'save'},
-        { type: 'push', label: 'Do It CTRL + D', value: 'doit' }
+        { type: 'push', label: 'Do It CTRL + D', value: 'doit' },
+        { type: 'push', label: 'Show HTML', value: 'showHTML' }
       ]
     }
   ]
@@ -76,6 +77,7 @@ myEditor.on("toolbarLoaded", function() {
 
   myEditor.toolbar.on("saveClick", save);
   myEditor.toolbar.on("doitClick", doit);
+  myEditor.toolbar.on("showHTMLClick", showHTML);
   myEditor.on("editorMouseUp", onMouseUp);
 });
 
@@ -92,6 +94,15 @@ function doit() {
     return
   var sel = myEditor._getSelection().toString()
   println(eval(translateCode(sel)))
+}
+
+function showHTML() {
+  var range = myEditor._getRange();
+  if (!range) return
+  var contents = range.cloneContents()
+  var div = document.createElement("div")
+  div.appendChild(contents)
+  println(div.innerHTML)
 }
 
 // Handle anchor tag for YUI editor

@@ -18,6 +18,10 @@ function Wiki() {
   this.isDirty = function() { return false }
   // callback function called when URL is changed
   this.contentsChanged = function(aString) { alert("Contents: " + aString) }
+  // interval for checking the url in millisecond
+  this.interval = 500
+
+  // private
   this.oldHash = null
 }
 
@@ -38,7 +42,7 @@ Wiki.prototype.init = function () {
     self.oldHash = document.location.hash
     self.loadProject()
   }
-  this.intervalId = setInterval(hashChangedHandler, 1000)
+  this.intervalId = setInterval(hashChangedHandler, this.interval)
 
   window.onbeforeunload = function() {
     if (self.isDirty()) return dirtyAreYouSureMessage

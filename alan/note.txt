@@ -1,7 +1,10 @@
 = To do
 
-todo done: The title bar should be changed as document's title.
+todo: image uploader
+todo: more pictures for Alan's example
+todo: <pre>, home button
 todo: Proper layout (fixed size at first, toolbar should be taken out to keep one line in 
+todo done: The title bar should be changed as document's title.
 
 = About icon
 

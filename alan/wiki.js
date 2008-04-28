@@ -18,6 +18,7 @@ function Wiki() {
   this.isDirty = function() { return false }
   // callback function called when URL is changed
   this.contentsChanged = function(aString) { alert("Contents: " + aString) }
+  this.oldHash = null
 }
 
 Wiki.prototype.init = function () {
@@ -25,19 +26,24 @@ Wiki.prototype.init = function () {
   var hashChangedHandler = function() {
     if (document.location.hash == self.oldHash)
       return
+
+    if (document.location.hash == "") {
+      if (self.oldHash == null) {
+        document.location.hash = "#" + self.defaultTitle
+      } else {
+        document.location.hash = self.oldHash
+        return
+      }
+    }
     self.oldHash = document.location.hash
     self.loadProject()
   }
-  this.oldHash    = document.location.hash
   this.intervalId = setInterval(hashChangedHandler, 1000)
 
   window.onbeforeunload = function() {
     if (self.isDirty()) return dirtyAreYouSureMessage
   }
-
-  if (!document.location.hash)
-    document.location.hash = "#" + this.defaultTitle
-  this.loadProject()
+  hashChangedHandler()
 }
 
 Wiki.prototype.title = function () {
@@ -87,27 +93,20 @@ Wiki.prototype.saveFileWithMozilla = function(url, content) {
 	filePath = (directory + url);
   }
 
-    if(window.Components)
-        try
-            {
-            netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
-            var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
-            file.initWithPath(filePath);
-            if (!file.exists())
-                file.create(0, 0664);
-            var out = Components.classes["@mozilla.org/network/file-output-stream;1"].createInstance(Components.interfaces.nsIFileOutputStream);
-            out.init(file, 0x20 | 0x02, 00004,null);
-            out.write(content, content.length);
-            out.flush();
-            out.close();
-            return(true);
-            }
-        catch(e)
-            {
-            alert("Exception while attempting to save\n\n" + e);
-            return(false);
-            }
-    return(null);
+  if(window.Components) {
+    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+    var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+    file.initWithPath(filePath);
+    if (!file.exists())
+      file.create(0, 0664);
+    var out = Components.classes["@mozilla.org/network/file-output-stream;1"].createInstance(Components.interfaces.nsIFileOutputStream);
+    out.init(file, 0x20 | 0x02, 00004,null);
+    out.write(content, content.length);
+    out.flush();
+    out.close();
+  } else {
+    throw "window.Content is not found.";
+  }
 }
 
 Wiki.prototype.dirtyAreYouSureMessage = "The changes you have made to this project will be lost unless you press 'cancel' " +

@@ -47,7 +47,7 @@ var toolbar = {
       ]
     },
     { type: 'separator' },
-    { group: 'file', label: 'File',
+    { group: 'Workspace', label: 'Workspace',
       buttons: [
         { type: 'push', label: 'Save CTRL + S', value: 'save'},
         { type: 'push', label: 'Do It CTRL + D', value: 'doit' }
@@ -59,7 +59,8 @@ var toolbar = {
 var myEditor = new YAHOO.widget.SimpleEditor('source', {
   // Width and height are specified by the textarea
   dompath: true, //Turns on the bar at the bottom
-  toolbar: toolbar
+  toolbar: toolbar,
+  markup: "xhtml",
 });
 myEditor.render();
 
@@ -75,6 +76,7 @@ myEditor.on("toolbarLoaded", function() {
 
   myEditor.toolbar.on("saveClick", save);
   myEditor.toolbar.on("doitClick", doit);
+  myEditor.on("editorMouseUp", onMouseUp);
 });
 
 myEditor.on("editorContentLoaded", function() {
@@ -82,8 +84,7 @@ myEditor.on("editorContentLoaded", function() {
 });
 
 function save() {
-  wiki.save(myEditor.getEditorHTML())
-  return false
+  wiki.save(myEditor.cleanHTML(myEditor.getEditorHTML()))
 }
 
 function doit() {
@@ -91,7 +92,17 @@ function doit() {
     return
   var sel = myEditor._getSelection().toString()
   println(eval(translateCode(sel)))
-  return false
+}
+
+// Handle anchor tag for YUI editor
+function onMouseUp(e) {
+  var element = e.ev.element();
+  if (element.tagName == "A") {
+    var href = element.getAttribute("href")
+    if (href.charAt(0) == "#") href = location.pathname + href
+    document.location.href = href
+    YAHOO.util.Event.preventDefault(e);
+  }
 }
 
 function translateCode(s) {

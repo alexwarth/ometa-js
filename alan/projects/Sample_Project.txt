@@ -1,13 +1,13 @@
-<span style="font-size: 11pt;" lang="EN-US">alert(3 + 4)</span>
+<span style="font-size: 11pt;" lang="EN-US">3 + 4<br />Go to <a href="#Canvas">Canvas</a><br /></span>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><b style=""><span style="font-size: 14pt;" lang="EN-US">Basic
-Programming of a Basic Computer</span></b><span style="font-size: 11pt;" lang="EN-US"><o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><strong><span style="font-size: 14pt;" lang="EN-US">Basic
+Programming of a Basic Computer</span></strong><span style="font-size: 11pt;" lang="EN-US"><o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Alan Kay, Alex Warth, Takashi Yamamiya<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Physical computers come in many shapes, sizes
 and configurations, and all can do something called computation. Part of what
-this means is that they can all be programmed to <i style="">simulate</i> each others (and any other computers or mechanisms)
+this means is that they can all be programmed to <em>simulate</em> each others (and any other computers or mechanisms)
 operations. <o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">So, despite being different in physical and
@@ -25,7 +25,7 @@ holds patterns  and a simple but very fast processor that can do a few
 things with the patterns in memory, and which is directed by patterns in
 memory.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******
 picture<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">An analogy that might be helpful: the
@@ -36,7 +36,7 @@ practice, the marks are much more humble and elementary than those we usually
 write on paper, and the kinds of instructions that the processor can follow are
 dog-simple, quite below the kinds of instructions that humans can follow.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******
 maybe an animation<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">The elementary patterns in the memory of a
@@ -45,15 +45,15 @@ Each one of these is called a bit. The bits are organized in memory in
 sequential groupings, called words, and are usually a fixed size of 32 or 64 bits
 wide.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******
 pictures<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;</span>The
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;</span>The
 words are sequentially ordered (like houses on a street, or mailboxes in a post
-office) and each is given an number that can be used as an <i style="">address</i>. The first word will have address 1, the second will have
+office) and each is given an number that can be used as an <em>address</em>. The first word will have address 1, the second will have
 address 2. And so forth.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********
 pictures<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Part of the computer memory will be used to
@@ -61,12 +61,12 @@ hold a program: a sequence of words whose patterns can be interpreted by the
 processor as instructions for what operation to do next. Other parts of the
 memory will hold patterns that represent other kinds of descriptions, such as
 numbers, text characters, pictures, and all the familiar stuff that we are used
-to seeing when we use a computer. One section<span style="">&nbsp;
+to seeing when we use a computer. One section<span>&nbsp;
 </span>of the memory will be used to hold an assembly of words that represent
 the picture elements (or pixels) that will be moved to the screen on your
 computer.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******
 picture of sections of memory<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><o:p>&nbsp;</o:p></span></p>
@@ -74,7 +74,7 @@ picture of sections of memory<o:p></o:p></span></p>
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Lets suppose we want to animate a picture to
 move across your computer screen. So that it will look like this.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******
 example<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><o:p>&nbsp;</o:p></span></p>
@@ -89,37 +89,37 @@ example<o:p></o:p></span></p>
  margin-left:2.1pt;margin-top:7.75pt;width:560.25pt;height:145.95pt;z-index:1;
  mso-wrap-style:none'>
  <v:textbox style='mso-next-textbox:#_x0000_s1026;mso-fit-shape-to-text:t'/>
-</v:shape><![endif]--><!--[if !vml]--><span style="">
+</v:shape><![endif]--><!--[if !vml]--><span>
 
 <table align="left" cellpadding="0" cellspacing="0">
  <tbody><tr>
-  <td height="9" width="2"><br></td>
+ <td height="9" width="2"><br /></td>
  </tr>
  <tr>
-  <td><br></td>
-  <td style="border: 0.75pt solid black; background: white none repeat scroll 0% 50%; vertical-align: top; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;" bgcolor="white" height="201" width="753"><!--[endif]--><!--[if !mso]--><span style="position: absolute; z-index: 1;">
-  <table cellpadding="0" cellspacing="0" width="100%">
-   <tbody><tr>
-    <td><!--[endif]-->
-    <div v:shape="_x0000_s1026" style="padding: 4.35pt 7.95pt;" class="shape">
-    <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">1.<span style="">&nbsp; </span>we need to represent the picture in
-    memory using conventions that the computer display can deal with.<o:p></o:p></span></p>
-    <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">2.<span style="">&nbsp; </span>we need to be able to copy that picture
-    into the display-screen assembly area, and get the computer to put it out
-    onto your physical display for about 1/30<sup>th</sup> of a second. <o:p></o:p></span></p>
-    <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">3.<span style="">&nbsp; </span>we need to erase the display memory<o:p></o:p></span></p>
-    <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">4. change the addresses
-    for where our picture should be on the display<o:p></o:p></span></p>
-    <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">5.<span style="">&nbsp; </span>and do the copy again (it would be nice
-    if we could just go to step 2 here to make a repeating sequence). <o:p></o:p></span></p>
-    <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">6. Somehow we should put
-    in a way to stop this repeating sequence (perhaps when our picture moves
-    out of the display area).<o:p></o:p></span></p>
-    </div>
-    <!--[if !mso]--></td>
-   </tr>
-  </tbody></table>
-  </span><!--[endif]--><!--[if !mso & !vml]-->&nbsp;<!--[endif]--><!--[if !vml]--></td>
+ <td><br /></td>
+ <td style="border: 0.75pt solid black; background: white none repeat scroll 0% 50%; vertical-align: top; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;" bgcolor="white" height="201" width="753"><!--[endif]--><!--[if !mso]--><span style="position: absolute; z-index: 1;">
+ <table cellpadding="0" cellspacing="0" width="100%">
+ <tbody><tr>
+ <td><!--[endif]-->
+ <div v:shape="_x0000_s1026" style="padding: 4.35pt 7.95pt;" class="shape">
+ <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">1.<span>&nbsp; </span>we need to represent the picture in
+ memory using conventions that the computer display can deal with.<o:p></o:p></span></p>
+ <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">2.<span>&nbsp; </span>we need to be able to copy that picture
+ into the display-screen assembly area, and get the computer to put it out
+ onto your physical display for about 1/30<sup>th</sup> of a second. <o:p></o:p></span></p>
+ <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">3.<span>&nbsp; </span>we need to erase the display memory<o:p></o:p></span></p>
+ <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">4. change the addresses
+ for where our picture should be on the display<o:p></o:p></span></p>
+ <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">5.<span>&nbsp; </span>and do the copy again (it would be nice
+ if we could just go to step 2 here to make a repeating sequence). <o:p></o:p></span></p>
+ <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">6. Somehow we should put
+ in a way to stop this repeating sequence (perhaps when our picture moves
+ out of the display area).<o:p></o:p></span></p>
+ </div>
+ <!--[if !mso]--></td>
+ </tr>
+ </tbody></table>
+ </span><!--[endif]--><!--[if !mso & !vml]-->&nbsp;<!--[endif]--><!--[if !vml]--></td>
  </tr>
 </tbody></table>
 
@@ -143,7 +143,7 @@ example<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><o:p>&nbsp;</o:p></span></p>
 
-<br style="" clear="all">
+<br />
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">If the erasure and recopy are done fast
 enough (and they will be) we wont see a flash, but instead will see a new
@@ -158,7 +158,7 @@ completely that primary as possible). If several hundred shades for each
 color works well, then we can chose 8 bits (from 0 to 255) to represent the
 shade. Three primary colors will consume 24 bits in our of our words. <o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">There are 8 bits left over, and these are
 sometimes used to indicate the degree of translucency of this color (we will 
@@ -173,7 +173,7 @@ primaries, we might guess that the shades of grey could be represented by the
 cases in which the intensity of the primaries are equal. And this is the case.
 There are 0 to 255 of these, and so 0 to 255 shades of grey are also available.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">For convenience in copying, we will represent
 a picture as pixels inside its enclosing rectangle. Pictures with irregular
@@ -182,7 +182,7 @@ the rectangle. Well use our 4<sup>th</sup> 8 bit region to indicate
 transparency if the 8 bits are zero and not-transparent if the 8 bits are
 non-zero.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Since computer storage on our little computer
 is laid out in one-dimension, and pictures and the display are two-dimensional,
@@ -192,11 +192,11 @@ copying of the picture into the display region.<o:p></o:p></span></p>
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">So our picture will actually look like this
 in memory &amp;.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">&amp; and our display region will look like this:<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Lets first figure out how to copy our
 picture into the display region so we can see it  and this will help us think
@@ -206,7 +206,7 @@ about how to animate it.<o:p></o:p></span></p>
 that represent the instructions this computer can interpret, but before we
 worry about these, it will help if we just sketch out our strategy using simple
 informal language or diagrams (as we did in English above, but now a little
-more detailed.) Well call this informal language a <i style="">pseudocode</i> and make it up as we go along. (We just want to keep it
+more detailed.) Well call this informal language a <em>pseudocode</em> and make it up as we go along. (We just want to keep it
 roughly as simple as the underlying computer for now.)<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">First, lets just copy a rectangle into the
@@ -216,7 +216,7 @@ pixels of the rectangle. Another word can hold its width and height. Etc.
 Similarly, the display region can use the same conventions, so there will be a
 word for where it starts in memory, and for its width and height.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">The key here is that we have to deal with the
 widths of both the rectangle and the display area when we are calculating where
@@ -231,12 +231,12 @@ track of where we are would be to set up a looping program that will pick up
 each element in a row. Well use some more words in memory for the properties
 that this program uses, such as: currentElement, etc.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">We can put this inside a very similar looping
 program that will move to the next row down after a row has been traversed.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">This program will get us all the elements of
 our rectangle in order.<o:p></o:p></span></p>
@@ -246,18 +246,18 @@ to take heed of the width of the display, and just where in the display region
 we want to position our rectangle. The vertical and horizontal positions of the
 rectangle can be part of the properties of our rectangle:<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Now we can add to our traversal program a few
 more properties that will keep track of where in the display region we are so
 far (and thus where the next pixel should be copied to).<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">And we can add the very simple (after all this
 thinking it through) commands to do the copy.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">This will work. (I should point out here that
 the most usual case in programming is to make errors of many different kinds,
@@ -285,40 +285,40 @@ elementary operations, and then show the actual bits that the processor uses.<o:
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">So the loop construct in our pseudocode
 would be mapped into:<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">The if statement that tests and takes one
 branch or another would look like:<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Arithmetic would look like:<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Tests look like:<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">And finally here is the translation from our
 first pseudocode that we used to think things through, to the second pseudocode
 that is much closer to what the computer can deal with.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">This is already much harder to read, even for
 this simple program. Our computer cannot directly deal with this second pseudocode
 either: it can only directly deal with patterns of bits in memory. So lets now
 reveal what each of our pseudocode conventions looks like:<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">And this is what our program will actually
 look like in memory:<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Yikes! But lets run it and see if it works.
 Yay! That we can get programs to do something neat for us is a nice feeling,
@@ -347,12 +347,12 @@ we need to have another loop that will clear the display area, do our copy
 program, pause for 1/30<sup>th</sup> of a second, and then this again, until
 the rectangle moves all the way to the right of the display area.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">We wont bother to go through the process to
 translate by hand to actualcode, but here it is:<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">We try it and it works.<o:p></o:p></span></p>
 
@@ -360,7 +360,7 @@ translate by hand to actualcode, but here it is:<o:p></o:p></span></p>
 We now need to add the test for transparency of a pixel, and not do the copy
 when we find one.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">This gives us a nice simple animation, and
 also a sense of what a computer is actually doing at its most elemental levels.<o:p></o:p></span></p>
@@ -370,25 +370,25 @@ simple framework. For example, the (Galilean) acceleration of gravity can be
 represented by the following changes to the vertical coordinate of the animated
 object.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Try this program and now the picture will
 fall at an ever increasing rate. Now lets test to see when the ground is
 hit, and change the direction of the velocity (notice that the acceleration of
 gravity is always the same and directed downward in the negative direction).<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>*******<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">The picture will now bounce.. We can add
 some friction (that will reduce the velocity a little on each bounce), and
 the result looks pretty natural.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Finally, lets kick the picture off a table,
 so that it has some horizontal velocity to start.<o:p></o:p></span></p>
 
-<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span style="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
+<p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>********<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US">Here we have combined a simple (but fast)
 computer, with a simple physical model that gives rise to simple mathematics,
@@ -401,4 +401,3 @@ useful pseudocodes into codes that the computer can carry out (and the
 programmer does not have to deal with).<o:p></o:p></span></p>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><span style="font-size: 11pt;" lang="EN-US"><o:p>&nbsp;</o:p></span></p>
-

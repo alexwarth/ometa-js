@@ -49,8 +49,8 @@ var toolbar = {
     { type: 'separator' },
     { group: 'Workspace', label: 'Workspace',
       buttons: [
-        { type: 'push', label: 'Save CTRL + S', value: 'save'},
-        { type: 'push', label: 'Do It CTRL + D', value: 'doit' },
+        { type: 'push', label: 'Save CTRL', value: 'save'},
+        { type: 'push', label: 'Do It CTRL', value: 'doit' },
         { type: 'push', label: 'Show HTML', value: 'showHTML' }
       ]
     }

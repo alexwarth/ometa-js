@@ -62,6 +62,7 @@ var myEditor = new YAHOO.widget.SimpleEditor('source', {
   dompath: true, //Turns on the bar at the bottom
   toolbar: toolbar,
   markup: "xhtml",
+  extracss: "a { cursor: pointer; }",
 });
 myEditor.render();
 
@@ -83,6 +84,7 @@ myEditor.on("toolbarLoaded", function() {
 
 myEditor.on("editorContentLoaded", function() {
   wiki.init();
+  init();
 });
 
 function save() {
@@ -135,4 +137,10 @@ wiki.contentsChanged = function(aString) {
 
 function println(string) {
   $("transcript").value += string + "\n";
+}
+
+function init() {
+  canvas = $('playArea')
+  canvas.setAttribute('width',  canvas.clientWidth)
+  canvas.setAttribute('height', canvas.clientHeight)
 }

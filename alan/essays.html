@@ -32,7 +32,6 @@ body{
   margin: 0;
   padding: 0;
   border: 0;
-/*  overflow: hidden; */
   height: 100%; 
   max-height: 100%;
 }
@@ -43,9 +42,7 @@ body{
   left: 10px;
   right: 38%;
   bottom: 10px;
-/*  overflow: hidden; */
   background: #fff;
-/*  border: 1px solid #808080;*/
 }
 
 #playArea {
@@ -54,7 +51,6 @@ body{
   right: 10px; /*Set right value to WidthOfFrameDiv*/
   width: 36%;
   height: 280px;
-/*  overflow: hidden; */
   background: #EFE7C2;
   border: 1px solid #808080;
 }
@@ -115,9 +111,9 @@ body{
 </head>
 <body class="yui-skin-sam"> 
 
-<div id="playArea">
+<canvas id="playArea">
 playArea
-</div>
+</canvas>
 
 <div id="transcriptPane">
 <textarea rows="4" cols="50" id="transcript"></textarea>

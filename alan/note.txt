@@ -16,6 +16,11 @@ Fireworks file.
 
 = references
 
+uploader
+- http://allmybrain.com/2007/10/16/an-image-upload-extension-for-yui-rich-text-editor/
+- http://allmybrain.com/2008/02/25/image-upload-with-yui-editor-250/
+
+
 frame in css
 - http://www.dynamicdrive.com/style/layouts/category/C11/P0/
 - http://www.webreference.com/programming/css_frames/

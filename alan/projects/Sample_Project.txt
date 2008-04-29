@@ -1,4 +1,4 @@
-<span style="font-size: 11pt;" lang="EN-US">3 + 4<br />Go to <a href="#Canvas">Canvas</a><br /></span>
+<span style="font-size: 11pt;" lang="EN-US">3 + 4<br />Go to <a href="#Canvas">Canvas</a><br />Go to <a href="#Scribble">Scribble</a><br /></span>
 
 <p class="MsoNormal" style="margin-top: 6pt;"><strong><span style="font-size: 14pt;" lang="EN-US">Basic
 Programming of a Basic Computer</span></strong><span style="font-size: 11pt;" lang="EN-US"><o:p></o:p></span></p>

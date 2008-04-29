@@ -1,5 +1,6 @@
 = To do
 
+todo: mouse cursor on the link is still I beam now.
 todo: image uploader
 todo: more pictures for Alan's example
 todo: <pre>, home button

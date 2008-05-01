@@ -1,5 +1,5 @@
+#!/usr/bin/env ruby
 #!ruby
-#!/usr/local/bin/ruby
 
 # Stupidly Simple Uploader
 

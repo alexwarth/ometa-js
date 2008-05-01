@@ -27,10 +27,11 @@ var toolbar = {
         { type: 'push', label: 'Bold CTRL + SHIFT + B', value: 'bold' },
         { type: 'push', label: 'Italic CTRL + SHIFT + I', value: 'italic' },
         { type: 'push', label: 'Underline CTRL + SHIFT + U', value: 'underline' },
-        { type: 'push', label: 'Program Code', value: 'code' },
         { type: 'separator' },
         { type: 'color', label: 'Font Color', value: 'forecolor', disabled: true },
-        { type: 'color', label: 'Background Color', value: 'backcolor', disabled: true }
+        { type: 'color', label: 'Background Color', value: 'backcolor', disabled: true },
+        { type: 'push', label: 'Program Code', value: 'code' },
+
       ]
     },
     { type: 'separator' },
@@ -66,7 +67,7 @@ var myEditor = new YAHOO.widget.Editor('source', {
   markup: "xhtml",
   extracss: "a { cursor: pointer; } pre { border: 1px solid #d0d0d0; padding: 6px; background-color: #f8fcf8 }",
 });
-yuiImgUploader(myEditor, '/upload_url','param_name');
+yuiImgUploader(myEditor, 'upload.cgi','yui_image');
 myEditor.render();
 
 myEditor.on("toolbarLoaded", function() {
@@ -156,4 +157,5 @@ function init() {
   canvas = $('playArea')
   canvas.setAttribute('width',  canvas.clientWidth)
   canvas.setAttribute('height', canvas.clientHeight)
+  YAHOO.widget.Logger.enableBrowserConsole();
 }

@@ -1,10 +1,13 @@
 = To do
 
-todo: mouse cursor on the link is still I beam now.
 todo: image uploader
+todo: mouse cursor on the link is still I beam now.
 todo: more pictures for Alan's example
-todo: <pre>, home button
+todo: home button
 todo: Proper layout (fixed size at first, toolbar should be taken out to keep one line in 
+
+todo done: <pre> button
+todo done: logger
 todo done: The title bar should be changed as document's title.
 
 = About icon
@@ -28,3 +31,5 @@ frame in css
 - http://www.dynamicdrive.com/style/layouts/category/C11/P0/
 - http://www.webreference.com/programming/css_frames/
 
+= random note
+http://localhost:8080/ometa-js/alan/essays.html

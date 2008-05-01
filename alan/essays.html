@@ -21,7 +21,10 @@
 <script type="text/javascript" src="../yui/build/yahoo-dom-event/yahoo-dom-event.js"></script> 
 <script type="text/javascript" src="../yui/build/element/element-beta-min.js"></script> 
 <script type="text/javascript" src="../yui/build/container/container_core-min.js"></script>
-<script type="text/javascript" src="../yui/build/editor/simpleeditor-beta-min.js"></script>
+<!-- script type="text/javascript" src="../yui/build/editor/simpleeditor-beta-min.js"></script -->
+<script type="text/javascript" src="../yui/build/editor/editor-beta-min.js"></script>
+<script type="text/javascript" src="../yui/build/connection/connection-min.js"></script>
+<script type="text/javascript" src="yui-image-uploader.js"></script>
 
 <!-- Wiki and others -->
 <script type="text/javascript" src="wiki.js"></script>
@@ -72,6 +75,7 @@ body{
     border: none;
 }
 
+
 .yui-skin-sam .yui-toolbar-container .yui-toolbar-doit span.yui-toolbar-icon {
   background-image: url(icons.png);
   background-position: 0px 0px; 
@@ -103,6 +107,18 @@ body{
 .yui-skin-sam .yui-toolbar-container .yui-button-showHTML-selected span.yui-toolbar-icon {
   background-image: url(icons.png);
   background-position: 0px -36px; 
+  left: 5px;
+}
+
+.yui-skin-sam .yui-toolbar-container .yui-toolbar-code span.yui-toolbar-icon {
+  background-image: url(icons.png);
+  background-position: 0px -108px; 
+  left: 5px;
+}
+
+.yui-skin-sam .yui-toolbar-container .yui-button-code-selected span.yui-toolbar-icon {
+  background-image: url(icons.png);
+  background-position: 0px -108px; 
   left: 5px;
 }
 

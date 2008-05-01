@@ -10,16 +10,19 @@ todo done: The title bar should be changed as document's title.
 = About icon
 
 Button icons are stored one file named icons.png. Each size of a
-picture is 18 x 18 and position is (0, n * 18). Position is specifies
-with background-position: directive in css. icons.png is also a
-Fireworks file.
+picture is 18 x 18, position is (0, 18 n), and then whole size is 18 x
+36 n. Position is specifies with background-position: directive in
+css. icons.png is also a Fireworks file.
 
 = references
 
 uploader
 - http://allmybrain.com/2007/10/16/an-image-upload-extension-for-yui-rich-text-editor/
 - http://allmybrain.com/2008/02/25/image-upload-with-yui-editor-250/
+- http://blog.enjoitech.jp/detail.php?aid=149
 
+webdav
+- http://d.hatena.ne.jp/shinichitomita/20061011/1160599354
 
 frame in css
 - http://www.dynamicdrive.com/style/layouts/category/C11/P0/

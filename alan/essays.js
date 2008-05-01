@@ -27,6 +27,7 @@ var toolbar = {
         { type: 'push', label: 'Bold CTRL + SHIFT + B', value: 'bold' },
         { type: 'push', label: 'Italic CTRL + SHIFT + I', value: 'italic' },
         { type: 'push', label: 'Underline CTRL + SHIFT + U', value: 'underline' },
+        { type: 'push', label: 'Program Code', value: 'code' },
         { type: 'separator' },
         { type: 'color', label: 'Font Color', value: 'forecolor', disabled: true },
         { type: 'color', label: 'Background Color', value: 'backcolor', disabled: true }
@@ -57,13 +58,15 @@ var toolbar = {
   ]
 }
 
-var myEditor = new YAHOO.widget.SimpleEditor('source', {
+// var myEditor = new YAHOO.widget.SimpleEditor('source', {
+var myEditor = new YAHOO.widget.Editor('source', {
   // Width and height are specified by the textarea
   dompath: true, //Turns on the bar at the bottom
   toolbar: toolbar,
   markup: "xhtml",
-  extracss: "a { cursor: pointer; }",
+  extracss: "a { cursor: pointer; } pre { border: 1px solid #d0d0d0; padding: 6px; background-color: #f8fcf8 }",
 });
+yuiImgUploader(myEditor, '/upload_url','param_name');
 myEditor.render();
 
 myEditor.on("toolbarLoaded", function() {
@@ -76,16 +79,26 @@ myEditor.on("toolbarLoaded", function() {
 //     ]
 //   });
 
+  myEditor.toolbar.on("codeClick", code);
   myEditor.toolbar.on("saveClick", save);
   myEditor.toolbar.on("doitClick", doit);
   myEditor.toolbar.on("showHTMLClick", showHTML);
   myEditor.on("editorMouseUp", onMouseUp);
+  myEditor._tag2cmd['pre'] = 'code'
 });
 
 myEditor.on("editorContentLoaded", function() {
   wiki.init();
   init();
 });
+
+function code() {
+  if (myEditor._getDoc().queryCommandValue ('FormatBlock') == 'pre') {
+    myEditor._getDoc().execCommand('FormatBlock', false, 'p')
+  } else {
+    myEditor._getDoc().execCommand('FormatBlock', false, 'pre')
+  }
+}
 
 function save() {
   wiki.save(myEditor.cleanHTML(myEditor.getEditorHTML()))

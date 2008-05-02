@@ -59,6 +59,7 @@ Wiki.prototype.readFile = function(name) {
   new Ajax.Request(this.storage + name + this.suffix, {
     method:       "get",
     asynchronous: false,
+    requestHeaders: ["If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT"],
     onSuccess:    function(transport) { r = transport.responseText },
     onFailure:    function(transport) { r = "" },
     onException:  function(x)         { console.log(x) }

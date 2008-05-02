@@ -1,11 +1,11 @@
 = To do
 
-todo: image uploader
-todo: mouse cursor on the link is still I beam now.
 todo: more pictures for Alan's example
+todo: mouse cursor on the link is still I beam now.
 todo: home button
 todo: Proper layout (fixed size at first, toolbar should be taken out to keep one line in 
 
+todo done: image uploader
 todo done: <pre> button
 todo done: logger
 todo done: The title bar should be changed as document's title.
@@ -33,3 +33,6 @@ frame in css
 
 = random note
 http://localhost:8080/ometa-js/alan/essays.html
+myEditor._toggleDesignMode()
+
+document.designMode = "on"

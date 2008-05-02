@@ -1,7 +1,16 @@
 #!/usr/bin/env ruby
 #!ruby
 
-# Stupidly Simple Uploader
+# Simple Uploader for YUI Editor
+
+# This CGI script handles an input form named "yui_image", save the
+# file into DATA_DIR, and answers JSON status string for An Image
+# Upload Extension for YUI Rich Text Editor
+# http://allmybrain.com/2007/10/16/an-image-upload-extension-for-yui-rich-text-editor/
+# If "yui_image" is not included in the request, it shows input form
+# by itself for debugging purpose. The file name is encoded in URL
+# escape. The content type should be image/* but there is no security
+# regard, so it is not recommended to use in serious application.
 
 require "cgi"
 

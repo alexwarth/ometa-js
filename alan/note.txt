@@ -1,5 +1,8 @@
 = To do
 
+todo: Log output windows doesn't scroll to bottom.
+todo: Do it button doesn't show errors.
+
 todo: more pictures for Alan's example
 todo: mouse cursor on the link is still I beam now.
 todo: home button

@@ -108,8 +108,20 @@ function save() {
 function doit() {
   if (!myEditor._hasSelection())
     return
-  var sel = myEditor._getSelection().toString()
-  println(eval(translateCode(sel)))
+  var sel = myEditor._getSelection(), code
+  try { code = translateCode(sel.toString()) }
+  catch (e) {
+    var rng = sel.getRangeAt(0)
+    rng.setStart(rng.startContainer, e.errorPos)
+    var txt = document.createTextNode(" syntax error --> ")
+    rng.insertNode(txt)
+    rng.selectNode(txt)
+    return
+  }
+  var result
+  try { result = eval(code) }
+  catch (e) { result = "error: exception was thrown " + e }
+  println(result)
 }
 
 function showHTML() {

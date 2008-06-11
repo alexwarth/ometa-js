@@ -1,4 +1,6 @@
 ometa BSOMetaParser <: Parser {
+  fromTo :x :y   = seq(x) (~seq(y) char)* seq(y), 
+  space          = super(#space) | fromTo('//', '\n') | fromTo('/*', '*/'),
   nameFirst      = '_' | '$' | letter,
   nameRest       = nameFirst | digit,
   tsName         = firstAndRest(#nameFirst, #nameRest):xs              -> xs.join(''),

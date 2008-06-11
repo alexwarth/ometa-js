@@ -126,7 +126,8 @@ ometa BSJSParser <: Parser {
                | "return" ( expr
                           | empty -> [#get, 'undefined'] ):e sc                                  -> [#return, e]
                | "with" "(" expr:x ")" stmt:s                                                    -> [#with, x, s]
-               | expr:e sc                                                                       -> e,
+               | expr:e sc                                                                       -> e
+               | ";"                                                                             -> [#get, "undefined"],
   srcElem      = "function" "name":n funcRest:f                                                  -> [#var, n, f]
                | stmt,
   srcElems     = srcElem*:ss                                                                     -> [#begin].concat(ss),

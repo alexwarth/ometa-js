@@ -5149,6 +5149,7 @@ var Dom = YAHOO.util.Dom,
                 this._selectNode(el);
                 exec = false;
             } else {
+alert("yay")
                 this._createCurrentElement('span', { backgroundColor: value });
                 this._selectNode(this.currentElement[0]);
                 exec = false;

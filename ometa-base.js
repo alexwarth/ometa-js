@@ -277,7 +277,7 @@ OMeta = {
     this._pred(r.isString())
     return r
   },
-  char: function() {
+  "char": function() {
     var r = this._apply("anything")
     this._pred(r.isCharacter())
     return r

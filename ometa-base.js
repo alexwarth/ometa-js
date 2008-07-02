@@ -231,6 +231,9 @@ OMeta = {
     var $elf = this
     return this._not(function() { return $elf._apply("anything") })
   },
+  pos: function() {
+    return this.input.idx
+  },
   empty: function() { return true },
   apply: function() {
     var r = this._apply("anything")

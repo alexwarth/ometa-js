@@ -13,7 +13,7 @@ ometa BSOMetaParser <: Parser {
   string         = (('#' | '`') tsName | tsString):xs                  -> [#App, #exactly, xs.toProgramString()],
   number         = ('-' | empty -> ''):sign digit+:ds                  -> [#App, #exactly, sign + ds.join('')],
   keyword :xs    = token(xs) ~letterOrDigit                            -> xs,
-  args           = "(" listOf(#hostExpr, ','):xs ")"                   -> xs
+  args           = '(' listOf(#hostExpr, ','):xs ")"                   -> xs
                  | empty                                               -> [],
   application    = name:rule args:as                                   -> [#App, rule].concat(as),
   hostExpr       = foreign(BSJSParser, #expr):r                           foreign(BSJSTranslator, #trans, r),

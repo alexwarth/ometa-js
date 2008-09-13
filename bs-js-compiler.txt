@@ -56,9 +56,9 @@ ometa BSJSParser <: Parser {
   addExpr      = addExpr:x "+" mulExpr:y                                                         -> [#binop, "+",          x, y]
                | addExpr:x "-" mulExpr:y                                                         -> [#binop, "-",          x, y]
                | mulExpr,
-  mulExpr      = mulExpr:x "*" mulExpr:y                                                         -> [#binop, "*",          x, y]
-               | mulExpr:x "/" mulExpr:y                                                         -> [#binop, "/",          x, y]
-               | mulExpr:x "%" mulExpr:y                                                         -> [#binop, "%",          x, y]
+  mulExpr      = mulExpr:x "*" unary:y                                                           -> [#binop, "*",          x, y]
+               | mulExpr:x "/" unary:y                                                           -> [#binop, "/",          x, y]
+               | mulExpr:x "%" unary:y                                                           -> [#binop, "%",          x, y]
                | unary,
   unary        = "-"  postfix:p                                                                  -> [#unop,  "-",   p]
                | "+"  postfix:p                                                                  -> p
@@ -191,5 +191,6 @@ ometa BSJSTranslator {
   json     trans*:props                                 -> ('({' + props.join(',') + '})'),
   binding  :name trans:val                              -> (name.toProgramString() + ': ' + val),
   switch   trans:x trans*:cases                         -> ('switch(' + x + '){' + cases.join(';') + '}'),
-  case     trans:x trans:y                              -> ('case ' + x + ': '+ y)
+  case     trans:x trans:y                              -> ('case ' + x + ': '+ y),
+  default          trans:y                              -> ('default: ' + y)
 }

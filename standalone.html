@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <script src="prototype.js"></script>
+    <script src="lib.js"></script>
+    <script src="ometa-base.js"></script>
+    <script src="parser.js"></script>
+    <script src="bs-js-compiler.js"></script>
+    <script src="bs-ometa-compiler.js"></script>
+    <script src="bs-ometa-optimizer.js"></script>
+    <script src="bs-ometa-js-compiler.js"></script>
+    <script src="ometa-script-tag.js"></script>
+
+    <script type="text/x-ometa-js">
+      ometa M { ones = 1* }
+      alert(M.matchAll([1, 1, 1, 1, 1], "ones"))
+    </script>
+
+  <body>
+    hello world
+  </body>
+</html>

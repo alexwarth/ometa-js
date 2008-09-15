@@ -11,7 +11,7 @@ ometa BSJSParser <: Parser {
                                                                                                      parseFloat(ws.join('') + '.' +
                                                                                                                 fs.join(''))],
   escapeChar   = '\\' char:c                                                                     -> unescape('\\' + c),
-  str          = seq('"""')  (escapeChar | ~seq('"""') char)*:cs seq('"""')                      -> [`string, cs.join('')]
+  str          = seq('"""')  (escapeChar | ~seq('"""') char)*:cs seq('"""')                      -> [#string, cs.join('')]
                | '\'' (escapeChar | ~'\'' char)*:cs '\''                                         -> [#string, cs.join('')]
                | '"'  (escapeChar | ~'"'  char)*:cs '"'                                          -> [#string, cs.join('')]
                | ('#' | '`') iName:n                                                             -> [#string, n],

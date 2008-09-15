@@ -169,7 +169,7 @@ ometa BSJSTranslator {
   return   trans:x                                      -> ('return ' + x),
   with     trans:x curlyTrans:s                         -> ('with(' + x + ')' + s),
   if       trans:cond curlyTrans:t curlyTrans:e         -> ('if(' + cond + ')' + t + 'else' + e),
-  condExpr trans:cond trans:t trans:e                   -> (cond + '?' + t + ':' + e),
+  condExpr trans:cond trans:t trans:e                   -> ('(' + cond + '?' + t + ':' + e + ')'),
   while    trans:cond curlyTrans:body                   -> ('while(' + cond + ')' + body),
   doWhile  curlyTrans:body trans:cond                   -> ('do' + body + 'while(' + cond + ')'),
   for      trans:init trans:cond trans:upd

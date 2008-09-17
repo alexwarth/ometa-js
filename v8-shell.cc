@@ -43,7 +43,6 @@ bool  ExecuteString(v8::Handle<v8::String> source,
 bool iExecuteString(v8::Handle<v8::String> source,
                     v8::Handle<v8::Value> name,
                     v8::Handle<v8::Value> &result,
-                    bool print_result,
                     bool report_exceptions);
 v8::Handle<v8::Value> Print(const v8::Arguments& args);
 v8::Handle<v8::Value> Load(const v8::Arguments& args);
@@ -201,20 +200,23 @@ bool ExecuteString(v8::Handle<v8::String> source,
                    bool print_result,
                    bool report_exceptions) {
   v8::Handle<v8::Value> result;
+  context->Global()->Set(v8::String::New("__xy7z"), source);
   bool ok = true;
-  context->Global()->Set(v8::String::New("__theCode"), source);
-  if (iExecuteString(v8::String::New("translateCode"), v8::Undefined(), result, false, false)) {
-    ok = iExecuteString(v8::String::New("__theCode = translateCode(__theCode)"), v8::Undefined(), result, false, false);
-  }
+  ok = iExecuteString(v8::String::New("if ((function() { return this.translateCode })()) __xy7z = translateCode(__xy7z)"),
+                      name, result, false);
+  if (!ok)
+    printf("error: translateCode failed\n");
   if (ok)
-    ok = iExecuteString(v8::String::New("eval(__theCode)"), name, result, print_result, report_exceptions);
+    ok = iExecuteString(v8::String::New("__xy7z = eval(__xy7z)"), name, result, report_exceptions);
+  if (ok && print_result && !result->IsUndefined())
+    iExecuteString(v8::String::New("print(__xy7z)"), name, result, report_exceptions);
   return ok;
 }
+
 
 bool iExecuteString(v8::Handle<v8::String> source,
                     v8::Handle<v8::Value> name,
                     v8::Handle<v8::Value> &result,
-                    bool print_result,
                     bool report_exceptions) {
   v8::HandleScope handle_scope;
   v8::TryCatch try_catch;
@@ -232,12 +234,6 @@ bool iExecuteString(v8::Handle<v8::String> source,
         ReportException(&try_catch);
       return false;
     } else {
-      if (print_result && !result->IsUndefined()) {
-        // If all went well and the result wasn't undefined then print
-        // the returned value.
-        v8::String::Utf8Value str(result);
-        printf("%s\n", *str);
-      }
       return true;
     }
   }

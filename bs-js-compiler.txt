@@ -64,7 +64,7 @@ ometa BSJSParser <: Parser {
                | "+"  postfix:p                                                                  -> p
                | "++" postfix:p                                                                  -> [#preop, "++",  p]
                | "--" postfix:p                                                                  -> [#preop, "--",  p]
-               | "!"  postfix:p                                                                  -> [#unop,  "!",   p]
+               | "!"  unary:p                                                                    -> [#unop,  "!",   p]
                | postfix,
   postfix      = primExpr:p ( spacesNoNl "++"                                                    -> [#postop, "++", p]
                             | spacesNoNl "--"                                                    -> [#postop, "--", p]

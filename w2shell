@@ -1,0 +1,2 @@
+./v8 Worlds2_Library.js ometa-rhino.js Worlds2.js arrays.wjs $@ --shell
+

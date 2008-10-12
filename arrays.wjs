@@ -1,0 +1,35 @@
+Array.prototype.toString = function() {
+  var r = "["
+  for (var idx = 0; idx < this.length; idx = idx + 1) {
+    if (idx > 0)
+      r = r + ", "
+    r = r + this[idx].toString()
+  }
+  return r + "]"
+}
+Array.prototype.push = function(x) {
+  this[this.length] = x
+  this.length = this.length + 1
+  return x
+}
+Array.prototype.pop = function() {
+  var r = this[this.length - 1]
+  this[this.length - 1] = undefined
+  this.length = this.length - 1
+  return r
+}
+Array.prototype.join = function(delim) {
+  var r = ""
+  for (var idx = 0; idx < this.length; idx++) {
+    if (idx > 0)
+      r += delim
+    r += this[idx]
+  }
+  return r  
+}
+Array.prototype.concat = function(xs) {
+  for (var idx = 0; idx < xs.length; idx++)
+    this.push(xs[idx])
+  return this
+}
+

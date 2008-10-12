@@ -1,0 +1,624 @@
+// TODO: rewrite _apply to use worlds
+
+
+//////// lib.js
+
+/*
+  Copyright (c) 2007, 2008 Alessandro Warth <awarth@cs.ucla.edu>
+
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation
+  files (the "Software"), to deal in the Software without
+  restriction, including without limitation the rights to use,
+  copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+  OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+// try to use StringBuffer instead of string concatenation to improve performance
+
+function StringBuffer() {
+  this.strings = []
+  for (var idx = 0; idx < arguments.length; idx++)
+    this.nextPutAll(arguments[idx])
+}
+StringBuffer.prototype.nextPutAll = function(s) { this.strings.push(s) }
+StringBuffer.prototype.contents   = function()  { return this.strings.join("") }
+String.prototype.writeStream      = function()  { return new StringBuffer(this) }
+
+// make Arrays print themselves sensibly
+
+Object.prototype.printOn = function(ws) { ws.nextPutAll(this.toString()) }
+
+Array.prototype.toString = function() { var ws = "".writeStream(); this.printOn(ws); return ws.contents() }
+Array.prototype.printOn = function(ws) {
+  ws.nextPutAll("[")
+  for (var idx = 0; idx < this.length; idx++) {
+    if (idx > 0)
+      ws.nextPutAll(", ")
+    this[idx].printOn(ws)
+  }
+  ws.nextPutAll("]")
+}
+
+// delegation
+
+Object.prototype.delegated = function(props) {
+  var f = function() { }
+  f.prototype = this
+  var r = new f()
+  for (var p in props)
+    if (props.hasOwn(p))
+      r[p] = props[p]
+  return r
+}
+
+// some reflective stuff
+
+Object.prototype.ownPropertyNames = function() {
+  var r = []
+  for (name in this)
+    if (this.hasOwn(name))
+      r.push(name)
+  return r
+}
+
+Object.prototype.hasProperty = function(p) { return this[p] != undefined }
+
+Object.prototype.isNumber    = function() { return false }
+Number.prototype.isNumber    = function() { return true }
+
+Object.prototype.isString    = function() { return false }
+String.prototype.isString    = function() { return true }
+
+Object.prototype.isCharacter = function() { return false }
+
+String.prototype.isCharacter = function() { return this.length == 1 }
+String.prototype.isSpace     = function() { return this.isCharacter() && this.charCodeAt(0) <= 32   }
+String.prototype.isDigit     = function() { return this.isCharacter() && this >= "0" && this <= "9" }
+String.prototype.isLower     = function() { return this.isCharacter() && this >= "a" && this <= "z" }
+String.prototype.isUpper     = function() { return this.isCharacter() && this >= "A" && this <= "Z" }
+  
+String.prototype.digitValue  = function() { return this.charCodeAt(0) - "0".charCodeAt(0) }
+
+Object.prototype.isSequenceable = false
+Array.prototype.isSequenceable  = true
+String.prototype.isSequenceable = true
+
+// some functional programming stuff
+
+Array.prototype.map = function(f) {
+  var r = []
+  for (var idx = 0; idx < this.length; idx++)
+    r[idx] = f(this[idx])
+  return r
+}
+
+Array.prototype.reduce = function(f, z) {
+  var r = z
+  for (var idx = 0; idx < this.length; idx++)
+    r = f(r, this[idx])
+  return r
+}
+
+Array.prototype.delimWith = function(d) {
+  return this.reduce(
+    function(xs, x) {
+      if (xs.length > 0)
+        xs.push(d)
+      xs.push(x)
+      return xs
+    },
+   [])
+}
+
+// Squeak's ReadStream, kind of
+
+function ReadStream(anArrayOrString) {
+  this.src = anArrayOrString
+  this.pos = 0
+}
+ReadStream.prototype.atEnd = function() { return this.pos >= this.src.length }
+ReadStream.prototype.next  = function() { return this.src[this.pos++] }
+
+// escape characters
+
+escapeStringFor = new Object()
+for (var c = 0; c < 256; c++)
+  escapeStringFor[c] = String.fromCharCode(c)
+escapeStringFor["\\".charCodeAt(0)] = "\\\\"
+escapeStringFor['"'.charCodeAt(0)]  = '\\"'
+escapeStringFor["'".charCodeAt(0)]  = "\\'"
+escapeStringFor["\r".charCodeAt(0)] = "\\r"
+escapeStringFor["\n".charCodeAt(0)] = "\\n"
+escapeStringFor["\t".charCodeAt(0)] = "\\t"
+escapeChar = function(c) {
+  var charCode = c.charCodeAt(0)
+  return charCode > 255 ? String.fromCharCode(charCode) : escapeStringFor[charCode]
+}
+
+function unescape(s) {
+  if (s[0] == '\\')
+    switch (s[1]) {
+      case '\\': return '\\'
+      case 'r':  return '\r'
+      case 'n':  return '\n'
+      case 't':  return '\t'
+      default:   return s[1]
+    }
+  else
+    return s
+}
+
+String.prototype.toProgramString = function() {
+  var ws = "\"".writeStream()
+  for (var idx = 0; idx < this.length; idx++)
+    ws.nextPutAll(escapeChar(this[idx]))
+  ws.nextPutAll("\"")
+  return ws.contents()
+}
+
+// C-style tempnam function
+
+function tempnam(s) { return (s ? s : "_tmpnam_") + tempnam.n++ }
+tempnam.n = 0
+
+
+//////// ometa-base.js
+
+/*
+  Copyright (c) 2007, 2008 Alessandro Warth <awarth@cs.ucla.edu>
+
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation
+  files (the "Software"), to deal in the Software without
+  restriction, including without limitation the rights to use,
+  copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+  OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+/*
+  new syntax:
+    #foo        match the string object 'foo' (should also be accepted in JS)
+    'abc'       match the string object 'abc'
+    'c'         match the string object 'c'
+    ``abc''     match the sequence of string objects 'a', 'b', 'c'
+    "abc"       token('abc')
+    [1 2 3]     match the array object [1, 2, 3]
+    foo(bar)    apply rule foo with argument bar
+    -> ...      do semantic actions in JS (no more ST). allow multiple statements, but no declarations
+                probably don't even need {}s, because newlines can terminate it!
+*/
+
+/*
+// ometa M {
+//   number = number:n digit:d -> { n * 10 + d.digitValue() }
+//          | digit:d          -> { d.digitValue() }.
+// }
+
+try {
+  M = OMeta.delegated({
+    number: function() {
+      var $elf = this
+      return $elf._or(
+        function() {
+          var n, d
+          n = $elf._apply("number")
+          d = $elf._apply("digit")
+          return n * 10 + d.digitValue()
+        },
+        function() {
+          var d
+          d = $elf._apply("digit")
+          return d.digitValue()
+        }
+      )
+    }
+  })
+  M.matchAll("123456789", "number")
+} catch (f) { alert(f) }
+*/
+
+// the failure exception
+
+fail = { toString: function() { return "match failed" } }
+
+// streams and memoization
+
+function OMInputStream(hd, tl) {
+  this.memo = { }
+  this.hd   = hd
+  this.tl   = tl
+}
+OMInputStream.prototype.head = function() { return this.hd }
+OMInputStream.prototype.tail = function() { return this.tl }
+
+function OMInputStreamEnd() { this.memo = { } }
+OMInputStreamEnd.prototype.head = function() { throw fail }
+OMInputStreamEnd.prototype.tail = function() { throw fail }
+
+Array.prototype.toOMInputStream  = function() { return makeArrayOMInputStream(this, 0) }
+String.prototype.toOMInputStream = Array.prototype.toOMInputStream
+
+function makeArrayOMInputStream(arr, idx) { return idx < arr.length ? new ArrayOMInputStream(arr, idx) : new OMInputStreamEnd() }
+
+function ArrayOMInputStream(arr, idx) {
+  this.memo = { }
+  this.arr  = arr
+  this.idx  = idx
+  this.hd   = arr[idx]
+}
+ArrayOMInputStream.prototype.head = function() { return this.hd }
+ArrayOMInputStream.prototype.tail = function() {
+  if (this.tl == undefined)
+    this.tl = makeArrayOMInputStream(this.arr, this.idx + 1)
+  return this.tl
+}
+
+function makeOMInputStreamProxy(target) {
+  return target.delegated({
+    memo:   { },
+    target: target,
+    tail:   function() { return makeOMInputStreamProxy(target.tail()) }
+  })
+}
+
+// Failer (i.e., that which makes things fail) is used to detect (direct) left recursion and memoize failures
+
+function Failer() { }
+Failer.prototype.used = false
+
+// the OMeta "class" and basic functionality
+
+OMeta = {
+  _apply: function(rule) {
+    var memoRec = this.input.memo[rule]
+    if (memoRec == undefined) {
+      var origInput = this.input,
+          failer    = new Failer()
+      this.input.memo[rule] = failer
+      this.input.memo[rule] = memoRec = {ans: this[rule].apply(this), nextInput: this.input}
+      if (failer.used) {
+        var sentinel = this.input
+        while (true) {
+          try {
+            this.input = origInput
+            var ans = this[rule].apply(this)
+            if (this.input == sentinel)
+              throw fail
+            memoRec.ans       = ans
+            memoRec.nextInput = this.input
+          }
+          catch (f) {
+            if (f != fail)
+              throw f
+            break
+          }
+        }
+      }
+    }
+    else if (memoRec instanceof Failer) {
+      memoRec.used = true
+      throw fail
+    }
+    this.input = memoRec.nextInput
+    return memoRec.ans
+  },
+
+  // note: _applyWithArgs and _superApplyWithArgs are not memoized, so they can't be left-recursive
+  _applyWithArgs: function(rule) {
+    for (var idx = arguments.length - 1; idx > 0; idx--)
+      this.input = new OMInputStream(arguments[idx], this.input)
+    return this[rule].apply(this)
+  },
+  _superApplyWithArgs: function($elf, rule) {
+    for (var idx = arguments.length - 1; idx > 1; idx--)
+      $elf.input = new OMInputStream(arguments[idx], $elf.input)
+    return this[rule].apply($elf)
+  },
+  _pred: function(b) {
+    if (b)
+      return true
+    throw fail
+  },
+  _not: function(x) {
+    var origInput = this.input
+    try { x() }
+    catch (f) {
+      if (f != fail)
+        throw f
+      this.input = origInput
+      return true
+    }
+    throw fail
+  },
+  _lookahead: function(x) {
+    var origInput = this.input,
+        r        = x()
+    this.input = origInput
+    return r
+  },
+  _or: function() {
+    var origInput = this.input
+    for (var idx = 0; idx < arguments.length; idx++)
+      try { this.input = origInput; return arguments[idx]() }
+      catch (f) {
+        if (f != fail)
+          throw f
+      }
+    throw fail
+  },
+  _many: function(x) {
+    var ans = arguments[1] != undefined ? [arguments[1]] : []
+    while (true) {
+      var origInput = this.input
+      try { ans.push(x()) }
+      catch (f) {
+        if (f != fail)
+          throw f
+        this.input = origInput
+        break
+      }
+    }
+    return ans
+  },
+  _many1: function(x) { return this._many(x, x()) },
+  _form: function(x) {
+    var v = this._apply("anything")
+    if (!v.isSequenceable)
+      throw fail
+    var origInput = this.input
+    this.input = makeArrayOMInputStream(v, 0)
+    var r = x()
+    this._apply("end")
+    this.input = origInput
+    return v
+  },
+
+  // some basic rules
+  anything: function() {
+    var r = this.input.head()
+    this.input = this.input.tail()
+    return r
+  },
+  end: function() {
+    var $elf = this
+    return this._not(function() { return $elf._apply("anything") })
+  },
+  pos: function() {
+    return this.input.idx
+  },
+  empty: function() { return true },
+  apply: function() {
+    var r = this._apply("anything")
+    return this._apply(r)
+  },
+  foreign: function() {
+    var g   = this._apply("anything"),
+        r   = this._apply("anything"),
+        gi  = g.delegated({input: makeOMInputStreamProxy(this.input)})
+    var ans = gi._apply(r)
+    this.input = gi.input.target
+    return ans
+  },
+
+  //  some useful "derived" rules
+  exactly: function() {
+    var wanted = this._apply("anything")
+    if (wanted === this._apply("anything"))
+      return wanted
+    throw fail
+  },
+  "true": function() {
+    var r = this._apply("anything")
+    this._pred(r == true)
+    return r
+  },
+  "false": function() {
+    var r = this._apply("anything")
+    this._pred(r == false)
+    return r
+  },
+  "undefined": function() {
+    var r = this._apply("anything")
+    this._pred(r == undefined)
+    return r
+  },
+  number: function() {
+    var r = this._apply("anything")
+    this._pred(r.isNumber())
+    return r
+  },
+  string: function() {
+    var r = this._apply("anything")
+    this._pred(r.isString())
+    return r
+  },
+  "char": function() {
+    var r = this._apply("anything")
+    this._pred(r.isCharacter())
+    return r
+  },
+  space: function() {
+    var r = this._apply("char")
+    this._pred(r.charCodeAt(0) <= 32)
+    return r
+  },
+  spaces: function() {
+    var $elf = this
+    return this._many(function() { return $elf._apply("space") })
+  },
+  digit: function() {
+    var r = this._apply("char")
+    this._pred(r.isDigit())
+    return r
+  },
+  lower: function() {
+    var r = this._apply("char")
+    this._pred(r.isLower())
+    return r
+  },
+  upper: function() {
+    var r = this._apply("char")
+    this._pred(r.isUpper())
+    return r
+  },
+  letter: function() {
+    var $elf = this
+    return this._or(function() { return $elf._apply("lower") },
+                    function() { return $elf._apply("upper") })
+  },
+  letterOrDigit: function() {
+    var $elf = this
+    return this._or(function() { return $elf._apply("letter") },
+                    function() { return $elf._apply("digit")  })
+  },
+  firstAndRest: function()  {
+    var $elf  = this,
+        first = this._apply("anything"),
+        rest  = this._apply("anything")
+     return this._many(function() { return $elf._apply(rest) }, this._apply(first))
+  },
+  seq: function() {
+    var xs = this._apply("anything")
+    for (var idx = 0; idx < xs.length; idx++)
+      this._applyWithArgs("exactly", xs[idx])
+    return xs
+  },
+  notLast: function() {
+    var $elf = this,
+        rule = this._apply("anything"),
+        r    = this._apply(rule)
+    this._lookahead(function() { return $elf._apply(rule) })
+    return r
+  },
+
+  initialize: function() { },
+  // match and matchAll are a grammar's "public interface"
+  _genericMatch: function(input, rule, args, matchFailed) {
+    if (args == undefined)
+      args = []
+    var realArgs = [rule]
+    for (var idx = 0; idx < args.length; idx++)
+      realArgs.push(args[idx])
+    var m = this.delegated({input: input})
+    m.initialize()
+    try { return realArgs.length == 1 ? m._apply.call(m, realArgs[0]) : m._applyWithArgs.apply(m, realArgs) }
+    catch (f) {
+      if (f == fail && matchFailed != undefined) {
+        var input = m.input
+        if (input.idx != undefined) {
+          while (input.tl != undefined && input.tl.idx != undefined)
+            input = input.tl
+          input.idx--
+        }
+        return matchFailed(m, input.idx)
+      }
+      throw f
+    }
+  },
+  match: function(obj, rule, args, matchFailed) {
+    return this._genericMatch([obj].toOMInputStream(),    rule, args, matchFailed)
+  },
+  matchAll: function(listyObj, rule, args, matchFailed) {
+    return this._genericMatch(listyObj.toOMInputStream(), rule, args, matchFailed)
+  }
+}
+
+
+//////// parser.js
+
+/*
+  Copyright (c) 2007, 2008 Alessandro Warth <awarth@cs.ucla.edu>
+
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation
+  files (the "Software"), to deal in the Software without
+  restriction, including without limitation the rights to use,
+  copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+  OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+Parser = OMeta.delegated({
+  listOf: function() {
+    var $elf  = this,
+        rule  = this._apply("anything"),
+        delim = this._apply("anything")
+    return this._or(function() {
+                      var r = $elf._apply(rule)
+                      return $elf._many(function() {
+                                          $elf._applyWithArgs("token", delim)
+                                          return $elf._apply(rule)
+                                        },
+                                        r)
+                    },
+                    function() { return [] })
+  },
+  token: function() {
+    var cs = this._apply("anything")
+    this._apply("spaces")
+    return this._applyWithArgs("seq", cs)
+  }
+})
+
+
+//////// bs-js-compiler.js
+
+{BSJSParser=Parser.delegated({"fromTo":function(){var $elf=this,x,y;return (function(){x=$elf._apply("anything");y=$elf._apply("anything");$elf._applyWithArgs("seq",x);$elf._many(function(){return (function(){$elf._not(function(){return $elf._applyWithArgs("seq",y)});return $elf._apply("char")})()});return $elf._applyWithArgs("seq",y)})()},"space":function(){var $elf=this;return $elf._or((function(){return Parser._superApplyWithArgs($elf,"space")}),(function(){return $elf._applyWithArgs("fromTo","//","\n")}),(function(){return $elf._applyWithArgs("fromTo","/*","*/")}))},"nameFirst":function(){var $elf=this;return $elf._or((function(){return $elf._apply("letter")}),(function(){return $elf._applyWithArgs("exactly","$")}),(function(){return $elf._applyWithArgs("exactly","_")}))},"nameRest":function(){var $elf=this;return $elf._or((function(){return $elf._apply("nameFirst")}),(function(){return $elf._apply("digit")}))},"iName":function(){var $elf=this,r;return (function(){r=$elf._applyWithArgs("firstAndRest","nameFirst","nameRest");return r.join("")})()},"isKeyword":function(){var $elf=this,x;return (function(){x=$elf._apply("anything");return $elf._pred(BSJSParser._isKeyword(x))})()},"name":function(){var $elf=this,n;return (function(){n=$elf._apply("iName");$elf._not(function(){return $elf._applyWithArgs("isKeyword",n)});return ["name",(n == "self")?"$elf":n]})()},"keyword":function(){var $elf=this,k;return (function(){k=$elf._apply("iName");$elf._applyWithArgs("isKeyword",k);return [k,k]})()},"number":function(){var $elf=this,ws,fs;return (function(){ws=$elf._many1(function(){return $elf._apply("digit")});fs=$elf._or((function(){return (function(){$elf._applyWithArgs("exactly",".");return $elf._many1(function(){return $elf._apply("digit")})})()}),(function(){return (function(){$elf._apply("empty");return []})()}));return ["number",parseFloat(((ws.join("") + ".") + fs.join("")))]})()},"escapeChar":function(){var $elf=this,c;return (function(){$elf._applyWithArgs("exactly","\\");c=$elf._apply("char");return unescape(("\\" + c))})()},"str":function(){var $elf=this,cs,cs,cs,n;return $elf._or((function(){return (function(){$elf._applyWithArgs("seq","\"\"\"");cs=$elf._many(function(){return $elf._or((function(){return $elf._apply("escapeChar")}),(function(){return (function(){$elf._not(function(){return $elf._applyWithArgs("seq","\"\"\"")});return $elf._apply("char")})()}))});$elf._applyWithArgs("seq","\"\"\"");return ["string",cs.join("")]})()}),(function(){return (function(){$elf._applyWithArgs("exactly","\'");cs=$elf._many(function(){return $elf._or((function(){return $elf._apply("escapeChar")}),(function(){return (function(){$elf._not(function(){return $elf._applyWithArgs("exactly","\'")});return $elf._apply("char")})()}))});$elf._applyWithArgs("exactly","\'");return ["string",cs.join("")]})()}),(function(){return (function(){$elf._applyWithArgs("exactly","\"");cs=$elf._many(function(){return $elf._or((function(){return $elf._apply("escapeChar")}),(function(){return (function(){$elf._not(function(){return $elf._applyWithArgs("exactly","\"")});return $elf._apply("char")})()}))});$elf._applyWithArgs("exactly","\"");return ["string",cs.join("")]})()}),(function(){return (function(){$elf._or((function(){return $elf._applyWithArgs("exactly","#")}),(function(){return $elf._applyWithArgs("exactly","`")}));n=$elf._apply("iName");return ["string",n]})()}))},"special":function(){var $elf=this,s;return (function(){s=$elf._or((function(){return $elf._applyWithArgs("exactly","(")}),(function(){return $elf._applyWithArgs("exactly",")")}),(function(){return $elf._applyWithArgs("exactly","{")}),(function(){return $elf._applyWithArgs("exactly","}")}),(function(){return $elf._applyWithArgs("exactly","[")}),(function(){return $elf._applyWithArgs("exactly","]")}),(function(){return $elf._applyWithArgs("exactly",",")}),(function(){return $elf._applyWithArgs("exactly",";")}),(function(){return $elf._applyWithArgs("exactly","?")}),(function(){return $elf._applyWithArgs("exactly",":")}),(function(){return $elf._applyWithArgs("seq","!==")}),(function(){return $elf._applyWithArgs("seq","!=")}),(function(){return $elf._applyWithArgs("seq","===")}),(function(){return $elf._applyWithArgs("seq","==")}),(function(){return $elf._applyWithArgs("seq","=")}),(function(){return $elf._applyWithArgs("seq",">=")}),(function(){return $elf._applyWithArgs("exactly",">")}),(function(){return $elf._applyWithArgs("seq","<=")}),(function(){return $elf._applyWithArgs("exactly","<")}),(function(){return $elf._applyWithArgs("seq","++")}),(function(){return $elf._applyWithArgs("seq","+=")}),(function(){return $elf._applyWithArgs("exactly","+")}),(function(){return $elf._applyWithArgs("seq","--")}),(function(){return $elf._applyWithArgs("seq","-=")}),(function(){return $elf._applyWithArgs("exactly","-")}),(function(){return $elf._applyWithArgs("seq","*=")}),(function(){return $elf._applyWithArgs("exactly","*")}),(function(){return $elf._applyWithArgs("seq","/=")}),(function(){return $elf._applyWithArgs("exactly","/")}),(function(){return $elf._applyWithArgs("seq","%=")}),(function(){return $elf._applyWithArgs("exactly","%")}),(function(){return $elf._applyWithArgs("seq","&&=")}),(function(){return $elf._applyWithArgs("seq","&&")}),(function(){return $elf._applyWithArgs("seq","||=")}),(function(){return $elf._applyWithArgs("seq","||")}),(function(){return $elf._applyWithArgs("exactly",".")}),(function(){return $elf._applyWithArgs("exactly","!")}));return [s,s]})()},"tok":function(){var $elf=this;return (function(){$elf._apply("spaces");return $elf._or((function(){return $elf._apply("name")}),(function(){return $elf._apply("keyword")}),(function(){return $elf._apply("number")}),(function(){return $elf._apply("str")}),(function(){return $elf._apply("special")}))})()},"toks":function(){var $elf=this,ts;return (function(){ts=$elf._many(function(){return $elf._apply("token")});$elf._apply("spaces");$elf._apply("end");return ts})()},"token":function(){var $elf=this,tt,t;return (function(){tt=$elf._apply("anything");t=$elf._apply("tok");$elf._pred((t[(0)] == tt));return t[(1)]})()},"spacesNoNl":function(){var $elf=this;return $elf._many(function(){return (function(){$elf._not(function(){return $elf._applyWithArgs("exactly","\n")});return $elf._apply("space")})()})},"expr":function(){var $elf=this,e,t,f,rhs,rhs,rhs,rhs,rhs,rhs,rhs,rhs;return (function(){e=$elf._apply("orExpr");return $elf._or((function(){return (function(){$elf._applyWithArgs("token","?");t=$elf._apply("expr");$elf._applyWithArgs("token",":");f=$elf._apply("expr");return ["condExpr",e,t,f]})()}),(function(){return (function(){$elf._applyWithArgs("token","=");rhs=$elf._apply("expr");return ["set",e,rhs]})()}),(function(){return (function(){$elf._applyWithArgs("token","+=");rhs=$elf._apply("expr");return ["mset",e,"+",rhs]})()}),(function(){return (function(){$elf._applyWithArgs("token","-=");rhs=$elf._apply("expr");return ["mset",e,"-",rhs]})()}),(function(){return (function(){$elf._applyWithArgs("token","*=");rhs=$elf._apply("expr");return ["mset",e,"*",rhs]})()}),(function(){return (function(){$elf._applyWithArgs("token","/=");rhs=$elf._apply("expr");return ["mset",e,"/",rhs]})()}),(function(){return (function(){$elf._applyWithArgs("token","%=");rhs=$elf._apply("expr");return ["mset",e,"%",rhs]})()}),(function(){return (function(){$elf._applyWithArgs("token","&&=");rhs=$elf._apply("expr");return ["mset",e,"&&",rhs]})()}),(function(){return (function(){$elf._applyWithArgs("token","||=");rhs=$elf._apply("expr");return ["mset",e,"||",rhs]})()}),(function(){return (function(){$elf._apply("empty");return e})()}))})()},"orExpr":function(){var $elf=this,x,y;return $elf._or((function(){return (function(){x=$elf._apply("orExpr");$elf._applyWithArgs("token","||");y=$elf._apply("andExpr");return ["binop","||",x,y]})()}),(function(){return $elf._apply("andExpr")}))},"andExpr":function(){var $elf=this,x,y;return $elf._or((function(){return (function(){x=$elf._apply("andExpr");$elf._applyWithArgs("token","&&");y=$elf._apply("eqExpr");return ["binop","&&",x,y]})()}),(function(){return $elf._apply("eqExpr")}))},"eqExpr":function(){var $elf=this,x,y,y,y,y;return $elf._or((function(){return (function(){x=$elf._apply("eqExpr");return $elf._or((function(){return (function(){$elf._applyWithArgs("token","==");y=$elf._apply("relExpr");return ["binop","==",x,y]})()}),(function(){return (function(){$elf._applyWithArgs("token","!=");y=$elf._apply("relExpr");return ["binop","!=",x,y]})()}),(function(){return (function(){$elf._applyWithArgs("token","===");y=$elf._apply("relExpr");return ["binop","===",x,y]})()}),(function(){return (function(){$elf._applyWithArgs("token","!==");y=$elf._apply("relExpr");return ["binop","!==",x,y]})()}))})()}),(function(){return $elf._apply("relExpr")}))},"relExpr":function(){var $elf=this,x,y,y,y,y,y;return $elf._or((function(){return (function(){x=$elf._apply("relExpr");return $elf._or((function(){return (function(){$elf._applyWithArgs("token",">");y=$elf._apply("addExpr");return ["binop",">",x,y]})()}),(function(){return (function(){$elf._applyWithArgs("token",">=");y=$elf._apply("addExpr");return ["binop",">=",x,y]})()}),(function(){return (function(){$elf._applyWithArgs("token","<");y=$elf._apply("addExpr");return ["binop","<",x,y]})()}),(function(){return (function(){$elf._applyWithArgs("token","<=");y=$elf._apply("addExpr");return ["binop","<=",x,y]})()}),(function(){return (function(){$elf._applyWithArgs("token","instanceof");y=$elf._apply("addExpr");return ["binop","instanceof",x,y]})()}))})()}),(function(){return $elf._apply("addExpr")}))},"addExpr":function(){var $elf=this,x,y,x,y;return $elf._or((function(){return (function(){x=$elf._apply("addExpr");$elf._applyWithArgs("token","+");y=$elf._apply("mulExpr");return ["binop","+",x,y]})()}),(function(){return (function(){x=$elf._apply("addExpr");$elf._applyWithArgs("token","-");y=$elf._apply("mulExpr");return ["binop","-",x,y]})()}),(function(){return $elf._apply("mulExpr")}))},"mulExpr":function(){var $elf=this,x,y,x,y,x,y;return $elf._or((function(){return (function(){x=$elf._apply("mulExpr");$elf._applyWithArgs("token","*");y=$elf._apply("unary");return ["binop","*",x,y]})()}),(function(){return (function(){x=$elf._apply("mulExpr");$elf._applyWithArgs("token","/");y=$elf._apply("unary");return ["binop","/",x,y]})()}),(function(){return (function(){x=$elf._apply("mulExpr");$elf._applyWithArgs("token","%");y=$elf._apply("unary");return ["binop","%",x,y]})()}),(function(){return $elf._apply("unary")}))},"unary":function(){var $elf=this,p,p,p,p,p;return $elf._or((function(){return (function(){$elf._applyWithArgs("token","-");p=$elf._apply("postfix");return ["unop","-",p]})()}),(function(){return (function(){$elf._applyWithArgs("token","+");p=$elf._apply("postfix");return p})()}),(function(){return (function(){$elf._applyWithArgs("token","++");p=$elf._apply("postfix");return ["preop","++",p]})()}),(function(){return (function(){$elf._applyWithArgs("token","--");p=$elf._apply("postfix");return ["preop","--",p]})()}),(function(){return (function(){$elf._applyWithArgs("token","!");p=$elf._apply("postfix");return ["unop","!",p]})()}),(function(){return $elf._apply("postfix")}))},"postfix":function(){var $elf=this,p;return (function(){p=$elf._apply("primExpr");return $elf._or((function(){return (function(){$elf._apply("spacesNoNl");$elf._applyWithArgs("token","++");return ["postop","++",p]})()}),(function(){return (function(){$elf._apply("spacesNoNl");$elf._applyWithArgs("token","--");return ["postop","--",p]})()}),(function(){return (function(){$elf._apply("empty");return p})()}))})()},"primExpr":function(){var $elf=this,p,i,m,as,f,as;return $elf._or((function(){return (function(){p=$elf._apply("primExpr");return $elf._or((function(){return (function(){$elf._applyWithArgs("token","[");i=$elf._apply("expr");$elf._applyWithArgs("token","]");return ["getp",i,p]})()}),(function(){return (function(){$elf._applyWithArgs("token",".");m=$elf._applyWithArgs("token","name");$elf._applyWithArgs("token","(");as=$elf._applyWithArgs("listOf","expr",",");$elf._applyWithArgs("token",")");return ["send",m,p].concat(as)})()}),(function(){return (function(){$elf._applyWithArgs("token",".");f=$elf._applyWithArgs("token","name");return ["getp",["string",f],p]})()}),(function(){return (function(){$elf._applyWithArgs("token","(");as=$elf._applyWithArgs("listOf","expr",",");$elf._applyWithArgs("token",")");return ["call",p].concat(as)})()}))})()}),(function(){return $elf._apply("primExprHd")}))},"primExprHd":function(){var $elf=this,e,n,n,s,n,as,es;return $elf._or((function(){return (function(){$elf._applyWithArgs("token","(");e=$elf._apply("expr");$elf._applyWithArgs("token",")");return e})()}),(function(){return (function(){$elf._applyWithArgs("token","this");return ["this"]})()}),(function(){return (function(){n=$elf._applyWithArgs("token","name");return ["get",n]})()}),(function(){return (function(){n=$elf._applyWithArgs("token","number");return ["number",n]})()}),(function(){return (function(){s=$elf._applyWithArgs("token","string");return ["string",s]})()}),(function(){return (function(){$elf._applyWithArgs("token","function");return $elf._apply("funcRest")})()}),(function(){return (function(){$elf._applyWithArgs("token","new");n=$elf._applyWithArgs("token","name");$elf._applyWithArgs("token","(");as=$elf._applyWithArgs("listOf","expr",",");$elf._applyWithArgs("token",")");return ["new",n].concat(as)})()}),(function(){return (function(){$elf._applyWithArgs("token","[");es=$elf._applyWithArgs("listOf","expr",",");$elf._applyWithArgs("token","]");return ["arr"].concat(es)})()}),(function(){return $elf._apply("json")}))},"json":function(){var $elf=this,bs;return (function(){$elf._applyWithArgs("token","{");bs=$elf._applyWithArgs("listOf","jsonBinding",",");$elf._applyWithArgs("token","}");return ["json"].concat(bs)})()},"jsonBinding":function(){var $elf=this,n,v;return (function(){n=$elf._apply("jsonPropName");$elf._applyWithArgs("token",":");v=$elf._apply("expr");return ["binding",n,v]})()},"jsonPropName":function(){var $elf=this;return $elf._or((function(){return $elf._applyWithArgs("token","name")}),(function(){return $elf._applyWithArgs("token","number")}),(function(){return $elf._applyWithArgs("token","string")}))},"formal":function(){var $elf=this;return (function(){$elf._apply("spaces");return $elf._applyWithArgs("token","name")})()},"funcRest":function(){var $elf=this,fs,body;return (function(){$elf._applyWithArgs("token","(");fs=$elf._applyWithArgs("listOf","formal",",");$elf._applyWithArgs("token",")");$elf._applyWithArgs("token","{");body=$elf._apply("srcElems");$elf._applyWithArgs("token","}");return ["func",fs,body]})()},"sc":function(){var $elf=this;return $elf._or((function(){return (function(){$elf._apply("spacesNoNl");return $elf._or((function(){return $elf._applyWithArgs("exactly","\n")}),(function(){return $elf._lookahead(function(){return $elf._applyWithArgs("exactly","}")})}),(function(){return $elf._apply("end")}))})()}),(function(){return $elf._applyWithArgs("token",";")}))},"binding":function(){var $elf=this,n,v;return (function(){n=$elf._applyWithArgs("token","name");v=$elf._or((function(){return (function(){$elf._applyWithArgs("token","=");return $elf._apply("expr")})()}),(function(){return (function(){$elf._apply("empty");return ["get","undefined"]})()}));return ["var",n,v]})()},"block":function(){var $elf=this,ss;return (function(){$elf._applyWithArgs("token","{");ss=$elf._apply("srcElems");$elf._applyWithArgs("token","}");return ss})()},"stmt":function(){var $elf=this,bs,c,t,f,c,s,s,c,i,c,u,s,n,v,e,s,e,c,cs,cs,cs,e,t,e,c,f,e,x,s,e;return $elf._or((function(){return $elf._apply("block")}),(function(){return (function(){$elf._applyWithArgs("token","var");bs=$elf._applyWithArgs("listOf","binding",",");$elf._apply("sc");return ["begin"].concat(bs)})()}),(function(){return (function(){$elf._applyWithArgs("token","if");$elf._applyWithArgs("token","(");c=$elf._apply("expr");$elf._applyWithArgs("token",")");t=$elf._apply("stmt");f=$elf._or((function(){return (function(){$elf._applyWithArgs("token","else");return $elf._apply("stmt")})()}),(function(){return (function(){$elf._apply("empty");return ["get","undefined"]})()}));return ["if",c,t,f]})()}),(function(){return (function(){$elf._applyWithArgs("token","while");$elf._applyWithArgs("token","(");c=$elf._apply("expr");$elf._applyWithArgs("token",")");s=$elf._apply("stmt");return ["while",c,s]})()}),(function(){return (function(){$elf._applyWithArgs("token","do");s=$elf._apply("stmt");$elf._applyWithArgs("token","while");$elf._applyWithArgs("token","(");c=$elf._apply("expr");$elf._applyWithArgs("token",")");$elf._apply("sc");return ["doWhile",s,c]})()}),(function(){return (function(){$elf._applyWithArgs("token","for");$elf._applyWithArgs("token","(");i=$elf._or((function(){return (function(){$elf._applyWithArgs("token","var");return $elf._apply("binding")})()}),(function(){return $elf._apply("expr")}),(function(){return (function(){$elf._apply("empty");return ["get","undefined"]})()}));$elf._applyWithArgs("token",";");c=$elf._or((function(){return $elf._apply("expr")}),(function(){return (function(){$elf._apply("empty");return ["get","true"]})()}));$elf._applyWithArgs("token",";");u=$elf._or((function(){return $elf._apply("expr")}),(function(){return (function(){$elf._apply("empty");return ["get","undefined"]})()}));$elf._applyWithArgs("token",")");s=$elf._apply("stmt");return ["for",i,c,u,s]})()}),(function(){return (function(){$elf._applyWithArgs("token","for");$elf._applyWithArgs("token","(");v=$elf._or((function(){return (function(){$elf._applyWithArgs("token","var");n=$elf._applyWithArgs("token","name");return ["var",n,["get","undefined"]]})()}),(function(){return $elf._apply("expr")}));$elf._applyWithArgs("token","in");e=$elf._apply("expr");$elf._applyWithArgs("token",")");s=$elf._apply("stmt");return ["forIn",v,e,s]})()}),(function(){return (function(){$elf._applyWithArgs("token","switch");$elf._applyWithArgs("token","(");e=$elf._apply("expr");$elf._applyWithArgs("token",")");$elf._applyWithArgs("token","{");cs=$elf._many(function(){return $elf._or((function(){return (function(){$elf._applyWithArgs("token","case");c=$elf._apply("expr");$elf._applyWithArgs("token",":");cs=$elf._apply("srcElems");return ["case",c,cs]})()}),(function(){return (function(){$elf._applyWithArgs("token","default");$elf._applyWithArgs("token",":");cs=$elf._apply("srcElems");return ["default",cs]})()}))});$elf._applyWithArgs("token","}");return ["switch",e].concat(cs)})()}),(function(){return (function(){$elf._applyWithArgs("token","break");$elf._apply("sc");return ["break"]})()}),(function(){return (function(){$elf._applyWithArgs("token","continue");$elf._apply("sc");return ["continue"]})()}),(function(){return (function(){$elf._applyWithArgs("token","throw");$elf._apply("spacesNoNl");e=$elf._apply("expr");$elf._apply("sc");return ["throw",e]})()}),(function(){return (function(){$elf._applyWithArgs("token","try");t=$elf._apply("block");$elf._applyWithArgs("token","catch");$elf._applyWithArgs("token","(");e=$elf._applyWithArgs("token","name");$elf._applyWithArgs("token",")");c=$elf._apply("block");f=$elf._or((function(){return (function(){$elf._applyWithArgs("token","finally");return $elf._apply("block")})()}),(function(){return (function(){$elf._apply("empty");return ["get","undefined"]})()}));return ["try",t,e,c,f]})()}),(function(){return (function(){$elf._applyWithArgs("token","return");e=$elf._or((function(){return $elf._apply("expr")}),(function(){return (function(){$elf._apply("empty");return ["get","undefined"]})()}));$elf._apply("sc");return ["return",e]})()}),(function(){return (function(){$elf._applyWithArgs("token","with");$elf._applyWithArgs("token","(");x=$elf._apply("expr");$elf._applyWithArgs("token",")");s=$elf._apply("stmt");return ["with",x,s]})()}),(function(){return (function(){e=$elf._apply("expr");$elf._apply("sc");return e})()}),(function(){return (function(){$elf._applyWithArgs("token",";");return ["get","undefined"]})()}))},"srcElem":function(){var $elf=this,n,f;return $elf._or((function(){return (function(){$elf._applyWithArgs("token","function");n=$elf._applyWithArgs("token","name");f=$elf._apply("funcRest");return ["var",n,f]})()}),(function(){return $elf._apply("stmt")}))},"srcElems":function(){var $elf=this,ss;return (function(){ss=$elf._many(function(){return $elf._apply("srcElem")});return ["begin"].concat(ss)})()},"topLevel":function(){var $elf=this,r;return (function(){r=$elf._apply("srcElems");$elf._apply("spaces");$elf._apply("end");return r})()},"curlySemAction":function(){var $elf=this,s,ss,r,r;return $elf._or((function(){return (function(){$elf._applyWithArgs("token","{");ss=$elf._many1(function(){return (function(){s=$elf._apply("srcElem");$elf._lookahead(function(){return $elf._apply("srcElem")});return s})()});r=$elf._apply("expr");$elf._apply("sc");$elf._applyWithArgs("token","}");$elf._apply("spaces");return (function (){ss.push(["return",r]);return ["call",["func",[],["begin"].concat(ss)]]})()})()}),(function(){return (function(){$elf._applyWithArgs("token","{");r=$elf._apply("expr");$elf._applyWithArgs("token","}");$elf._apply("spaces");return r})()}))},"semAction":function(){var $elf=this,r;return $elf._or((function(){return $elf._apply("curlySemAction")}),(function(){return (function(){r=$elf._apply("primExpr");$elf._apply("spaces");return r})()}))}});BSJSParser["keywords"]=({});keywords=["break","case","catch","continue","default","delete","do","else","finally","for","function","if","in","instanceof","new","return","switch","this","throw","try","typeof","var","void","while","with","ometa"];for(var idx=(0);(idx < keywords["length"]);idx++){BSJSParser["keywords"][keywords[idx]]=true}BSJSParser["_isKeyword"]=(function (k){return (this["keywords"].hasProperty(k) && (!Object["prototype"].hasProperty(k)))});BSJSTranslator=OMeta.delegated({"trans":function(){var $elf=this,t,ans;return (function(){$elf._form(function(){return (function(){t=$elf._apply("anything");return ans=$elf._applyWithArgs("apply",t)})()});return ans})()},"curlyTrans":function(){var $elf=this,r,rs,r;return $elf._or((function(){return (function(){$elf._form(function(){return (function(){$elf._applyWithArgs("exactly","begin");return r=$elf._apply("curlyTrans")})()});return r})()}),(function(){return (function(){$elf._form(function(){return (function(){$elf._applyWithArgs("exactly","begin");return rs=$elf._many(function(){return $elf._apply("trans")})})()});return (("{" + rs.join(";")) + "}")})()}),(function(){return (function(){r=$elf._apply("trans");return (("{" + r) + "}")})()}))},"this":function(){var $elf=this;return "this"},"break":function(){var $elf=this;return "break"},"continue":function(){var $elf=this;return "continue"},"number":function(){var $elf=this,n;return (function(){n=$elf._apply("anything");return (("(" + n) + ")")})()},"string":function(){var $elf=this,s;return (function(){s=$elf._apply("anything");return s.toProgramString()})()},"arr":function(){var $elf=this,xs;return (function(){xs=$elf._many(function(){return $elf._apply("trans")});return (("[" + xs.join(",")) + "]")})()},"unop":function(){var $elf=this,op,x;return (function(){op=$elf._apply("anything");x=$elf._apply("trans");return ((("(" + op) + x) + ")")})()},"getp":function(){var $elf=this,fd,x;return (function(){fd=$elf._apply("trans");x=$elf._apply("trans");return (((x + "[") + fd) + "]")})()},"get":function(){var $elf=this,x;return (function(){x=$elf._apply("anything");return x})()},"set":function(){var $elf=this,lhs,rhs;return (function(){lhs=$elf._apply("trans");rhs=$elf._apply("trans");return ((lhs + "=") + rhs)})()},"mset":function(){var $elf=this,lhs,op,rhs;return (function(){lhs=$elf._apply("trans");op=$elf._apply("anything");rhs=$elf._apply("trans");return (((lhs + op) + "=") + rhs)})()},"binop":function(){var $elf=this,op,x,y;return (function(){op=$elf._apply("anything");x=$elf._apply("trans");y=$elf._apply("trans");return (((((("(" + x) + " ") + op) + " ") + y) + ")")})()},"preop":function(){var $elf=this,op,x;return (function(){op=$elf._apply("anything");x=$elf._apply("trans");return (op + x)})()},"postop":function(){var $elf=this,op,x;return (function(){op=$elf._apply("anything");x=$elf._apply("trans");return (x + op)})()},"return":function(){var $elf=this,x;return (function(){x=$elf._apply("trans");return ("return " + x)})()},"with":function(){var $elf=this,x,s;return (function(){x=$elf._apply("trans");s=$elf._apply("curlyTrans");return ((("with(" + x) + ")") + s)})()},"if":function(){var $elf=this,cond,t,e;return (function(){cond=$elf._apply("trans");t=$elf._apply("curlyTrans");e=$elf._apply("curlyTrans");return ((((("if(" + cond) + ")") + t) + "else") + e)})()},"condExpr":function(){var $elf=this,cond,t,e;return (function(){cond=$elf._apply("trans");t=$elf._apply("trans");e=$elf._apply("trans");return (((((("(" + cond) + "?") + t) + ":") + e) + ")")})()},"while":function(){var $elf=this,cond,body;return (function(){cond=$elf._apply("trans");body=$elf._apply("curlyTrans");return ((("while(" + cond) + ")") + body)})()},"doWhile":function(){var $elf=this,body,cond;return (function(){body=$elf._apply("curlyTrans");cond=$elf._apply("trans");return (((("do" + body) + "while(") + cond) + ")")})()},"for":function(){var $elf=this,init,cond,upd,body;return (function(){init=$elf._apply("trans");cond=$elf._apply("trans");upd=$elf._apply("trans");body=$elf._apply("curlyTrans");return ((((((("for(" + init) + ";") + cond) + ";") + upd) + ")") + body)})()},"forIn":function(){var $elf=this,x,arr,body;return (function(){x=$elf._apply("trans");arr=$elf._apply("trans");body=$elf._apply("curlyTrans");return ((((("for(" + x) + " in ") + arr) + ")") + body)})()},"begin":function(){var $elf=this,x,x,xs;return $elf._or((function(){return (function(){x=$elf._apply("trans");$elf._apply("end");return x})()}),(function(){return (function(){xs=$elf._many(function(){return (function(){x=$elf._apply("trans");return $elf._or((function(){return (function(){$elf._or((function(){return $elf._pred((x[(x["length"] - (1))] == "}"))}),(function(){return $elf._apply("end")}));return x})()}),(function(){return (function(){$elf._apply("empty");return (x + ";")})()}))})()});return (("{" + xs.join("")) + "}")})()}))},"func":function(){var $elf=this,args,body;return (function(){args=$elf._apply("anything");body=$elf._apply("curlyTrans");return (((("(function (" + args.join(",")) + ")") + body) + ")")})()},"call":function(){var $elf=this,fn,args;return (function(){fn=$elf._apply("trans");args=$elf._many(function(){return $elf._apply("trans")});return (((fn + "(") + args.join(",")) + ")")})()},"send":function(){var $elf=this,msg,recv,args;return (function(){msg=$elf._apply("anything");recv=$elf._apply("trans");args=$elf._many(function(){return $elf._apply("trans")});return (((((recv + ".") + msg) + "(") + args.join(",")) + ")")})()},"new":function(){var $elf=this,cls,args;return (function(){cls=$elf._apply("anything");args=$elf._many(function(){return $elf._apply("trans")});return (((("new " + cls) + "(") + args.join(",")) + ")")})()},"var":function(){var $elf=this,name,val;return (function(){name=$elf._apply("anything");val=$elf._apply("trans");return ((("var " + name) + "=") + val)})()},"throw":function(){var $elf=this,x;return (function(){x=$elf._apply("trans");return ("throw " + x)})()},"try":function(){var $elf=this,x,name,c,f;return (function(){x=$elf._apply("curlyTrans");name=$elf._apply("anything");c=$elf._apply("curlyTrans");f=$elf._apply("curlyTrans");return ((((((("try " + x) + "catch(") + name) + ")") + c) + "finally") + f)})()},"json":function(){var $elf=this,props;return (function(){props=$elf._many(function(){return $elf._apply("trans")});return (("({" + props.join(",")) + "})")})()},"binding":function(){var $elf=this,name,val;return (function(){name=$elf._apply("anything");val=$elf._apply("trans");return ((name.toProgramString() + ": ") + val)})()},"switch":function(){var $elf=this,x,cases;return (function(){x=$elf._apply("trans");cases=$elf._many(function(){return $elf._apply("trans")});return (((("switch(" + x) + "){") + cases.join(";")) + "}")})()},"case":function(){var $elf=this,x,y;return (function(){x=$elf._apply("trans");y=$elf._apply("trans");return ((("case " + x) + ": ") + y)})()},"default":function(){var $elf=this,y;return (function(){y=$elf._apply("trans");return ("default: " + y)})()}})}
+
+
+//////// bs-ometa-compiler.js
+
+{BSOMetaParser=Parser.delegated({"fromTo":function(){var $elf=this,x,y;return (function(){x=$elf._apply("anything");y=$elf._apply("anything");$elf._applyWithArgs("seq",x);$elf._many(function(){return (function(){$elf._not(function(){return $elf._applyWithArgs("seq",y)});return $elf._apply("char")})()});return $elf._applyWithArgs("seq",y)})()},"space":function(){var $elf=this;return $elf._or((function(){return Parser._superApplyWithArgs($elf,"space")}),(function(){return $elf._applyWithArgs("fromTo","//","\n")}),(function(){return $elf._applyWithArgs("fromTo","/*","*/")}))},"nameFirst":function(){var $elf=this;return $elf._or((function(){return $elf._applyWithArgs("exactly","_")}),(function(){return $elf._applyWithArgs("exactly","$")}),(function(){return $elf._apply("letter")}))},"nameRest":function(){var $elf=this;return $elf._or((function(){return $elf._apply("nameFirst")}),(function(){return $elf._apply("digit")}))},"tsName":function(){var $elf=this,xs;return (function(){xs=$elf._applyWithArgs("firstAndRest","nameFirst","nameRest");return xs.join("")})()},"name":function(){var $elf=this;return (function(){$elf._apply("spaces");return $elf._apply("tsName")})()},"eChar":function(){var $elf=this,c;return $elf._or((function(){return (function(){$elf._applyWithArgs("exactly","\\");c=$elf._apply("char");return unescape(("\\" + c))})()}),(function(){return $elf._apply("char")}))},"tsString":function(){var $elf=this,xs;return (function(){$elf._applyWithArgs("exactly","\'");xs=$elf._many(function(){return (function(){$elf._not(function(){return $elf._applyWithArgs("exactly","\'")});return $elf._apply("eChar")})()});$elf._applyWithArgs("exactly","\'");return xs.join("")})()},"characters":function(){var $elf=this,xs;return (function(){$elf._applyWithArgs("exactly","`");$elf._applyWithArgs("exactly","`");xs=$elf._many(function(){return (function(){$elf._not(function(){return (function(){$elf._applyWithArgs("exactly","\'");return $elf._applyWithArgs("exactly","\'")})()});return $elf._apply("eChar")})()});$elf._applyWithArgs("exactly","\'");$elf._applyWithArgs("exactly","\'");return ["App","seq",xs.join("").toProgramString()]})()},"sCharacters":function(){var $elf=this,xs;return (function(){$elf._applyWithArgs("exactly","\"");xs=$elf._many(function(){return (function(){$elf._not(function(){return $elf._applyWithArgs("exactly","\"")});return $elf._apply("eChar")})()});$elf._applyWithArgs("exactly","\"");return ["App","token",xs.join("").toProgramString()]})()},"string":function(){var $elf=this,xs;return (function(){xs=$elf._or((function(){return (function(){$elf._or((function(){return $elf._applyWithArgs("exactly","#")}),(function(){return $elf._applyWithArgs("exactly","`")}));return $elf._apply("tsName")})()}),(function(){return $elf._apply("tsString")}));return ["App","exactly",xs.toProgramString()]})()},"number":function(){var $elf=this,sign,ds;return (function(){sign=$elf._or((function(){return $elf._applyWithArgs("exactly","-")}),(function(){return (function(){$elf._apply("empty");return ""})()}));ds=$elf._many1(function(){return $elf._apply("digit")});return ["App","exactly",(sign + ds.join(""))]})()},"keyword":function(){var $elf=this,xs;return (function(){xs=$elf._apply("anything");$elf._applyWithArgs("token",xs);$elf._not(function(){return $elf._apply("letterOrDigit")});return xs})()},"args":function(){var $elf=this,xs;return $elf._or((function(){return (function(){$elf._applyWithArgs("exactly","(");xs=$elf._applyWithArgs("listOf","hostExpr",",");$elf._applyWithArgs("token",")");return xs})()}),(function(){return (function(){$elf._apply("empty");return []})()}))},"application":function(){var $elf=this,rule,as;return (function(){rule=$elf._apply("name");as=$elf._apply("args");return ["App",rule].concat(as)})()},"hostExpr":function(){var $elf=this,r;return (function(){r=$elf._applyWithArgs("foreign",BSJSParser,"expr");return $elf._applyWithArgs("foreign",BSJSTranslator,"trans",r)})()},"atomicHostExpr":function(){var $elf=this,r;return (function(){r=$elf._applyWithArgs("foreign",BSJSParser,"semAction");return $elf._applyWithArgs("foreign",BSJSTranslator,"trans",r)})()},"curlyHostExpr":function(){var $elf=this,r;return (function(){r=$elf._applyWithArgs("foreign",BSJSParser,"curlySemAction");return $elf._applyWithArgs("foreign",BSJSTranslator,"trans",r)})()},"semAction":function(){var $elf=this,x,x;return $elf._or((function(){return (function(){$elf._or((function(){return $elf._applyWithArgs("token","!")}),(function(){return $elf._applyWithArgs("token","->")}));x=$elf._apply("atomicHostExpr");return ["Act",x]})()}),(function(){return (function(){x=$elf._apply("curlyHostExpr");return ["Act",x]})()}))},"semPred":function(){var $elf=this,x;return (function(){$elf._applyWithArgs("token","?");x=$elf._apply("atomicHostExpr");return ["Pred",x]})()},"expr":function(){var $elf=this,xs;return (function(){xs=$elf._applyWithArgs("listOf","expr4","|");return ["Or"].concat(xs)})()},"expr4":function(){var $elf=this,xs;return (function(){xs=$elf._many(function(){return $elf._apply("expr3")});return ["And"].concat(xs)})()},"optIter":function(){var $elf=this,x;return (function(){x=$elf._apply("anything");return $elf._or((function(){return (function(){$elf._applyWithArgs("token","*");return ["Many",x]})()}),(function(){return (function(){$elf._applyWithArgs("token","+");return ["Many1",x]})()}),(function(){return (function(){$elf._apply("empty");return x})()}))})()},"expr3":function(){var $elf=this,x,x,n,n;return $elf._or((function(){return (function(){x=$elf._apply("expr2");x=$elf._applyWithArgs("optIter",x);return $elf._or((function(){return (function(){$elf._applyWithArgs("exactly",":");n=$elf._apply("name");return (function (){$elf["locals"].push(n);return ["Set",n,x]})()})()}),(function(){return (function(){$elf._apply("empty");return x})()}))})()}),(function(){return (function(){$elf._applyWithArgs("token",":");n=$elf._apply("name");return (function (){$elf["locals"].push(n);return ["Set",n,["App","anything"]]})()})()}))},"expr2":function(){var $elf=this,x,x;return $elf._or((function(){return (function(){$elf._applyWithArgs("token","~");x=$elf._apply("expr2");return ["Not",x]})()}),(function(){return (function(){$elf._applyWithArgs("token","&");x=$elf._apply("expr1");return ["Lookahead",x]})()}),(function(){return $elf._apply("expr1")}))},"expr1":function(){var $elf=this,x,x,x;return $elf._or((function(){return $elf._apply("application")}),(function(){return $elf._apply("semAction")}),(function(){return $elf._apply("semPred")}),(function(){return (function(){x=$elf._or((function(){return $elf._applyWithArgs("keyword","undefined")}),(function(){return $elf._applyWithArgs("keyword","nil")}),(function(){return $elf._applyWithArgs("keyword","true")}),(function(){return $elf._applyWithArgs("keyword","false")}));return ["App","exactly",x]})()}),(function(){return (function(){$elf._apply("spaces");return $elf._or((function(){return $elf._apply("characters")}),(function(){return $elf._apply("sCharacters")}),(function(){return $elf._apply("string")}),(function(){return $elf._apply("number")}))})()}),(function(){return (function(){$elf._applyWithArgs("token","[");x=$elf._apply("expr");$elf._applyWithArgs("token","]");return ["Form",x]})()}),(function(){return (function(){$elf._applyWithArgs("token","(");x=$elf._apply("expr");$elf._applyWithArgs("token",")");return x})()}))},"ruleName":function(){var $elf=this;return $elf._or((function(){return $elf._apply("name")}),(function(){return (function(){$elf._apply("spaces");return $elf._apply("tsString")})()}))},"rule":function(){var $elf=this,n,x,xs;return (function(){$elf._lookahead(function(){return n=$elf._apply("ruleName")});$elf["locals"]=["$elf=this"];x=$elf._applyWithArgs("rulePart",n);xs=$elf._many(function(){return (function(){$elf._applyWithArgs("token",",");return $elf._applyWithArgs("rulePart",n)})()});return ["Rule",n,$elf["locals"],["Or",x].concat(xs)]})()},"rulePart":function(){var $elf=this,rn,n,b1,b2;return (function(){rn=$elf._apply("anything");n=$elf._apply("ruleName");$elf._pred((n == rn));b1=$elf._apply("expr4");return $elf._or((function(){return (function(){$elf._applyWithArgs("token","=");b2=$elf._apply("expr");return ["And",b1,b2]})()}),(function(){return (function(){$elf._apply("empty");return b1})()}))})()},"grammar":function(){var $elf=this,n,sn,rs;return (function(){$elf._applyWithArgs("keyword","ometa");n=$elf._apply("name");sn=$elf._or((function(){return (function(){$elf._applyWithArgs("token","<:");return $elf._apply("name")})()}),(function(){return (function(){$elf._apply("empty");return "OMeta"})()}));$elf._applyWithArgs("token","{");rs=$elf._applyWithArgs("listOf","rule",",");$elf._applyWithArgs("token","}");return $elf._applyWithArgs("foreign",BSOMetaOptimizer,"optimizeGrammar",["Grammar",n,sn].concat(rs))})()}});BSOMetaTranslator=OMeta.delegated({"trans":function(){var $elf=this,t,ans;return (function(){$elf._form(function(){return (function(){t=$elf._apply("anything");return ans=$elf._applyWithArgs("apply",t)})()});return ans})()},"App":function(){var $elf=this,args,rule,args,rule;return $elf._or((function(){return (function(){$elf._applyWithArgs("exactly","super");args=$elf._many1(function(){return $elf._apply("anything")});return [$elf["sName"],"._superApplyWithArgs($elf,",args.join(","),")"].join("")})()}),(function(){return (function(){rule=$elf._apply("anything");args=$elf._many1(function(){return $elf._apply("anything")});return ["$elf._applyWithArgs(\"",rule,"\",",args.join(","),")"].join("")})()}),(function(){return (function(){rule=$elf._apply("anything");return ["$elf._apply(\"",rule,"\")"].join("")})()}))},"Act":function(){var $elf=this,expr;return (function(){expr=$elf._apply("anything");return expr})()},"Pred":function(){var $elf=this,expr;return (function(){expr=$elf._apply("anything");return ["$elf._pred(",expr,")"].join("")})()},"Or":function(){var $elf=this,xs;return (function(){xs=$elf._many(function(){return $elf._apply("transFn")});return ["$elf._or(",xs.join(","),")"].join("")})()},"And":function(){var $elf=this,xs,y;return $elf._or((function(){return (function(){xs=$elf._many(function(){return $elf._applyWithArgs("notLast","trans")});y=$elf._apply("trans");return (function (){xs.push(("return " + y));return ["(function(){",xs.join(";"),"})()"].join("")})()})()}),(function(){return "(function(){})"}))},"Many":function(){var $elf=this,x;return (function(){x=$elf._apply("trans");return ["$elf._many(function(){return ",x,"})"].join("")})()},"Many1":function(){var $elf=this,x;return (function(){x=$elf._apply("trans");return ["$elf._many1(function(){return ",x,"})"].join("")})()},"Set":function(){var $elf=this,n,v;return (function(){n=$elf._apply("anything");v=$elf._apply("trans");return [n,"=",v].join("")})()},"Not":function(){var $elf=this,x;return (function(){x=$elf._apply("trans");return ["$elf._not(function(){return ",x,"})"].join("")})()},"Lookahead":function(){var $elf=this,x;return (function(){x=$elf._apply("trans");return ["$elf._lookahead(function(){return ",x,"})"].join("")})()},"Form":function(){var $elf=this,x;return (function(){x=$elf._apply("trans");return ["$elf._form(function(){return ",x,"})"].join("")})()},"Rule":function(){var $elf=this,name,ls,body;return (function(){name=$elf._apply("anything");ls=$elf._apply("locals");body=$elf._apply("trans");return ["\"",name,"\":function(){",ls,"return ",body,"}"].join("")})()},"Grammar":function(){var $elf=this,name,sName,rules;return (function(){name=$elf._apply("anything");sName=$elf._apply("anything");$elf["sName"]=sName;rules=$elf._many(function(){return $elf._apply("trans")});return [name,"=",sName,".delegated({",rules.join(","),"})"].join("")})()},"locals":function(){var $elf=this,vs;return $elf._or((function(){return (function(){$elf._form(function(){return vs=$elf._many1(function(){return $elf._apply("string")})});return ["var ",vs.join(","),";"].join("")})()}),(function(){return (function(){$elf._form(function(){return (function(){})});return ""})()}))},"transFn":function(){var $elf=this,x;return (function(){x=$elf._apply("trans");return ["(function(){return ",x,"})"].join("")})()}})}
+
+
+//////// bs-ometa-optimizer.js
+
+{BSNullOptimization=OMeta.delegated();BSNullOptimization['setHelped']=function() {var $elf=this;return $elf["_didSomething"]=true};BSNullOptimization['helped']=function() {var $elf=this;return $elf._pred($elf["_didSomething"])};BSNullOptimization['trans']=function() {var $elf=this,t,ans;return $elf._or((function(){return (function(){$elf._form(function(){return (function(){t=$elf._apply("anything");$elf._pred($elf.hasProperty(t));return ans=$elf._applyWithArgs("apply", t)})()});return ans})()}),(function(){return $elf._apply("anything")}))};BSNullOptimization['optimize']=function() {var $elf=this,x;return (function(){x=$elf._apply("trans");$elf._apply("helped");return x})()};BSNullOptimization['Or']=function() {var $elf=this,xs;return (function(){xs=$elf._many(function(){return $elf._apply("trans")});return ["Or"].concat(xs)})()};BSNullOptimization['And']=function() {var $elf=this,xs;return (function(){xs=$elf._many(function(){return $elf._apply("trans")});return ["And"].concat(xs)})()};BSNullOptimization['Many']=function() {var $elf=this,x;return (function(){x=$elf._apply("trans");return ["Many",x]})()};BSNullOptimization['Many1']=function() {var $elf=this,x;return (function(){x=$elf._apply("trans");return ["Many1",x]})()};BSNullOptimization['Set']=function() {var $elf=this,n,v;return (function(){n=$elf._apply("anything");v=$elf._apply("trans");return ["Set",n,v]})()};BSNullOptimization['Not']=function() {var $elf=this,x;return (function(){x=$elf._apply("trans");return ["Not",x]})()};BSNullOptimization['Lookahead']=function() {var $elf=this,x;return (function(){x=$elf._apply("trans");return ["Lookahead",x]})()};BSNullOptimization['Form']=function() {var $elf=this,x;return (function(){x=$elf._apply("trans");return ["Form",x]})()};BSNullOptimization['Rule']=function() {var $elf=this,name,ls,body;return (function(){name=$elf._apply("anything");ls=$elf._apply("anything");body=$elf._apply("trans");return ["Rule",name,ls,body]})()};BSNullOptimization.prototype=BSNullOptimization;;BSNullOptimization["initialize"]=(function () {this["_didSomething"]=false});BSAndOrOptimization=BSNullOptimization.delegated();BSAndOrOptimization['And']=function() {var $elf=this,x,xs;return $elf._or((function(){return (function(){x=$elf._apply("trans");$elf._apply("end");$elf._apply("setHelped");return x})()}),(function(){return (function(){xs=$elf._applyWithArgs("transInside", "And");return ["And"].concat(xs)})()}))};BSAndOrOptimization['Or']=function() {var $elf=this,x,xs;return $elf._or((function(){return (function(){x=$elf._apply("trans");$elf._apply("end");$elf._apply("setHelped");return x})()}),(function(){return (function(){xs=$elf._applyWithArgs("transInside", "Or");return ["Or"].concat(xs)})()}))};BSAndOrOptimization['transInside']=function() {var $elf=this,t,xs,ys,x,xs;return (function(){t=$elf._apply("anything");return $elf._or((function(){return (function(){$elf._form(function(){return (function(){$elf._applyWithArgs("exactly", t);return xs=$elf._applyWithArgs("transInside", t)})()});ys=$elf._applyWithArgs("transInside", t);$elf._apply("setHelped");return xs.concat(ys)})()}),(function(){return (function(){x=$elf._apply("trans");xs=$elf._applyWithArgs("transInside", t);return [x].concat(xs)})()}),(function(){return []}))})()};BSAndOrOptimization.prototype=BSAndOrOptimization;;BSOMetaOptimizer=OMeta.delegated();BSOMetaOptimizer['optimizeGrammar']=function() {var $elf=this,n,sn,rs;return (function(){$elf._form(function(){return (function(){$elf._applyWithArgs("exactly", "Grammar");n=$elf._apply("anything");sn=$elf._apply("anything");return rs=$elf._many(function(){return $elf._apply("optimizeRule")})})()});return ["Grammar",n,sn].concat(rs)})()};BSOMetaOptimizer['optimizeRule']=function() {var $elf=this,r,r;return (function(){r=$elf._apply("anything");$elf._many(function(){return r=$elf._applyWithArgs("foreign", BSAndOrOptimization, "optimize", r)});return r})()};BSOMetaOptimizer.prototype=BSOMetaOptimizer;}
+
+
+//////// bs-ometa-js-compiler.js
+
+{BSOMetaJSParser=BSJSParser.delegated();BSOMetaJSParser['srcElem']=function() {var $elf=this,r;return $elf._or((function(){return (function(){$elf._apply("spaces");r=$elf._applyWithArgs("foreign", BSOMetaParser, "grammar");$elf._apply("sc");return r})()}),(function(){return BSJSParser._superApplyWithArgs($elf,"srcElem")}))};BSOMetaJSParser.prototype=BSOMetaJSParser;;BSOMetaJSTranslator=BSJSTranslator.delegated();BSOMetaJSTranslator['Grammar']=function() {var $elf=this;return $elf._applyWithArgs("foreign", BSOMetaTranslator, "Grammar")};BSOMetaJSTranslator.prototype=BSOMetaJSTranslator;}
+

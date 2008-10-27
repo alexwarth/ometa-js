@@ -142,7 +142,7 @@ GlobalScope.prototype = {
   has:       function(n)    { return thisWorld.has(this, n)     },
   get:       function(n)    { return thisWorld.get(this, n)     },
   set:       function(n, v) { return thisWorld.set(this, n, v)  },
-  decl:      function(n, v) { return thisWorld.set(this, n, v)  },
+  decl:      function(n, v) { return baseWorld.set(this, n, v)  },
   makeChild: function()     { return new ActivationRecord(this) }
 }
 

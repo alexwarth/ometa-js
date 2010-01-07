@@ -83,15 +83,19 @@ saveIt = saveProject
 
 if (!document.location.hash)
   document.location.hash = "#Sample_Project"
-titleRest = " - <span title='In case you are wondering, this is\n" +
-                            "(OMeta/JS) 2.0, not OMeta/(JS 2.0).\n" +
-                            "In other words, it has nothing to do\n" +
-                            "with JS 2 / EcmaScript 2.'>OMeta/JS 2.0</span> Workspace"
+titleRest = " - <nobr><span title='In case you are wondering, this is\n" +
+                                  "(OMeta/JS) 2.0, not OMeta/(JS 2.0).\n" +
+                                  "In other words, it has nothing to do\n" +
+                                  "with JS 2 / EcmaScript 2.'>OMeta/JS 2.0</span> Workspace</nobr>"
 
 function translateCode(s) {
   var translationError = function(m, i) { alert("Translation error - please tell Alex about this!"); throw fail },
       tree             = BSOMetaJSParser.matchAll(s, "topLevel", undefined, function(m, i) { throw fail.delegated({errorPos: i}) })
   return BSOMetaJSTranslator.match(tree, "trans", undefined, translationError)
+}
+
+function include(fileName) {
+  return eval(readFile(fileName))
 }
 
     </script>
@@ -100,7 +104,7 @@ function translateCode(s) {
     <table border=0 align=right>
       <tr><td align=right><b>important info: </b></td><td><span id=infoSelectorHome></span></td></tr>
       <tr><td align=right><b>go to project: </b></td><td><span id=projectSelectorHome></span></td></tr>
-      <tr><td colspan=2 align=right><input type=button value="previous versions of this project" onClick="document.location = 'http://jarrett.cs.ucla.edu/websvn/log.php?repname=ometa-js-projects&path=%2F' + document.location.hash.substring(1) + '.txt&rev=0&sc=0&isdir=0'"><br>
+      <tr><td colspan=2 align=right><input type=button value="previous versions of this project" onClick="document.location = 'http://www.tinlizzie.org/ometa-js/websvn/log.php?repname=ometa-js-projects&path=%2F' + document.location.hash.substring(1) + '.txt&rev=0&sc=0&isdir=0'"><br>
       </td></tr>
    </table>
     <table border=0><tr><td><h2 id=title>OMeta/JS 2.0 Workspace <small><font color=lightgray>(not to be confused with JS 2 / EcmaScript 4)</font></small></h2></td></tr></table>
@@ -155,7 +159,7 @@ function translateCode(s) {
                   style="font-family:monaco, monospace; font-size: 10pt; margin-bottom: .4em"></textArea>
       </div>
     </form>
-    To learn more about OMeta, click <a href=http://www.cs.ucla.edu/~awarth/ometa/>here</a>.<br>
+    To learn more about OMeta, click <a href=http://www.tinlizzie.org/ometa/>here</a>.<br>
   </body>
 </html>
 

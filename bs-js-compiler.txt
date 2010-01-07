@@ -60,11 +60,14 @@ ometa BSJSParser <: Parser {
                | mulExpr:x "/" unary:y                                                           -> [#binop, "/",          x, y]
                | mulExpr:x "%" unary:y                                                           -> [#binop, "%",          x, y]
                | unary,
-  unary        = "-"  postfix:p                                                                  -> [#unop,  "-",   p]
-               | "+"  postfix:p                                                                  -> p
-               | "++" postfix:p                                                                  -> [#preop, "++",  p]
-               | "--" postfix:p                                                                  -> [#preop, "--",  p]
-               | "!"  unary:p                                                                    -> [#unop,  "!",   p]
+  unary        = "-"      postfix:p                                                              -> [#unop,  "-",        p]
+               | "+"      postfix:p                                                              -> [#unop,  "+",        p]
+               | "++"     postfix:p                                                              -> [#preop, "++",       p]
+               | "--"     postfix:p                                                              -> [#preop, "--",       p]
+               | "!"      unary:p                                                                -> [#unop,  "!",        p]
+               | "void"   unary:p                                                                -> [#unop,  "void",     p]
+               | "delete" unary:p                                                                -> [#unop,  "delete",   p]
+               | "typeof" unary:p                                                                -> [#unop,  "typeof",   p]
                | postfix,
   postfix      = primExpr:p ( spacesNoNl "++"                                                    -> [#postop, "++", p]
                             | spacesNoNl "--"                                                    -> [#postop, "--", p]
@@ -158,7 +161,7 @@ ometa BSJSTranslator {
   number   :n                                           -> ('(' + n + ')'),
   string   :s                                           -> s.toProgramString(),
   arr      trans*:xs                                    -> ('[' + xs.join(',') + ']'),
-  unop     :op trans:x                                  -> ('(' + op + x + ')'),
+  unop     :op trans:x                                  -> ('(' + op + ' ' + x + ')'),
   getp     trans:fd trans:x                             -> (x + '[' + fd + ']'),
   get      :x                                           -> x,
   set      trans:lhs trans:rhs                          -> (lhs + '=' + rhs),

@@ -154,14 +154,39 @@ OMeta = {
   // note: _applyWithArgs and _superApplyWithArgs are not memoized, so they can't be left-recursive
   _applyWithArgs: function(rule) {
     for (var idx = arguments.length - 1; idx > 0; idx--)
-      this.input = new OMInputStream(arguments[idx], this.input)
+      this._prependInput(arguments[idx])
     return this[rule].apply(this)
   },
   _superApplyWithArgs: function($elf, rule) {
     for (var idx = arguments.length - 1; idx > 1; idx--)
-      $elf.input = new OMInputStream(arguments[idx], $elf.input)
+      $elf._prependInput(arguments[idx])
     return this[rule].apply($elf)
   },
+  _prependInput: function(v) {
+    this.input = new OMInputStream(v, this.input);
+  },
+
+  // if you want your grammar (and its subgrammars) to memoize parameterized rules, invoke this method on it:
+  memoizeParameterizedRules: function() {
+    this._prependInput = function(v) {
+      var newInput
+      if (isImmutable(v)) {
+        newInput = this.input[getTag(v)]
+        if (!newInput) {
+          newInput = new OMInputStream(v, this.input)
+          this.input[getTag(v)] = newInput
+        }
+      }
+      else newInput = new OMInputStream(v, this.input)
+      this.input = newInput
+    }
+    this._applyWithArgs = function(rule) {
+      for (var idx = arguments.length - 1; idx > 0; idx--)
+        this._prependInput(arguments[idx])
+      return this._apply(rule)
+    }
+  },
+
   _pred: function(b) {
     if (b)
       return true

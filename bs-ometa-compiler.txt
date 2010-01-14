@@ -15,8 +15,9 @@ ometa BSOMetaParser <: Parser {
   keyword :xs    = token(xs) ~letterOrDigit                            -> xs,
   args           = '(' listOf(#hostExpr, ','):xs ")"                   -> xs
                  | empty                                               -> [],
-  application    = "^" name:rule args:as                               -> [#App, "super", "'" + rule + "'"].concat(as)
-                 |     name:rule args:as                               -> [#App, rule].concat(as),
+  application    = "^"          name:rule args:as                      -> [#App, "super",        "'" + rule + "'"].concat(as)
+                 | name:grm "." name:rule args:as                      -> [#App, "foreign", grm, "'" + rule + "'"].concat(as)
+                 |              name:rule args:as                      -> [#App, rule].concat(as),
   hostExpr       = foreign(BSJSParser, #expr):r                           foreign(BSJSTranslator, #trans, r),
   atomicHostExpr = foreign(BSJSParser, #semAction):r                      foreign(BSJSTranslator, #trans, r),
   curlyHostExpr  = foreign(BSJSParser, #curlySemAction):r                 foreign(BSJSTranslator, #trans, r),

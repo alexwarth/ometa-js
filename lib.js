@@ -74,9 +74,10 @@ Object.prototype.ownPropertyNames = function() {
 Object.prototype.hasProperty = function(p) { return this[p] != undefined }
 
 isImmutable = function(x) { return x === null || x === undefined || x.isImmutable() }
-Object.prototype.isImmutable = function() { return false }
-Number.prototype.isImmutable = function() { return true }
-String.prototype.isImmutable = function() { return true }
+Object.prototype.isImmutable  = function() { return false }
+Boolean.prototype.isImmutable = function() { return true }
+Number.prototype.isImmutable  = function() { return true }
+String.prototype.isImmutable  = function() { return true }
 
 Object.prototype.isNumber    = function() { return false }
 Number.prototype.isNumber    = function() { return true }

@@ -76,7 +76,7 @@ ometa BSOMetaTranslator {
   Form  trans:x                       -> ['$elf._form(function(){return ', x, '})']                     .join(''),
   JumpTable jtCase*:cases             -> self.jumpTableCode(cases),
   Rule  :name {self.rName = name}
-        locals:ls trans:body          -> ['"', name, '":function(){', ls, 'return ', body, '}']         .join(''),
+        locals:ls trans:body          -> ['\n"', name, '":function(){', ls, 'return ', body, '}']         .join(''),
   Grammar :name :sName
           {self.name = name}
           {self.sName = sName}

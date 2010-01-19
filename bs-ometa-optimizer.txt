@@ -35,7 +35,7 @@ ometa BSAndOrOptimization <: BSNullOptimization {
 }
 
 ometa BSSeqInliner <: BSNullOptimization {
-  App        = 'seq' :s end seqString(s):cs setHelped -> [`And].concat(cs)
+  App        = 'seq' :s end seqString(s):cs setHelped -> [`And].concat(cs).concat([[`Act, s]])
              | :rule anything*:args                   -> [`App, rule].concat(args),
   inlineChar = char:c ~end                            -> [`App, 'exactly', c.toProgramString()],
   seqString  = &(:s ?(typeof s === 'string'))

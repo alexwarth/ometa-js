@@ -1,19 +1,25 @@
-ometa BSNullOptimization {
-  setHelped = !($elf._didSomething = true),
-  helped    = ?$elf._didSomething,
-  trans     = [:t ?$elf.hasProperty(t) apply(t):ans] -> ans
-            | anything,
-  optimize  = trans:x helped     -> x,
+// TODO: turn off the "seq" inliner when G.seq !== OMeta.seq (will require some refactoring)
+// TODO: add a factorizing optimization (will make jumptables more useful)
 
-  Or        trans*:xs            -> [#Or].concat(xs),
-  And       trans*:xs            -> [#And].concat(xs),
-  Many      trans:x              -> [#Many,  x],
-  Many1     trans:x              -> [#Many1, x],
-  Set       :n trans:v           -> [#Set, n, v],
-  Not       trans:x              -> [#Not, x],
-  Lookahead trans:x              -> [#Lookahead, x],
-  Form      trans:x              -> [#Form, x],
-  Rule      :name :ls trans:body -> [#Rule, name, ls, body]
+ometa BSNullOptimization {
+  setHelped = !(self._didSomething = true),
+  helped    = ?self._didSomething,
+  trans     = [:t ?self.hasProperty(t) apply(t):ans] -> ans,
+  optimize  = trans:x helped                         -> x,
+
+  App       :rule anything*:args          -> [#App, rule].concat(args),
+  Act       :expr                         -> [#Act, expr],
+  Pred      :expr                         -> [#Pred, expr],
+  Or        trans*:xs                     -> [#Or].concat(xs),
+  And       trans*:xs                     -> [#And].concat(xs),
+  Many      trans:x                       -> [#Many,  x],
+  Many1     trans:x                       -> [#Many1, x],
+  Set       :n trans:v                    -> [#Set, n, v],
+  Not       trans:x                       -> [#Not, x],
+  Lookahead trans:x                       -> [#Lookahead, x],
+  Form      trans:x                       -> [#Form, x],
+  JumpTable ([:c trans:e] -> [c, e])*:ces -> [#JumpTable].concat(ces),
+  Rule      :name :ls trans:body          -> [#Rule, name, ls, body]
 }
 BSNullOptimization.initialize = function() { this._didSomething = false }
 
@@ -28,8 +34,47 @@ ometa BSAndOrOptimization <: BSNullOptimization {
                  |                                                            -> []
 }
 
+ometa BSSeqInliner <: BSNullOptimization {
+  App        = 'seq' :s end seqString(s):cs setHelped -> [`And].concat(cs)
+             | :rule anything*:args                   -> [`App, rule].concat(args),
+  inlineChar = char:c ~end                            -> [`App, 'exactly', c.toProgramString()],
+  seqString  = &(:s ?(typeof s === 'string'))
+                 ( ['"'  inlineChar*:cs '"' ]         -> cs
+                 | ['\'' inlineChar*:cs '\'']         -> cs
+                 )
+}
+
+JumpTable = function(choice) { this.addChoice(choice) }
+JumpTable.prototype.addChoice = function(choice) {
+  var c = choice[0], t = choice[1]
+  if (this[c]) {
+    if (this[c][0] == 'Or')
+      this[c].push(t)
+    else
+      this[c] = ['Or', this[c], t]
+  }
+  else
+    this[c] = t
+}
+JumpTable.prototype.toTree = function() {
+  var r = ['JumpTable'], props = this.ownPropertyNames()
+  for (var i = 0; i < props.length; i += 1)
+    r.push([props[i], this[props[i]]])
+  return r
+}
+ometa BSJumpTableOptimization <: BSNullOptimization {
+  Or (jtChoices | trans)*:cs -> ['Or'].concat(cs),
+  quotedString = &string ['"'  (char:c ~end -> c)*:cs '"' | '\'' (char:c ~end -> c)*:cs '\''] -> cs.join(''),
+  jtChoice     = ['And' ['App' 'exactly' quotedString:x] anything*:rest]                      -> [x, ['And'].concat(rest)]
+               |        ['App' 'exactly' quotedString:x]                                      -> [x, ['Act', x]],
+  jtChoices    = jtChoice:c {new JumpTable(c)}:jt (jtChoice:c {jt.addChoice(c)})* setHelped   -> jt.toTree()
+}
+
 ometa BSOMetaOptimizer {
-  optimizeGrammar = [#Grammar :n :sn optimizeRule*:rs]                 -> [#Grammar, n, sn].concat(rs),
-  optimizeRule    = :r (foreign(BSAndOrOptimization, #optimize, r):r)* -> r
+  optimizeGrammar = [#Grammar :n :sn optimizeRule*:rs]                   -> [#Grammar, n, sn].concat(rs),
+  optimizeRule    = :r (BSSeqInliner.optimize(r):r | empty)
+                       ( BSAndOrOptimization.optimize(r):r
+                       | BSJumpTableOptimization.optimize(r):r
+                       )*                                                -> r
 }
 

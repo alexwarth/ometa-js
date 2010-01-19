@@ -56,7 +56,7 @@ ometa BSOMetaParser <: Parser {
 }
 
 // By dispatching on the head of a list, the following idiom allows translators to avoid doing a linear search.
-// (Note that the "=" in a rule definition is optional, which can be used to get an ML "feel".)
+// (Note that the "=" in a rule definition is optional, which can be used to get the "ML feel".)
 ometa BSOMetaTranslator {
   trans [:t apply(t):ans]             -> ans,
   App  'super' anything+:args         -> [self.sName, '._superApplyWithArgs($elf,', args.join(','), ')'].join(''),
@@ -74,11 +74,27 @@ ometa BSOMetaTranslator {
   Not   trans:x                       -> ['$elf._not(function(){return ', x, '})']                      .join(''),
   Lookahead trans:x                   -> ['$elf._lookahead(function(){return ', x, '})']                .join(''),
   Form  trans:x                       -> ['$elf._form(function(){return ', x, '})']                     .join(''),
-  Rule  :name locals:ls trans:body    -> ['"', name, '":function(){', ls, 'return ', body, '}']         .join(''),
+  JumpTable jtCase*:cases             -> self.jumpTableCode(cases),
+  Rule  :name {self.rName = name}
+        locals:ls trans:body          -> ['"', name, '":function(){', ls, 'return ', body, '}']         .join(''),
   Grammar :name :sName
-          !(self.sName = sName)
+          {self.name = name}
+          {self.sName = sName}
           trans*:rules                -> [name, '=', sName, '.delegated({', rules.join(','), '})']      .join(''),
+  jtCase  = [:x trans:e]              -> [x.toProgramString(), e],
   locals  = [string+:vs]              -> ['var ', vs.join(','), ';']                                    .join('')
           | []                        -> '',
   transFn = trans:x                   -> ['(function(){return ', x, '})']                               .join('')
 }
+BSOMetaTranslator.jumpTableCode = function(cases) {
+  var buf = new StringBuffer()
+  buf.nextPutAll("(({")
+  for (var i = 0; i < cases.length; i += 1) {
+    if (i > 0)
+      buf.nextPutAll(",")
+    buf.nextPutAll(cases[i][0] + ":function(){return " + cases[i][1] + "}")
+  }
+  buf.nextPutAll("})[$elf._apply('anything')]" + "||function(){throw fail})()")
+  return buf.contents()
+}
+

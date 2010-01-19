@@ -282,32 +282,32 @@ OMeta = {
   },
   "true": function() {
     var r = this._apply("anything")
-    this._pred(r == true)
+    this._pred(r === true)
     return r
   },
   "false": function() {
     var r = this._apply("anything")
-    this._pred(r == false)
+    this._pred(r === false)
     return r
   },
   "undefined": function() {
     var r = this._apply("anything")
-    this._pred(r == undefined)
+    this._pred(r === undefined)
     return r
   },
   number: function() {
     var r = this._apply("anything")
-    this._pred(r.isNumber())
+    this._pred(typeof r === "number")
     return r
   },
   string: function() {
     var r = this._apply("anything")
-    this._pred(r.isString())
+    this._pred(typeof r === "string")
     return r
   },
   "char": function() {
     var r = this._apply("anything")
-    this._pred(r.isCharacter())
+    this._pred(typeof r === "string" && r.length == 1)
     return r
   },
   space: function() {

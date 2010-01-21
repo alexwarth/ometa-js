@@ -1,6 +1,6 @@
 ometa BSJSParser <: Parser {
   fromTo :x :y = seq(x) (~seq(y) char)* seq(y), 
-  space        = super(#space) | fromTo('//', '\n') | fromTo('/*', '*/'),
+  space        = ^space | fromTo('//', '\n') | fromTo('/*', '*/'),
   nameFirst    = letter | '$' | '_',
   nameRest     = nameFirst | digit,
   iName        = firstAndRest(#nameFirst, #nameRest):r                                           -> r.join(''),

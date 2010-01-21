@@ -21,7 +21,7 @@ Pattern Syntax
 | atom                 foo                      N/A                      |
 | rule application     <expr>                   expr                     |
 |                      <r x y>                  r(x, y)                  |   (see note #3)
-|                      <super stmt>             super(`stmt)             |   (see note #4)
+|                      <super stmt>             ^stmt                    |   (see note #4)
 | list                 ("hello" 42 answer ())   ['hello' 42 `answer []]  |
 | negation             ~'x'                     ~'x'                     |
 | look-ahead           ~~'x'                    ~~'x'                    |
@@ -58,7 +58,7 @@ The value of a statement expression is equal to that of its last expression.
 
 Note #3: The arguments you pass to a rule don't have to be statement expressions - they can be any JavaScript expression.
 
-Note #4: In OMeta/JS, "super" is just like any other rule (not a special form), so you have to quote the rule name that you pass in as an argument.
+Note #4: In OMeta/JS, "super" is just like any other rule (not a special form), so you have to quote the rule name that you pass in as an argument, e.g., both ^r(1, 2) and super("r", 1, 2) are valid super-sends.
 
 
 A "Handy" New Shorthand

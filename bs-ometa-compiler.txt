@@ -1,6 +1,6 @@
 ometa BSOMetaParser <: Parser {
   fromTo :x :y   = seq(x) (~seq(y) char)* seq(y), 
-  space          = super(#space) | fromTo('//', '\n') | fromTo('/*', '*/'),
+  space          = ^space | fromTo('//', '\n') | fromTo('/*', '*/'),
   nameFirst      = '_' | '$' | letter,
   nameRest       = nameFirst | digit,
   tsName         = firstAndRest(#nameFirst, #nameRest):xs              -> xs.join(''),
@@ -18,9 +18,9 @@ ometa BSOMetaParser <: Parser {
   application    = "^"          name:rule args:as                      -> [#App, "super",        "'" + rule + "'"].concat(as)
                  | name:grm "." name:rule args:as                      -> [#App, "foreign", grm, "'" + rule + "'"].concat(as)
                  |              name:rule args:as                      -> [#App, rule].concat(as),
-  hostExpr       = foreign(BSJSParser, #expr):r                           foreign(BSJSTranslator, #trans, r),
-  atomicHostExpr = foreign(BSJSParser, #semAction):r                      foreign(BSJSTranslator, #trans, r),
-  curlyHostExpr  = foreign(BSJSParser, #curlySemAction):r                 foreign(BSJSTranslator, #trans, r),
+  hostExpr       = BSJSParser.expr:r                                      BSJSTranslator.trans(r),
+  atomicHostExpr = BSJSParser.semAction:r                                 BSJSTranslator.trans(r),
+  curlyHostExpr  = BSJSParser.curlySemAction:r                            BSJSTranslator.trans(r),
   semAction      = ("!" | "->") atomicHostExpr:x                       -> [#Act, x]
                  | curlyHostExpr:x                                     -> [#Act, x],
   semPred        = "?" atomicHostExpr:x                                -> [#Pred, x],
@@ -51,8 +51,9 @@ ometa BSOMetaParser <: Parser {
                                                   ),
   grammar        = keyword('ometa') name:n
                      ( "<:" name | empty -> 'OMeta' ):sn
-                     "{" listOf(#rule, ','):rs "}"                        foreign(BSOMetaOptimizer, #optimizeGrammar,
-                                                                                  [#Grammar, n, sn].concat(rs))
+                     "{" listOf(#rule, ','):rs "}"                        BSOMetaOptimizer.optimizeGrammar(
+                                                                            [#Grammar, n, sn].concat(rs)
+                                                                          )
 }
 
 // By dispatching on the head of a list, the following idiom allows translators to avoid doing a linear search.

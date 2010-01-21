@@ -89,13 +89,10 @@ ometa BSOMetaTranslator {
 }
 BSOMetaTranslator.jumpTableCode = function(cases) {
   var buf = new StringBuffer()
-  buf.nextPutAll("(({")
-  for (var i = 0; i < cases.length; i += 1) {
-    if (i > 0)
-      buf.nextPutAll(",")
-    buf.nextPutAll(cases[i][0] + ":function(){return " + cases[i][1] + "}")
-  }
-  buf.nextPutAll("})[$elf._apply('anything')]" + "||function(){throw fail})()")
+  buf.nextPutAll("(function(){switch($elf._apply('anything')){")
+  for (var i = 0; i < cases.length; i += 1)
+    buf.nextPutAll("case " + cases[i][0] + ":return " + cases[i][1] + ";")
+  buf.nextPutAll("default: throw fail}})()")
   return buf.contents()
 }
 

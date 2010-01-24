@@ -235,7 +235,7 @@ OMeta = {
     }
     if      (numMatches == 0) throw fail
     else if (numMatches == 1) return ans
-    else                      throw 'more than one choice matched in "excluse-OR"'
+    else                      throw 'more than one choice matched in "exclusive-OR"'
   },
   _many: function(x) {
     var ans = arguments[1] != undefined ? [arguments[1]] : []

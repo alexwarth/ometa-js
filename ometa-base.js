@@ -219,6 +219,24 @@ OMeta = {
       }
     throw fail
   },
+  _xor: function() {
+    var origInput = this.input, idx = 0, numMatches = 0, ans
+    while (idx < arguments.length) {
+      try {
+        this.input = origInput
+        ans = arguments[idx]()
+        numMatches += 1
+      }
+      catch (f) {
+        if (f != fail)
+          throw f
+      }
+      idx += 1
+    }
+    if      (numMatches == 0) throw fail
+    else if (numMatches == 1) return ans
+    else                      throw 'more than one choice matched in "excluse-OR"'
+  },
   _many: function(x) {
     var ans = arguments[1] != undefined ? [arguments[1]] : []
     while (true) {

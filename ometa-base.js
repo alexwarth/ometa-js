@@ -219,8 +219,8 @@ OMeta = {
       }
     throw fail
   },
-  _xor: function() {
-    var origInput = this.input, idx = 0, numMatches = 0, ans
+  _xor: function(ruleName) {
+    var origInput = this.input, idx = 1, numMatches = 0, ans
     while (idx < arguments.length) {
       try {
         this.input = origInput
@@ -235,10 +235,19 @@ OMeta = {
     }
     if      (numMatches == 0) throw fail
     else if (numMatches == 1) return ans
-    else                      throw 'more than one choice matched in "exclusive-OR"'
+    else                      throw 'more than one choice matched by "exclusive-OR" in ' + ruleName
   },
-  speedUpXORs: function() {
-    this._xor = this._or
+  disableXORs: function() {
+    this._xor = function(ruleName) {
+      var origInput = this.input
+      for (var idx = 1; idx < arguments.length; idx++)
+        try { this.input = origInput; return arguments[idx]() }
+        catch (f) {
+          if (f != fail)
+            throw f
+        }
+      throw fail
+    }
   },
   _many: function(x) {
     var ans = arguments[1] != undefined ? [arguments[1]] : []

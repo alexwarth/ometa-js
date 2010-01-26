@@ -69,7 +69,8 @@ ometa BSOMetaTranslator {
   Act  :expr                          -> expr,
   Pred :expr                          -> ['$elf._pred(', expr, ')']                                     .join(''),
   Or   transFn*:xs                    -> ['$elf._or(',  xs.join(','), ')']                              .join(''),
-  XOr  transFn*:xs                    -> ['$elf._xor(', xs.join(','), ')']                              .join(''),
+  XOr  transFn*:xs                       {xs.unshift((self.name + "." + self.rName).toProgramString())}
+                                      -> ['$elf._xor(', xs.join(','), ')']                              .join(''),
   And  notLast(#trans)*:xs trans:y    -> { xs.push('return ' + y)
                                            ['(function(){', xs.join(';'), '})()'].join('') },
   And                                 -> '(function(){})',

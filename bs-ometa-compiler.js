@@ -35,7 +35,7 @@
 "Act":function(){var $elf=this,expr;return (function(){expr=$elf._apply("anything");return expr})()},
 "Pred":function(){var $elf=this,expr;return (function(){expr=$elf._apply("anything");return ["$elf._pred(",expr,")"].join("")})()},
 "Or":function(){var $elf=this,xs;return (function(){xs=$elf._many(function(){return $elf._apply("transFn")});return ["$elf._or(",xs.join(","),")"].join("")})()},
-"XOr":function(){var $elf=this,xs;return (function(){xs=$elf._many(function(){return $elf._apply("transFn")});return ["$elf._xor(",xs.join(","),")"].join("")})()},
+"XOr":function(){var $elf=this,xs;return (function(){xs=$elf._many(function(){return $elf._apply("transFn")});xs.unshift((($elf["name"] + ".") + $elf["rName"]).toProgramString());return ["$elf._xor(",xs.join(","),")"].join("")})()},
 "And":function(){var $elf=this,xs,y;return $elf._or((function(){return (function(){xs=$elf._many(function(){return $elf._applyWithArgs("notLast","trans")});y=$elf._apply("trans");return (function (){xs.push(("return " + y));return ["(function(){",xs.join(";"),"})()"].join("")})()})()}),(function(){return "(function(){})"}))},
 "Many":function(){var $elf=this,x;return (function(){x=$elf._apply("trans");return ["$elf._many(function(){return ",x,"})"].join("")})()},
 "Many1":function(){var $elf=this,x;return (function(){x=$elf._apply("trans");return ["$elf._many1(function(){return ",x,"})"].join("")})()},

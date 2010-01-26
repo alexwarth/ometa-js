@@ -237,6 +237,9 @@ OMeta = {
     else if (numMatches == 1) return ans
     else                      throw 'more than one choice matched in "exclusive-OR"'
   },
+  speedUpXORs: function() {
+    this._xor = this._or
+  },
   _many: function(x) {
     var ans = arguments[1] != undefined ? [arguments[1]] : []
     while (true) {

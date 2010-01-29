@@ -32,10 +32,10 @@ ometa BSOMetaParser <: Parser {
   optIter :x     = "*"                                                 -> [#Many,  x]
                  | "+"                                                 -> [#Many1, x]
                  | empty                                               -> x,
-  expr3          = expr2:x optIter(x):x ( ':' name:n                   -> { self.locals.push(n); [#Set, n, x] }
+  expr3          = expr2:x optIter(x):x ( ':' name:n                   -> { this.locals.push(n); [#Set, n, x] }
                                         | empty                        -> x
                                         )
-                 | ":" name:n                                          -> { self.locals.push(n); [#Set, n, [#App, #anything]] },
+                 | ":" name:n                                          -> { this.locals.push(n); [#Set, n, [#App, #anything]] },
   expr2          = "~" expr2:x                                         -> [#Not,       x]
                  | "&" expr1:x                                         -> [#Lookahead, x]
                  | expr1,
@@ -47,8 +47,8 @@ ometa BSOMetaParser <: Parser {
                  | "(" expr:x ")"                                      -> x,
   ruleName       = name
                  | spaces tsString,
-  rule           = &(ruleName:n) !(self.locals = ['$elf=this'])
-                     rulePart(n):x ("," rulePart(n))*:xs               -> [#Rule, n, self.locals, [#Or, x].concat(xs)],
+  rule           = &(ruleName:n) !(this.locals = ['$elf=this'])
+                     rulePart(n):x ("," rulePart(n))*:xs               -> [#Rule, n, this.locals, [#Or, x].concat(xs)],
   rulePart :rn   = ruleName:n ?(n == rn) expr4:b1 ( "=" expr:b2        -> [#And, b1, b2]
                                                   | empty              -> b1
                                                   ),
@@ -63,29 +63,29 @@ ometa BSOMetaParser <: Parser {
 // (Note that the "=" in a rule definition is optional, which can be used to get the "ML feel".)
 ometa BSOMetaTranslator {
   trans [:t apply(t):ans]             -> ans,
-  App  'super' anything+:args         -> [self.sName, '._superApplyWithArgs($elf,', args.join(','), ')'].join(''),
-  App  :rule   anything+:args         -> ['$elf._applyWithArgs("', rule, '",',      args.join(','), ')'].join(''),
-  App  :rule                          -> ['$elf._apply("', rule, '")']                                  .join(''),
+  App  'super' anything+:args         -> [this.sName, '._superApplyWithArgs(this,', args.join(','), ')'].join(''),
+  App  :rule   anything+:args         -> ['this._applyWithArgs("', rule, '",',      args.join(','), ')'].join(''),
+  App  :rule                          -> ['this._apply("', rule, '")']                                  .join(''),
   Act  :expr                          -> expr,
-  Pred :expr                          -> ['$elf._pred(', expr, ')']                                     .join(''),
-  Or   transFn*:xs                    -> ['$elf._or(',  xs.join(','), ')']                              .join(''),
-  XOr  transFn*:xs                       {xs.unshift((self.name + "." + self.rName).toProgramString())}
-                                      -> ['$elf._xor(', xs.join(','), ')']                              .join(''),
-  And  notLast(#trans)*:xs trans:y    -> { xs.push('return ' + y)
-                                           ['(function(){', xs.join(';'), '})()'].join('') },
-  And                                 -> '(function(){})',
-  Many  trans:x                       -> ['$elf._many(function(){return ', x, '})']                     .join(''),
-  Many1 trans:x                       -> ['$elf._many1(function(){return ', x, '})']                    .join(''),
+  Pred :expr                          -> ['this._pred(', expr, ')']                                     .join(''),
+  Or   transFn*:xs                    -> ['this._or(',  xs.join(','), ')']                              .join(''),
+  XOr  transFn*:xs                       {xs.unshift((this.name + "." + this.rName).toProgramString())}
+                                      -> ['this._xor(', xs.join(','), ')']                              .join(''),
+  And  notLast(#trans)*:xs trans:y
+       {xs.push('return ' + y)}       -> ['(function(){', xs.join(';'), '}).call(this)']                .join(''),
+  And                                 -> 'undefined',
+  Many  transFn:x                     -> ['this._many(', x, ')']                                        .join(''),
+  Many1 transFn:x                     -> ['this._many1(', x, ')']                                       .join(''),
   Set   :n trans:v                    -> [n, '=', v].join(''),
-  Not   trans:x                       -> ['$elf._not(function(){return ', x, '})']                      .join(''),
-  Lookahead trans:x                   -> ['$elf._lookahead(function(){return ', x, '})']                .join(''),
-  Form  trans:x                       -> ['$elf._form(function(){return ', x, '})']                     .join(''),
-  JumpTable jtCase*:cases             -> self.jumpTableCode(cases),
-  Rule  :name {self.rName = name}
-        locals:ls trans:body          -> ['\n"', name, '":function(){', ls, 'return ', body, '}']         .join(''),
+  Not   transFn:x                     -> ['this._not(', x, ')']                                         .join(''),
+  Lookahead transFn:x                 -> ['this._lookahead(', x, ')']                                   .join(''),
+  Form  transFn:x                     -> ['this._form(', x, ')']                                        .join(''),
+  JumpTable jtCase*:cases             -> this.jumpTableCode(cases),
+  Rule  :name {this.rName = name}
+        locals:ls trans:body          -> ['\n"', name, '":function(){', ls, 'return ', body, '}']       .join(''),
   Grammar :name :sName
-          {self.name = name}
-          {self.sName = sName}
+          {this.name = name}
+          {this.sName = sName}
           trans*:rules                -> [name, '=', sName, '.delegated({', rules.join(','), '})']      .join(''),
   jtCase  = [:x trans:e]              -> [x.toProgramString(), e],
   locals  = [string+:vs]              -> ['var ', vs.join(','), ';']                                    .join('')
@@ -94,10 +94,10 @@ ometa BSOMetaTranslator {
 }
 BSOMetaTranslator.jumpTableCode = function(cases) {
   var buf = new StringBuffer()
-  buf.nextPutAll("(function(){switch($elf._apply('anything')){")
+  buf.nextPutAll("(function(){switch(this._apply('anything')){")
   for (var i = 0; i < cases.length; i += 1)
     buf.nextPutAll("case " + cases[i][0] + ":return " + cases[i][1] + ";")
-  buf.nextPutAll("default: throw fail}})()")
+  buf.nextPutAll("default: throw fail}}).call(this)")
   return buf.contents()
 }
 

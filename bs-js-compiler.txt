@@ -7,7 +7,7 @@ ometa BSJSParser <: Parser {
   isKeyword :x = ?BSJSParser._isKeyword(x),
   name         = iName:n ~isKeyword(n)                                                           -> [#name, n=='self' ? '$elf' : n],
   keyword      = iName:k isKeyword(k)                                                            -> [k, k],
-  hexDigit     = char:x {self.hexDigits.indexOf(x.toLowerCase())}:v ?(v >= 0)                    -> v,
+  hexDigit     = char:x {this.hexDigits.indexOf(x.toLowerCase())}:v ?(v >= 0)                    -> v,
   hexLit       = hexLit:n hexDigit:d                                                             -> (n * 16 + d)
                | hexDigit,
   number       = ``0x'' hexLit:n                                                                 -> [#number, n]
@@ -141,7 +141,8 @@ ometa BSJSParser <: Parser {
 
   topLevel       = srcElems:r                                      spaces end -> r,
   curlySemAction = "{" (srcElem:s &srcElem -> s)+:ss expr:r sc "}" spaces     -> { ss.push([#return, r])
-                                                                                   [#call, [#func, [], [#begin].concat(ss)]] }
+                                                                                   [#send, #call, [#func, [], [#begin].concat(ss)],
+                                                                                           [#this]] }
                  | "{" expr:r "}"                                  spaces     -> r,
   semAction      = curlySemAction
                  | primExpr:r                                      spaces     -> r

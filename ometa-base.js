@@ -25,44 +25,39 @@
 
 /*
   new syntax:
-    #foo	match the string object 'foo' (should also be accepted in JS)
-    'abc'	match the string object 'abc'
-    'c'		match the string object 'c'
-    ``abc''	match the sequence of string objects 'a', 'b', 'c'
-    "abc"	token('abc')
-    [1 2 3]	match the array object [1, 2, 3]
-    foo(bar)	apply rule foo with argument bar
-    -> ...	do semantic actions in JS (no more ST). allow multiple statements, but no declarations
-		probably don't even need {}s, because newlines can terminate it!
+    #foo and `foo	match the string object 'foo' (it's also accepted in my JS)
+    'abc'		match the string object 'abc'
+    'c'			match the string object 'c'
+    ``abc''		match the sequence of string objects 'a', 'b', 'c'
+    "abc"		token('abc')
+    [1 2 3]		match the array object [1, 2, 3]
+    foo(bar)		apply rule foo with argument bar
+    -> ...		semantic actions written in JS (see OMetaParser's atomicHostExpr rule)
 */
 
 /*
-// ometa M {
-//   number = number:n digit:d -> { n * 10 + d.digitValue() }
-//          | digit:d          -> { d.digitValue() }.
-// }
+ometa M {
+  number = number:n digit:d -> { n * 10 + d.digitValue() }
+         | digit:d          -> { d.digitValue() }
+}
 
-try {
-  M = OMeta.delegated({
-    number: function() {
-      var $elf = this
-      return $elf._or(
-        function() {
-          var n, d
-          n = $elf._apply("number")
-          d = $elf._apply("digit")
-          return n * 10 + d.digitValue()
-        },
-        function() {
-          var d
-          d = $elf._apply("digit")
-          return d.digitValue()
-        }
-      )
-    }
-  })
-  M.matchAll("123456789", "number")
-} catch (f) { alert(f) }
+translates to...
+
+M = OMeta.delegated({
+  number: function() {
+            return this._or(function() {
+                              var n = this._apply("number"),
+                                  d = this._apply("digit")
+                              return n * 10 + d.digitValue()
+                            },
+                            function() {
+                              var d = this._apply("digit")
+                              return d.digitValue()
+                            }
+                           )
+          }
+})
+M.matchAll("123456789", "number")
 */
 
 // the failure exception
@@ -123,13 +118,13 @@ OMeta = {
       var origInput = this.input,
           failer    = new Failer()
       this.input.memo[rule] = failer
-      this.input.memo[rule] = memoRec = {ans: this[rule].apply(this), nextInput: this.input}
+      this.input.memo[rule] = memoRec = {ans: this[rule].call(this), nextInput: this.input}
       if (failer.used) {
         var sentinel = this.input
         while (true) {
           try {
             this.input = origInput
-            var ans = this[rule].apply(this)
+            var ans = this[rule].call(this)
             if (this.input == sentinel)
               throw fail
             memoRec.ans       = ans
@@ -155,12 +150,12 @@ OMeta = {
   _applyWithArgs: function(rule) {
     for (var idx = arguments.length - 1; idx > 0; idx--)
       this._prependInput(arguments[idx])
-    return this[rule].apply(this)
+    return this[rule].call(this)
   },
-  _superApplyWithArgs: function($elf, rule) {
+  _superApplyWithArgs: function(recv, rule) {
     for (var idx = arguments.length - 1; idx > 1; idx--)
-      $elf._prependInput(arguments[idx])
-    return this[rule].apply($elf)
+      recv._prependInput(arguments[idx])
+    return this[rule].call(recv)
   },
   _prependInput: function(v) {
     this.input = new OMInputStream(v, this.input);
@@ -194,7 +189,7 @@ OMeta = {
   },
   _not: function(x) {
     var origInput = this.input
-    try { x() }
+    try { x.call(this) }
     catch (f) {
       if (f != fail)
         throw f
@@ -205,14 +200,14 @@ OMeta = {
   },
   _lookahead: function(x) {
     var origInput = this.input,
-        r        = x()
+        r         = x.call(this)
     this.input = origInput
     return r
   },
   _or: function() {
     var origInput = this.input
     for (var idx = 0; idx < arguments.length; idx++)
-      try { this.input = origInput; return arguments[idx]() }
+      try { this.input = origInput; return arguments[idx].call(this) }
       catch (f) {
         if (f != fail)
           throw f
@@ -224,7 +219,7 @@ OMeta = {
     while (idx < arguments.length) {
       try {
         this.input = origInput
-        ans = arguments[idx]()
+        ans = arguments[idx].call(this)
         numMatches += 1
       }
       catch (f) {
@@ -241,7 +236,7 @@ OMeta = {
     this._xor = function(ruleName) {
       var origInput = this.input
       for (var idx = 1; idx < arguments.length; idx++)
-        try { this.input = origInput; return arguments[idx]() }
+        try { this.input = origInput; return arguments[idx].call(this) }
         catch (f) {
           if (f != fail)
             throw f
@@ -253,7 +248,7 @@ OMeta = {
     var ans = arguments[1] != undefined ? [arguments[1]] : []
     while (true) {
       var origInput = this.input
-      try { ans.push(x()) }
+      try { ans.push(x.call(this)) }
       catch (f) {
         if (f != fail)
           throw f
@@ -263,14 +258,14 @@ OMeta = {
     }
     return ans
   },
-  _many1: function(x) { return this._many(x, x()) },
+  _many1: function(x) { return this._many(x, x.call(this)) },
   _form: function(x) {
     var v = this._apply("anything")
     if (!v.isSequenceable)
       throw fail
     var origInput = this.input
     this.input = makeArrayOMInputStream(v, 0)
-    var r = x()
+    var r = x.call(this)
     this._apply("end")
     this.input = origInput
     return v
@@ -283,8 +278,7 @@ OMeta = {
     return r
   },
   end: function() {
-    var $elf = this
-    return this._not(function() { return $elf._apply("anything") })
+    return this._not(function() { return this._apply("anything") })
   },
   pos: function() {
     return this.input.idx
@@ -346,8 +340,7 @@ OMeta = {
     return r
   },
   spaces: function() {
-    var $elf = this
-    return this._many(function() { return $elf._apply("space") })
+    return this._many(function() { return this._apply("space") })
   },
   digit: function() {
     var r = this._apply("char")
@@ -365,20 +358,17 @@ OMeta = {
     return r
   },
   letter: function() {
-    var $elf = this
-    return this._or(function() { return $elf._apply("lower") },
-                    function() { return $elf._apply("upper") })
+    return this._or(function() { return this._apply("lower") },
+                    function() { return this._apply("upper") })
   },
   letterOrDigit: function() {
-    var $elf = this
-    return this._or(function() { return $elf._apply("letter") },
-                    function() { return $elf._apply("digit")  })
+    return this._or(function() { return this._apply("letter") },
+                    function() { return this._apply("digit")  })
   },
   firstAndRest: function()  {
-    var $elf  = this,
-        first = this._apply("anything"),
+    var first = this._apply("anything"),
         rest  = this._apply("anything")
-     return this._many(function() { return $elf._apply(rest) }, this._apply(first))
+     return this._many(function() { return this._apply(rest) }, this._apply(first))
   },
   seq: function() {
     var xs = this._apply("anything")
@@ -387,10 +377,9 @@ OMeta = {
     return xs
   },
   notLast: function() {
-    var $elf = this,
-        rule = this._apply("anything"),
+    var rule = this._apply("anything"),
         r    = this._apply(rule)
-    this._lookahead(function() { return $elf._apply(rule) })
+    this._lookahead(function() { return this._apply(rule) })
     return r
   },
 

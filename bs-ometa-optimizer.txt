@@ -2,9 +2,9 @@
 // TODO: add a factorizing optimization (will make jumptables more useful)
 
 ometa BSNullOptimization {
-  setHelped = !(self._didSomething = true),
-  helped    = ?self._didSomething,
-  trans     = [:t ?self.hasProperty(t) apply(t):ans] -> ans,
+  setHelped = !(this._didSomething = true),
+  helped    = ?this._didSomething,
+  trans     = [:t ?this.hasProperty(t) apply(t):ans] -> ans,
   optimize  = trans:x helped                         -> x,
 
   App       :rule anything*:args          -> ['App', rule].concat(args),

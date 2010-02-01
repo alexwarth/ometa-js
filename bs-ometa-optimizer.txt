@@ -7,20 +7,23 @@ ometa BSNullOptimization {
   trans     = [:t ?this.hasProperty(t) apply(t):ans] -> ans,
   optimize  = trans:x helped                         -> x,
 
-  App       :rule anything*:args          -> ['App', rule].concat(args),
-  Act       :expr                         -> ['Act', expr],
-  Pred      :expr                         -> ['Pred', expr],
-  Or        trans*:xs                     -> ['Or'].concat(xs),
-  XOr       trans*:xs                     -> ['XOr'].concat(xs),
-  And       trans*:xs                     -> ['And'].concat(xs),
-  Many      trans:x                       -> ['Many',  x],
-  Many1     trans:x                       -> ['Many1', x],
-  Set       :n trans:v                    -> ['Set', n, v],
-  Not       trans:x                       -> ['Not', x],
-  Lookahead trans:x                       -> ['Lookahead', x],
-  Form      trans:x                       -> ['Form', x],
-  JumpTable ([:c trans:e] -> [c, e])*:ces -> ['JumpTable'].concat(ces),
-  Rule      :name :ls trans:body          -> ['Rule', name, ls, body]
+  App        :rule anything*:args          -> ['App', rule].concat(args),
+  Act        :expr                         -> ['Act', expr],
+  Pred       :expr                         -> ['Pred', expr],
+  Or         trans*:xs                     -> ['Or'].concat(xs),
+  XOr        trans*:xs                     -> ['XOr'].concat(xs),
+  And        trans*:xs                     -> ['And'].concat(xs),
+  Many       trans:x                       -> ['Many',  x],
+  Many1      trans:x                       -> ['Many1', x],
+  Set        :n trans:v                    -> ['Set', n, v],
+  Not        trans:x                       -> ['Not',       x],
+  Lookahead  trans:x                       -> ['Lookahead', x],
+  Form       trans:x                       -> ['Form',      x],
+  ConsBy     trans:x                       -> ['ConsBy',    x],
+  IdxConsBy  trans:x                       -> ['IdxConsBy', x],
+  JumpTable  ([:c trans:e] -> [c, e])*:ces -> ['JumpTable'].concat(ces),
+  Interleave trans*:xs                     -> ['Interleave'].concat(xs),
+  Rule       :name :ls trans:body          -> ['Rule', name, ls, body]
 }
 BSNullOptimization.initialize = function() { this._didSomething = false }
 

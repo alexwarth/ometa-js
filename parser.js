@@ -25,14 +25,13 @@
 
 Parser = OMeta.delegated({
   listOf: function() {
-    var $elf  = this,
-        rule  = this._apply("anything"),
+    var rule  = this._apply("anything"),
         delim = this._apply("anything")
     return this._or(function() {
-                      var r = $elf._apply(rule)
-                      return $elf._many(function() {
-                                          $elf._applyWithArgs("token", delim)
-                                          return $elf._apply(rule)
+                      var r = this._apply(rule)
+                      return this._many(function() {
+                                          this._applyWithArgs("token", delim)
+                                          return this._apply(rule)
                                         },
                                         r)
                     },

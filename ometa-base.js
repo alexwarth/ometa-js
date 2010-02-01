@@ -78,22 +78,31 @@ function OMInputStreamEnd() { this.memo = { } }
 OMInputStreamEnd.prototype.head = function() { throw fail }
 OMInputStreamEnd.prototype.tail = function() { throw fail }
 
-Array.prototype.toOMInputStream  = function() { return makeArrayOMInputStream(this, 0) }
-String.prototype.toOMInputStream = Array.prototype.toOMInputStream
+Array.prototype.toOMInputStream  = function() { return makeListOMInputStream(this, 0) }
+String.prototype.toOMInputStream = function() { return makeListOMInputStream(this, 0) }
 
-function makeArrayOMInputStream(arr, idx) { return idx < arr.length ? new ArrayOMInputStream(arr, idx) : new OMInputStreamEnd() }
+function makeListOMInputStream(lst, idx) { return idx < lst.length ? new ListOMInputStream(lst, idx) : new OMInputStreamEnd() }
 
-function ArrayOMInputStream(arr, idx) {
+function ListOMInputStream(lst, idx) {
   this.memo = { }
-  this.arr  = arr
+  this.lst  = lst
   this.idx  = idx
-  this.hd   = arr[idx]
+  this.hd   = lst[idx]
 }
-ArrayOMInputStream.prototype.head = function() { return this.hd }
-ArrayOMInputStream.prototype.tail = function() {
+ListOMInputStream.prototype.head = function() { return this.hd }
+ListOMInputStream.prototype.tail = function() {
   if (this.tl == undefined)
-    this.tl = makeArrayOMInputStream(this.arr, this.idx + 1)
+    this.tl = makeListOMInputStream(this.lst, this.idx + 1)
   return this.tl
+}
+ListOMInputStream.prototype.type = function() { return this.lst.constructor }
+ListOMInputStream.prototype.upTo = function(that) {
+  var r = [], curr = this
+  while (curr != that) {
+    r.push(curr.head())
+    curr = curr.tail()
+  }
+  return this.type() == String ? r.join('') : r
 }
 
 function makeOMInputStreamProxy(target) {
@@ -264,11 +273,21 @@ OMeta = {
     if (!v.isSequenceable)
       throw fail
     var origInput = this.input
-    this.input = makeArrayOMInputStream(v, 0)
+    this.input = makeListOMInputStream(v, 0)
     var r = x.call(this)
     this._apply("end")
     this.input = origInput
     return v
+  },
+  _consumedBy: function(x) {
+    var origInput = this.input
+    x.call(this)
+    return origInput.upTo(this.input)
+  },
+  _idxConsumedBy: function(x) {
+    var origInput = this.input
+    x.call(this)
+    return {fromIdx: origInput.idx, toIdx: this.input.idx}
   },
 
   // some basic rules

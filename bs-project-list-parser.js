@@ -1,3 +1,3 @@
 ProjectListParser=BSJSParser.delegated({
-"proj":function(){var $elf=this;return (function(){$elf._apply("spaces");return $elf._apply("iName")})()},
-"projs":function(){var $elf=this,x,xs;return (function(){x=$elf._apply("proj");xs=$elf._many(function(){return (function(){$elf._apply("spaces");$elf._applyWithArgs("exactly",",");return $elf._apply("proj")})()});return [x].concat(xs)})()}})
+"proj":function(){var $elf=this;return (function(){this._apply("spaces");return this._apply("iName")}).call(this)},
+"projs":function(){var $elf=this,x,xs;return (function(){x=this._apply("proj");xs=this._many((function(){return (function(){this._apply("spaces");this._applyWithArgs("exactly",",");return this._apply("proj")}).call(this)}));return [x].concat(xs)}).call(this)}})

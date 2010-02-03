@@ -45,6 +45,7 @@
 "ConsBy":function(){var $elf=this,x;return (function(){x=this._apply("transFn");return ["this._consumedBy(",x,")"].join("")}).call(this)},
 "IdxConsBy":function(){var $elf=this,x;return (function(){x=this._apply("transFn");return ["this._idxConsumedBy(",x,")"].join("")}).call(this)},
 "JumpTable":function(){var $elf=this,cases;return (function(){cases=this._many((function(){return this._apply("jtCase")}));return this.jumpTableCode(cases)}).call(this)},
+"Interleave":function(){var $elf=this,xs;return (function(){xs=this._many((function(){return this._apply("transFn")}));return ["this._interleave(",xs.join(","),")"].join("")}).call(this)},
 "Rule":function(){var $elf=this,name,ls,body;return (function(){name=this._apply("anything");(this["rName"]=name);ls=this._apply("locals");body=this._apply("trans");return ["\n\"",name,"\":function(){",ls,"return ",body,"}"].join("")}).call(this)},
 "Grammar":function(){var $elf=this,name,sName,rules;return (function(){name=this._apply("anything");sName=this._apply("anything");(this["name"]=name);(this["sName"]=sName);rules=this._many((function(){return this._apply("trans")}));return [name,"=",sName,".delegated({",rules.join(","),"})"].join("")}).call(this)},
 "jtCase":function(){var $elf=this,x,e;return (function(){this._form((function(){return (function(){x=this._apply("anything");return e=this._apply("trans")}).call(this)}));return [x.toProgramString(),e]}).call(this)},

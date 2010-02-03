@@ -85,6 +85,7 @@ ometa BSOMetaTranslator {
   ConsBy     transFn:x                     -> ['this._consumedBy(',    x, ')']                               .join(''),
   IdxConsBy  transFn:x                     -> ['this._idxConsumedBy(', x, ')']                               .join(''),
   JumpTable  jtCase*:cases                 -> this.jumpTableCode(cases),
+  Interleave transFn*:xs                   -> ['this._interleave(', xs.join(','), ')']                       .join(''),
   Rule       :name {this.rName = name}
              locals:ls trans:body          -> ['\n"', name, '":function(){', ls, 'return ', body, '}']       .join(''),
   Grammar    :name :sName

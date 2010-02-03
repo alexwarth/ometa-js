@@ -74,14 +74,17 @@ function OMInputStream(hd, tl) {
 OMInputStream.prototype.head = function() { return this.hd }
 OMInputStream.prototype.tail = function() { return this.tl }
 
-function OMInputStreamEnd() { this.memo = { } }
+function OMInputStreamEnd(idx) {
+  this.memo = { }
+  this.idx = idx
+}
 OMInputStreamEnd.prototype.head = function() { throw fail }
 OMInputStreamEnd.prototype.tail = function() { throw fail }
 
 Array.prototype.toOMInputStream  = function() { return makeListOMInputStream(this, 0) }
 String.prototype.toOMInputStream = function() { return makeListOMInputStream(this, 0) }
 
-function makeListOMInputStream(lst, idx) { return idx < lst.length ? new ListOMInputStream(lst, idx) : new OMInputStreamEnd() }
+function makeListOMInputStream(lst, idx) { return idx < lst.length ? new ListOMInputStream(lst, idx) : new OMInputStreamEnd(idx) }
 
 function ListOMInputStream(lst, idx) {
   this.memo = { }
@@ -293,6 +296,34 @@ OMeta = {
     var origInput = this.input
     x.call(this)
     return {fromIdx: origInput.idx, toIdx: this.input.idx}
+  },
+  _interleave: function() {
+    var currInput = this.input, ans = []
+    while (true) {
+      var idx = 0, allDone = true
+      while (idx < arguments.length) {
+        if (arguments[idx])
+          try {
+            this.input = currInput
+            ans[idx] = arguments[idx].call(this)
+            arguments[idx] = null
+            currInput = this.input
+            break
+          }
+          catch (f) {
+            allDone = false
+            if (f != fail)
+              throw f
+          }
+        idx += 1
+      }
+      if (idx == arguments.length) {
+        if (allDone)
+          return ans
+        else
+          throw fail
+      }
+    }
   },
 
   // some basic rules

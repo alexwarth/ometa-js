@@ -29,7 +29,7 @@ ometa BSOMetaParser <: Parser {
                  | expr5(false),
   expr5 :ne      = expr4(true):x ("&&" expr4(true))+:xs                -> [#Interleave, x].concat(xs)
                  | expr4(ne),
-  expr4 :ne      = (?ne expr3+ | expr3*):xs                            -> [#And].concat(xs),
+  expr4 :ne      = (?ne expr3+ | ?(ne == false) expr3*):xs             -> [#And].concat(xs),
   optIter :x     = "*"                                                 -> [#Many,  x]
                  | "+"                                                 -> [#Many1, x]
                  | empty                                               -> x,

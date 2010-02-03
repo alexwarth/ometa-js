@@ -224,12 +224,14 @@ OMeta = {
     throw fail
   },
   _xor: function(ruleName) {
-    var origInput = this.input, idx = 1, numMatches = 0, ans
+    var origInput = this.input, idx = 1, newInput, ans
     while (idx < arguments.length) {
       try {
         this.input = origInput
         ans = arguments[idx].call(this)
-        numMatches += 1
+        if (newInput)
+          throw 'more than one choice matched by "exclusive-OR" in ' + ruleName
+        newInput = this.input
       }
       catch (f) {
         if (f != fail)
@@ -237,9 +239,12 @@ OMeta = {
       }
       idx += 1
     }
-    if      (numMatches == 0) throw fail
-    else if (numMatches == 1) return ans
-    else                      throw 'more than one choice matched by "exclusive-OR" in ' + ruleName
+    if (newInput) {
+      this.input = newInput
+      return ans
+    }
+    else
+      throw fail
   },
   disableXORs: function() {
     this._xor = function(ruleName) {

@@ -184,7 +184,7 @@ Object.prototype.getTag = (function() {
   var numIds = 0
   return function() { return this.hasOwnProperty("_id_") ? this._id_ : this._id_ = "R" + numIds++ }
 })()
-Boolean.prototype.getTag = function() { return this ? "Btrue" : "Bfalse" }
+Boolean.prototype.getTag = function() { return this == true ? "Btrue" : "Bfalse" }
 String.prototype.getTag  = function() { return "S" + this }
 Number.prototype.getTag  = function() { return "N" + this }
 

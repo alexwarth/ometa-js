@@ -170,7 +170,7 @@ OMeta = {
     return this[rule].call(recv)
   },
   _prependInput: function(v) {
-    this.input = new OMInputStream(v, this.input);
+    this.input = new OMInputStream(v, this.input)
   },
 
   // if you want your grammar (and its subgrammars) to memoize parameterized rules, invoke this method on it:
@@ -240,7 +240,7 @@ OMeta = {
         if (f != fail)
           throw f
       }
-      idx += 1
+      idx++
     }
     if (newInput) {
       this.input = newInput
@@ -297,25 +297,30 @@ OMeta = {
     x.call(this)
     return {fromIdx: origInput.idx, toIdx: this.input.idx}
   },
-  _interleave: function() {
+  _interleave: function(mode1, part1, mode2, part2 /* ..., moden, partn */) {
     var currInput = this.input, ans = []
     while (true) {
       var idx = 0, allDone = true
       while (idx < arguments.length) {
-        if (arguments[idx])
+        if (arguments[idx] != "0")
           try {
             this.input = currInput
-            ans[idx] = arguments[idx].call(this)
-            arguments[idx] = null
+            switch (arguments[idx]) {
+              case "*": (ans[idx / 2] = ans[idx / 2] || []).push(arguments[idx + 1].call(this));                       break
+              case "+": (ans[idx / 2] = ans[idx / 2] || []).push(arguments[idx + 1].call(this)); arguments[idx] = "*"; break
+              case "1":  ans[idx / 2] =                          arguments[idx + 1].call(this);  arguments[idx] = "0"; break
+              default:  throw "invalid mode '" + arguments[idx] + "' in OMeta._interleave"
+            }
             currInput = this.input
             break
           }
           catch (f) {
-            allDone = false
             if (f != fail)
               throw f
+            // if this (failed) part's mode is "1" or "+", we're not done yet
+            allDone = allDone && arguments[idx] == "*"
           }
-        idx += 1
+        idx += 2
       }
       if (idx == arguments.length) {
         if (allDone)

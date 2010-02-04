@@ -27,8 +27,13 @@ ometa BSOMetaParser <: Parser {
   expr           = expr5(true):x ("|"  expr5(true))+:xs                -> [#Or,  x].concat(xs)
                  | expr5(true):x ("||" expr5(true))+:xs                -> [#XOr, x].concat(xs)
                  | expr5(false),
-  expr5 :ne      = expr4(true):x ("&&" expr4(true))+:xs                -> [#Interleave, x].concat(xs)
+  expr5 :ne      = interleavePart:x ("&&" interleavePart)+:xs          -> [#Interleave, x].concat(xs)
                  | expr4(ne),
+  interleavePart = "(" expr4(true):part ")"                            -> ["1", part]
+                 | expr4(true):part modedIPart(part),
+  modedIPart     = [#And [#Many  :part]]                               -> ["*", part]
+                 | [#And [#Many1 :part]]                               -> ["+", part]
+                 | :part                                               -> ["1", part],
   expr4 :ne      = (?ne expr3+ | ?(ne == false) expr3*):xs             -> [#And].concat(xs),
   optIter :x     = "*"                                                 -> [#Many,  x]
                  | "+"                                                 -> [#Many1, x]
@@ -85,13 +90,15 @@ ometa BSOMetaTranslator {
   ConsBy     transFn:x                     -> ['this._consumedBy(',    x, ')']                               .join(''),
   IdxConsBy  transFn:x                     -> ['this._idxConsumedBy(', x, ')']                               .join(''),
   JumpTable  jtCase*:cases                 -> this.jumpTableCode(cases),
-  Interleave transFn*:xs                   -> ['this._interleave(', xs.join(','), ')']                       .join(''),
+  Interleave intPart*:xs                   -> ['this._interleave(', xs.join(','), ')']                       .join(''),
+  
   Rule       :name {this.rName = name}
              locals:ls trans:body          -> ['\n"', name, '":function(){', ls, 'return ', body, '}']       .join(''),
   Grammar    :name :sName
              {this.name = name}
              {this.sName = sName}
              trans*:rules                  -> [name, '=', sName, '.delegated({', rules.join(','), '})']      .join(''),
+  intPart  = [:mode transFn:part]          -> (mode.toProgramString()  + "," + part),
   jtCase   = [:x trans:e]                  -> [x.toProgramString(), e],
   locals   = [string+:vs]                  -> ['var ', vs.join(','), ';']                                    .join('')
            | []                            -> '',

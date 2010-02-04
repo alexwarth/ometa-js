@@ -22,7 +22,7 @@ ometa BSNullOptimization {
   ConsBy     trans:x                       -> ['ConsBy',    x],
   IdxConsBy  trans:x                       -> ['IdxConsBy', x],
   JumpTable  ([:c trans:e] -> [c, e])*:ces -> ['JumpTable'].concat(ces),
-  Interleave trans*:xs                     -> ['Interleave'].concat(xs),
+  Interleave ([:m trans:p] -> [m, p])*:xs  -> ['Interleave'].concat(xs),
   Rule       :name :ls trans:body          -> ['Rule', name, ls, body]
 }
 BSNullOptimization.initialize = function() { this._didSomething = false }

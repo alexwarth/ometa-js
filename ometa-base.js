@@ -73,33 +73,9 @@ function OMInputStream(hd, tl) {
 }
 OMInputStream.prototype.head = function() { return this.hd }
 OMInputStream.prototype.tail = function() { return this.tl }
-
-function OMInputStreamEnd(idx) {
-  this.memo = { }
-  this.idx = idx
-}
-OMInputStreamEnd.prototype.head = function() { throw fail }
-OMInputStreamEnd.prototype.tail = function() { throw fail }
-
-Array.prototype.toOMInputStream  = function() { return makeListOMInputStream(this, 0) }
-String.prototype.toOMInputStream = function() { return makeListOMInputStream(this, 0) }
-
-function makeListOMInputStream(lst, idx) { return idx < lst.length ? new ListOMInputStream(lst, idx) : new OMInputStreamEnd(idx) }
-
-function ListOMInputStream(lst, idx) {
-  this.memo = { }
-  this.lst  = lst
-  this.idx  = idx
-  this.hd   = lst[idx]
-}
-ListOMInputStream.prototype.head = function() { return this.hd }
-ListOMInputStream.prototype.tail = function() {
-  if (this.tl == undefined)
-    this.tl = makeListOMInputStream(this.lst, this.idx + 1)
-  return this.tl
-}
-ListOMInputStream.prototype.type = function() { return this.lst.constructor }
-ListOMInputStream.prototype.upTo = function(that) {
+OMInputStream.prototype.lst  = [] // this is to make type() work
+OMInputStream.prototype.type = function() { return this.lst.constructor }
+OMInputStream.prototype.upTo = function(that) {
   var r = [], curr = this
   while (curr != that) {
     r.push(curr.head())
@@ -107,6 +83,34 @@ ListOMInputStream.prototype.upTo = function(that) {
   }
   return this.type() == String ? r.join('') : r
 }
+
+function OMInputStreamEnd(lst, idx) {
+  this.memo = { }
+  this.lst = lst
+  this.idx = idx
+}
+OMInputStreamEnd.prototype = OMInputStream.prototype.delegated()
+OMInputStreamEnd.prototype.head = function() { throw fail }
+OMInputStreamEnd.prototype.tail = function() { throw fail }
+
+function ListOMInputStream(lst, idx) {
+  this.memo = { }
+  this.lst  = lst
+  this.idx  = idx
+  this.hd   = lst[idx]
+}
+ListOMInputStream.prototype = OMInputStream.prototype.delegated()
+ListOMInputStream.prototype.head = function() { return this.hd }
+ListOMInputStream.prototype.tail = function() {
+  if (this.tl == undefined)
+    this.tl = makeListOMInputStream(this.lst, this.idx + 1)
+  return this.tl
+}
+
+function makeListOMInputStream(lst, idx) { return new (idx < lst.length ? ListOMInputStream : OMInputStreamEnd)(lst, idx) }
+
+Array.prototype.toOMInputStream  = function() { return makeListOMInputStream(this, 0) }
+String.prototype.toOMInputStream = function() { return makeListOMInputStream(this, 0) }
 
 function makeOMInputStreamProxy(target) {
   return target.delegated({

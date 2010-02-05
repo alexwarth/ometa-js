@@ -68,12 +68,13 @@ fail = { toString: function() { return "match failed" } }
 
 function OMInputStream(hd, tl) {
   this.memo = { }
+  this.lst  = []
+  this.idx  = -1
   this.hd   = hd
   this.tl   = tl
 }
 OMInputStream.prototype.head = function() { return this.hd }
 OMInputStream.prototype.tail = function() { return this.tl }
-OMInputStream.prototype.lst  = [] // this is to make type() work
 OMInputStream.prototype.type = function() { return this.lst.constructor }
 OMInputStream.prototype.upTo = function(that) {
   var r = [], curr = this
@@ -101,11 +102,7 @@ function ListOMInputStream(lst, idx) {
 }
 ListOMInputStream.prototype = OMInputStream.prototype.delegated()
 ListOMInputStream.prototype.head = function() { return this.hd }
-ListOMInputStream.prototype.tail = function() {
-  if (this.tl == undefined)
-    this.tl = makeListOMInputStream(this.lst, this.idx + 1)
-  return this.tl
-}
+ListOMInputStream.prototype.tail = function() { return this.tl || (this.tl = makeListOMInputStream(this.lst, this.idx + 1)) }
 
 function makeListOMInputStream(lst, idx) { return new (idx < lst.length ? ListOMInputStream : OMInputStreamEnd)(lst, idx) }
 

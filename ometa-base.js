@@ -68,8 +68,8 @@ fail = { toString: function() { return "match failed" } }
 
 function OMInputStream(hd, tl) {
   this.memo = { }
-  this.lst  = []
-  this.idx  = -1
+  this.lst  = tl.lst
+  this.idx  = tl.idx
   this.hd   = hd
   this.tl   = tl
 }
@@ -331,6 +331,7 @@ OMeta = {
       }
     }
   },
+  _currIdx: function() { return this.input.idx },
 
   // some basic rules
   anything: function() {

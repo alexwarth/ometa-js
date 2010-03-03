@@ -36,6 +36,13 @@ String.prototype.writeStream      = function() { return new StringBuffer(this) }
 
 // make Arrays print themselves sensibly
 
+printOn = function(x, ws) {
+  if (x === undefined || x === null)
+    ws.nextPutAll("" + x)
+  else
+    x.printOn(ws)
+}
+
 Object.prototype.printOn = function(ws) { ws.nextPutAll(this.toString()) }
 
 Array.prototype.toString = function() { var ws = "".writeStream(); this.printOn(ws); return ws.contents() }
@@ -44,7 +51,7 @@ Array.prototype.printOn = function(ws) {
   for (var idx = 0; idx < this.length; idx++) {
     if (idx > 0)
       ws.nextPutAll(", ")
-    this[idx].printOn(ws)
+    printOn(this[idx], ws)
   }
   ws.nextPutAll("]")
 }

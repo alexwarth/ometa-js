@@ -13,6 +13,7 @@ ometa BSNullOptimization {
   Or         trans*:xs                     -> ['Or'].concat(xs),
   XOr        trans*:xs                     -> ['XOr'].concat(xs),
   And        trans*:xs                     -> ['And'].concat(xs),
+  Opt        trans:x                       -> ['Opt',  x],
   Many       trans:x                       -> ['Many',  x],
   Many1      trans:x                       -> ['Many1', x],
   Set        :n trans:v                    -> ['Set', n, v],

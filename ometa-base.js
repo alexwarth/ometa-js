@@ -262,6 +262,16 @@ OMeta = {
       throw fail
     }
   },
+  _opt: function(x) {
+    var origInput = this.input, ans
+    try { ans = x.call(this) }
+    catch (f) {
+      if (f != fail)
+        throw f
+      this.input = origInput
+    }
+    return ans
+  },
   _many: function(x) {
     var ans = arguments[1] != undefined ? [arguments[1]] : []
     while (true) {
@@ -300,6 +310,8 @@ OMeta = {
   },
   _interleave: function(mode1, part1, mode2, part2 /* ..., moden, partn */) {
     var currInput = this.input, ans = []
+    for (var idx = 0; idx < arguments.length; idx += 2)
+      ans[idx / 2] = (arguments[idx] == "*" || arguments[idx] == "+") ? [] : undefined
     while (true) {
       var idx = 0, allDone = true
       while (idx < arguments.length) {
@@ -307,9 +319,10 @@ OMeta = {
           try {
             this.input = currInput
             switch (arguments[idx]) {
-              case "*": (ans[idx / 2] = ans[idx / 2] || []).push(arguments[idx + 1].call(this));                       break
-              case "+": (ans[idx / 2] = ans[idx / 2] || []).push(arguments[idx + 1].call(this)); arguments[idx] = "*"; break
-              case "1":  ans[idx / 2] =                          arguments[idx + 1].call(this);  arguments[idx] = "0"; break
+              case "*": ans[idx / 2].push(arguments[idx + 1].call(this));                       break
+              case "+": ans[idx / 2].push(arguments[idx + 1].call(this)); arguments[idx] = "*"; break
+              case "?": ans[idx / 2] =    arguments[idx + 1].call(this);  arguments[idx] = "0"; break
+              case "1": ans[idx / 2] =    arguments[idx + 1].call(this);  arguments[idx] = "0"; break
               default:  throw "invalid mode '" + arguments[idx] + "' in OMeta._interleave"
             }
             currInput = this.input
@@ -319,7 +332,7 @@ OMeta = {
             if (f != fail)
               throw f
             // if this (failed) part's mode is "1" or "+", we're not done yet
-            allDone = allDone && arguments[idx] == "*"
+            allDone = allDone && (arguments[idx] == "*" || arguments[idx] == "?")
           }
         idx += 2
       }

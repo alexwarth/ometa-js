@@ -33,10 +33,12 @@ ometa BSOMetaParser <: Parser {
                  | expr4(true):part modedIPart(part),
   modedIPart     = [#And [#Many  :part]]                               -> ["*", part]
                  | [#And [#Many1 :part]]                               -> ["+", part]
+                 | [#And [#Opt   :part]]                               -> ["?", part]
                  | :part                                               -> ["1", part],
   expr4 :ne      = (?ne expr3+ | ?(ne == false) expr3*):xs             -> [#And].concat(xs),
-  optIter :x     = "*"                                                 -> [#Many,  x]
-                 | "+"                                                 -> [#Many1, x]
+  optIter :x     = '*'                                                 -> [#Many,  x]
+                 | '+'                                                 -> [#Many1, x]
+                 | '?'                                                 -> [#Opt,   x]
                  | empty                                               -> x,
   expr3          = expr2:x optIter(x):x ( ':' name:n                   -> { this.locals.push(n); [#Set, n, x] }
                                         | empty                        -> x
@@ -81,6 +83,7 @@ ometa BSOMetaTranslator {
   And        notLast(#trans)*:xs trans:y
              {xs.push('return ' + y)}      -> ['(function(){', xs.join(';'), '}).call(this)']                .join(''),
   And                                      -> 'undefined',
+  Opt        transFn:x                     -> ['this._opt(',           x, ')']                               .join(''),
   Many       transFn:x                     -> ['this._many(',          x, ')']                               .join(''),
   Many1      transFn:x                     -> ['this._many1(',         x, ')']                               .join(''),
   Set        :n trans:v                    -> [n, '=', v].join(''),

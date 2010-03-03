@@ -9,6 +9,7 @@
 "Or":function(){var $elf=this,_fromIdx=this.input.idx,xs;return (function(){xs=this._many((function(){return this._apply("trans")}));return ["Or"].concat(xs)}).call(this)},
 "XOr":function(){var $elf=this,_fromIdx=this.input.idx,xs;return (function(){xs=this._many((function(){return this._apply("trans")}));return ["XOr"].concat(xs)}).call(this)},
 "And":function(){var $elf=this,_fromIdx=this.input.idx,xs;return (function(){xs=this._many((function(){return this._apply("trans")}));return ["And"].concat(xs)}).call(this)},
+"Opt":function(){var $elf=this,_fromIdx=this.input.idx,x;return (function(){x=this._apply("trans");return ["Opt",x]}).call(this)},
 "Many":function(){var $elf=this,_fromIdx=this.input.idx,x;return (function(){x=this._apply("trans");return ["Many",x]}).call(this)},
 "Many1":function(){var $elf=this,_fromIdx=this.input.idx,x;return (function(){x=this._apply("trans");return ["Many1",x]}).call(this)},
 "Set":function(){var $elf=this,_fromIdx=this.input.idx,n,v;return (function(){n=this._apply("anything");v=this._apply("trans");return ["Set",n,v]}).call(this)},

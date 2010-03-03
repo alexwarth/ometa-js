@@ -105,6 +105,7 @@ function printIt() {
 
 function doIt() {
   var result = evalSelection()
+alert("do it ok")
   result.source.editor.focus()
 }
 

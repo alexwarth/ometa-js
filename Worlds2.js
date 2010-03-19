@@ -32,14 +32,12 @@ makeFunction = function(fs, body) {
                         ' for (var i = 0; i < arguments.length; i++) thisWorld.set(arguments, i, arguments[i]);' +
 */
                         ' try { ' + fs + body + '}'                                                              +
-                        ' catch (e) { throw e }'                                                                 +
                         ' finally { thisScope = oldScope }};'                                                    +
                       ' baseWorld.set(r, "prototype", {parent: Object.prototype});'                              +
                       ' return r })()' }
 
 makeIn = function(w, body) {
   return '{ try { worldStack.push(thisWorld); thisWorld = ' + w + '; ' + body + '} ' +
-           'catch (e) { throw e } '                                                  +
            'finally { thisWorld = worldStack.pop() }'                                +
            'undefined }'
 }

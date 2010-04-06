@@ -19,11 +19,13 @@ ometa BSOMetaParser <: Parser {
                  | name:grm "." name:rule args:as                      -> [#App, "foreign", grm, "'" + rule + "'"].concat(as)
                  |              name:rule args:as                      -> [#App, rule].concat(as),
   hostExpr       = BSSemActionParser.expr:r                               BSJSTranslator.trans(r),
-  atomicHostExpr = BSSemActionParser.semAction:r                          BSJSTranslator.trans(r),
   curlyHostExpr  = BSSemActionParser.curlySemAction:r                     BSJSTranslator.trans(r),
-  semAction      = ("!" | "->") atomicHostExpr:x                       -> [#Act, x]
-                 | curlyHostExpr:x                                     -> [#Act, x],
-  semPred        = "?" atomicHostExpr:x                                -> [#Pred, x],
+  primHostExpr   = BSSemActionParser.semAction:r                          BSJSTranslator.trans(r),
+  atomicHostExpr = curlyHostExpr | primHostExpr,
+  semAction      = curlyHostExpr:x                                     -> [#Act, x]
+                 | "!"  atomicHostExpr:x                               -> [#Act, x],
+  arrSemAction   = "->" atomicHostExpr:x                               -> [#Act, x],
+  semPred        = "?"  atomicHostExpr:x                               -> [#Pred, x],
   expr           = expr5(true):x ("|"  expr5(true))+:xs                -> [#Or,  x].concat(xs)
                  | expr5(true):x ("||" expr5(true))+:xs                -> [#XOr, x].concat(xs)
                  | expr5(false),
@@ -35,19 +37,22 @@ ometa BSOMetaParser <: Parser {
                  | [#And [#Many1 :part]]                               -> ["+", part]
                  | [#And [#Opt   :part]]                               -> ["?", part]
                  | :part                                               -> ["1", part],
-  expr4 :ne      = (?ne expr3+ | ?(ne == false) expr3*):xs             -> [#And].concat(xs),
+  expr4 :ne      =                expr3*:xs arrSemAction:act           -> [#And].concat(xs).concat([act])
+                 | ?ne            expr3+:xs                            -> [#And].concat(xs)
+                 | ?(ne == false) expr3*:xs                            -> [#And].concat(xs),
   optIter :x     = '*'                                                 -> [#Many,  x]
                  | '+'                                                 -> [#Many1, x]
                  | '?'                                                 -> [#Opt,   x]
                  | empty                                               -> x,
-  expr3          = expr2:x optIter(x):x ( ':' name:n                   -> { this.locals.push(n); [#Set, n, x] }
-                                        | empty                        -> x
-                                        )
-                 | ":" name:n                                          -> { this.locals.push(n); [#Set, n, [#App, #anything]] },
+  optBind :x     = ':' name:n                                          -> { this.locals.push(n); [#Set, n, x] }
+                 | empty                                               -> x,
+  expr3          = ":" name:n                                          -> { this.locals.push(n); [#Set, n, [#App, #anything]] }
+                 | (expr2:x optIter(x) | semAction):e optBind(e)
+                 | semPred,
   expr2          = "~" expr2:x                                         -> [#Not,       x]
                  | "&" expr1:x                                         -> [#Lookahead, x]
                  | expr1,
-  expr1          = application | semAction | semPred
+  expr1          = application 
                  | ( keyword('undefined') | keyword('nil')
                    | keyword('true')      | keyword('false') ):x       -> [#App, #exactly, x]
                  | spaces (characters | sCharacters | string | number)

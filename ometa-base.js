@@ -95,8 +95,8 @@ OMInputStreamEnd.prototype.head = function() { throw fail }
 OMInputStreamEnd.prototype.tail = function() { throw fail }
 
 // This is necessary b/c in IE, you can't say "foo"[idx]
-Array.prototype.at  = function(idx) { return this[idx]        }
-String.prototype.at = function(idx) { return this.charAt(idx) }
+Array.prototype.at  = function(idx) { return this[idx] }
+String.prototype.at = String.prototype.charAt
 
 function ListOMInputStream(lst, idx) {
   this.memo = { }

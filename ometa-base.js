@@ -94,11 +94,15 @@ OMInputStreamEnd.prototype = OMInputStream.prototype.delegated()
 OMInputStreamEnd.prototype.head = function() { throw fail }
 OMInputStreamEnd.prototype.tail = function() { throw fail }
 
+// This is necessary b/c in IE, you can't say "foo"[idx]
+Array.prototype.at  = function(idx) { return this[idx]        }
+String.prototype.at = function(idx) { return this.charAt(idx) }
+
 function ListOMInputStream(lst, idx) {
   this.memo = { }
   this.lst  = lst
   this.idx  = idx
-  this.hd   = lst[idx]
+  this.hd   = lst.at(idx)
 }
 ListOMInputStream.prototype = OMInputStream.prototype.delegated()
 ListOMInputStream.prototype.head = function() { return this.hd }
@@ -292,7 +296,7 @@ OMeta = {
     if (!v.isSequenceable)
       throw fail
     var origInput = this.input
-    this.input = makeListOMInputStream(v, 0)
+    this.input = v.toOMInputStream()
     var r = x.call(this)
     this._apply("end")
     this.input = origInput

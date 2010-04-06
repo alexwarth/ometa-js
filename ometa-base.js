@@ -452,7 +452,7 @@ OMeta = {
   seq: function() {
     var xs = this._apply("anything")
     for (var idx = 0; idx < xs.length; idx++)
-      this._applyWithArgs("exactly", xs[idx])
+      this._applyWithArgs("exactly", xs.at(idx))
     return xs
   },
   notLast: function() {

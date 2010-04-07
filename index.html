@@ -57,7 +57,7 @@ function initializeThisPage() {
     var option = document.createElement("option")
     option.innerHTML = x.replace(/_/g, " ")
     option.value     = x
-    $(toId).options.add(option)
+    $(toId).appendChild(option)
   }
   makeProjectSelector('infoSelector')
   addOption('infoSelector', 'Sample_Project')

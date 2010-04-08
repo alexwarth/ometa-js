@@ -159,13 +159,13 @@ escapeChar = function(c) {
 }
 
 function unescape(s) {
-  if (s[0] == '\\')
-    switch (s[1]) {
+  if (s.charAt(0) == '\\')
+    switch (s.charAt(1)) {
       case '\\': return '\\'
       case 'r':  return '\r'
       case 'n':  return '\n'
       case 't':  return '\t'
-      default:   return s[1]
+      default:   return s.charAt(1)
     }
   else
     return s
@@ -174,7 +174,7 @@ function unescape(s) {
 String.prototype.toProgramString = function() {
   var ws = "\"".writeStream()
   for (var idx = 0; idx < this.length; idx++)
-    ws.nextPutAll(escapeChar(this[idx]))
+    ws.nextPutAll(escapeChar(this.charAt(idx)))
   ws.nextPutAll("\"")
   return ws.contents()
 }

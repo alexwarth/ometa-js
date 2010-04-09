@@ -71,15 +71,6 @@ function onShortCutKey(evt) {
     return undefined;
   if (!(evt.altKey || evt.ctrlKey || evt.metaKey))
     return true;
-  var charCode = evt.charCode ? evt.charCode : evt.keyCode
-  if (charCode == 68)
-    doIt();
-  else if (charCode == 80)
-    printIt();
-  else if (charCode == 83)
-    saveIt();
-  else
-    return true
   if (evt.preventDefault) {
     evt.preventDefault()
     evt.stopPropagation()
@@ -87,6 +78,13 @@ function onShortCutKey(evt) {
   else {
     evt.returnValue  = false
     evt.cancelBubble = true
+  }
+  var charCode = evt.charCode ? evt.charCode : evt.keyCode
+  switch (charCode) {
+    case 68: doIt();    break
+    case 80: printIt(); break
+    case 83: saveIt();  break
+    default: return true
   }
   return false
 }
@@ -98,14 +96,17 @@ function printIt() {
       head         = editor.value.substring(0, end),
       tail         = editor.value.substring(end),
       oldScrollTop = editor.scrollTop
-  editor.value     = head + result.result + tail;
-  editor.scrollTop = oldScrollTop
-  setCaretSelection(editor, end, head.length + result.result.length)
+  if (result) {
+    editor.value     = head + result.result + tail;
+    editor.scrollTop = oldScrollTop
+    setCaretSelection(editor, end, head.length + result.result.length)
+  }
 }
 
 function doIt() {
   var result = evalSelection()
-  result.source.editor.focus()
+  if (result)
+    result.source.editor.focus()
 }
 
 function saveIt() { }
@@ -178,7 +179,7 @@ function getSource() {
 }
 
 function evalSelection() {
-  var source = getSource(), result;
+  var source = getSource()
   try { $('workspaceForm').translation.value = translateCode(source.text) }
   catch (e) {
     if (e.errorPos != undefined) {
@@ -190,17 +191,16 @@ function evalSelection() {
       $('workspaceForm').source.scrollTop = oldScrollTop
       setCaretSelection($('workspaceForm').source, errorPos, errorPos + errorMsg.length)
     }
-    throw e
+    return undefined
   }
   try {
-    result = " " + eval($('workspaceForm').translation.value)
+    return {
+      source: source,
+      result: " " + eval($('workspaceForm').translation.value)
+    }
   } catch (e) {
     alert("Oops!\n\n" + e)
     throw e
-  }
-  return {
-    source: source,
-    result: result
   }
 }
 

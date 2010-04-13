@@ -72,35 +72,42 @@ function onShortCutKey(evt) {
   if (!(evt.altKey || evt.ctrlKey || evt.metaKey))
     return true;
   var charCode = evt.charCode ? evt.charCode : evt.keyCode
-  switch (charCode) {
-    case 68: doIt();    break
-    case 80: printIt(); break
-    case 83: saveIt();  break
-    default: return true
+  try {
+    var handledIt = true
+    switch (charCode) {
+      case 68: doIt();            break
+      case 80: printIt();         break
+      case 83: saveIt();          break
+      default: handledIt = false; return true
+    }
   }
-  if (evt.preventDefault) {
-    evt.preventDefault()
-    evt.stopPropagation()
-  }
-  else {
-    evt.returnValue  = false
-    evt.cancelBubble = true
+  finally {
+    if (handledIt) {
+      if (evt.preventDefault) {
+        evt.preventDefault()
+        evt.stopPropagation()
+      }
+      else {
+        evt.returnValue  = false
+        evt.cancelBubble = true
+      }
+    }
   }
   return false
 }
 
 function printIt() {
-  var result       = evalSelection(),
-      editor       = result.source.editor,
+  var result       = evalSelection()
+  if (!result)
+    return
+  var editor       = result.source.editor,
       end          = result.source.end,
       head         = editor.value.substring(0, end),
       tail         = editor.value.substring(end),
       oldScrollTop = editor.scrollTop
-  if (result) {
-    editor.value     = head + result.result + tail;
-    editor.scrollTop = oldScrollTop
-    setCaretSelection(editor, end, head.length + result.result.length)
-  }
+  editor.value     = head + result.result + tail;
+  editor.scrollTop = oldScrollTop
+  setCaretSelection(editor, end, head.length + result.result.length)
 }
 
 function doIt() {

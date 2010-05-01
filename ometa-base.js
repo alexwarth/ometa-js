@@ -43,7 +43,7 @@ ometa M {
 
 translates to...
 
-M = OMeta.delegated({
+M = objectThatDelegatesTo(OMeta, {
   number: function() {
             return this._or(function() {
                               var n = this._apply("number"),
@@ -90,7 +90,7 @@ function OMInputStreamEnd(lst, idx) {
   this.lst = lst
   this.idx = idx
 }
-OMInputStreamEnd.prototype = OMInputStream.prototype.delegated()
+OMInputStreamEnd.prototype = objectThatDelegatesTo(OMInputStream.prototype)
 OMInputStreamEnd.prototype.head = function() { throw fail }
 OMInputStreamEnd.prototype.tail = function() { throw fail }
 
@@ -104,7 +104,7 @@ function ListOMInputStream(lst, idx) {
   this.idx  = idx
   this.hd   = lst.at(idx)
 }
-ListOMInputStream.prototype = OMInputStream.prototype.delegated()
+ListOMInputStream.prototype = objectThatDelegatesTo(OMInputStream.prototype)
 ListOMInputStream.prototype.head = function() { return this.hd }
 ListOMInputStream.prototype.tail = function() { return this.tl || (this.tl = makeListOMInputStream(this.lst, this.idx + 1)) }
 
@@ -114,7 +114,7 @@ Array.prototype.toOMInputStream  = function() { return makeListOMInputStream(thi
 String.prototype.toOMInputStream = function() { return makeListOMInputStream(this, 0) }
 
 function makeOMInputStreamProxy(target) {
-  return target.delegated({
+  return objectThatDelegatesTo(target, {
     memo:   { },
     target: target,
     tail:   function() { return makeOMInputStreamProxy(target.tail()) }
@@ -293,7 +293,7 @@ OMeta = {
   _many1: function(x) { return this._many(x, x.call(this)) },
   _form: function(x) {
     var v = this._apply("anything")
-    if (!v.isSequenceable)
+    if (!isSequenceable(v))
       throw fail
     var origInput = this.input
     this.input = v.toOMInputStream()
@@ -370,7 +370,7 @@ OMeta = {
   foreign: function() {
     var g   = this._apply("anything"),
         r   = this._apply("anything"),
-        gi  = g.delegated({input: makeOMInputStreamProxy(this.input)})
+        gi  = objectThatDelegatesTo(g, {input: makeOMInputStreamProxy(this.input)})
     var ans = gi._apply(r)
     this.input = gi.input.target
     return ans
@@ -423,17 +423,17 @@ OMeta = {
   },
   digit: function() {
     var r = this._apply("char")
-    this._pred(r.isDigit())
+    this._pred(r >= "0" && r <= "9")
     return r
   },
   lower: function() {
     var r = this._apply("char")
-    this._pred(r.isLower())
+    this._pred(r >= "a" && r <= "z")
     return r
   },
   upper: function() {
     var r = this._apply("char")
-    this._pred(r.isUpper())
+    this._pred(r >= "A" && r <= "Z")
     return r
   },
   letter: function() {
@@ -470,7 +470,7 @@ OMeta = {
     var realArgs = [rule]
     for (var idx = 0; idx < args.length; idx++)
       realArgs.push(args[idx])
-    var m = this.delegated({input: input})
+    var m = objectThatDelegatesTo(this, {input: input})
     m.initialize()
     try { return realArgs.length == 1 ? m._apply.call(m, realArgs[0]) : m._applyWithArgs.apply(m, realArgs) }
     catch (f) {

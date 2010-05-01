@@ -4,7 +4,7 @@
 ometa BSNullOptimization {
   setHelped = !(this._didSomething = true),
   helped    = ?this._didSomething,
-  trans     = [:t ?this.hasProperty(t) apply(t):ans] -> ans,
+  trans     = [:t ?(this[t] != undefined) apply(t):ans] -> ans,
   optimize  = trans:x helped                         -> x,
 
   App        :rule anything*:args          -> ['App', rule].concat(args),
@@ -68,7 +68,7 @@ JumpTable.prototype.add = function(choice) {
     this.choices[c] = t
 }
 JumpTable.prototype.toTree = function() {
-  var r = ['JumpTable'], choiceKeys = this.choices.ownPropertyNames()
+  var r = ['JumpTable'], choiceKeys = ownPropertyNames(this.choices)
   for (var i = 0; i < choiceKeys.length; i += 1)
     r.push([choiceKeys[i], this.choices[choiceKeys[i]]])
   return r

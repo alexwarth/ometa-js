@@ -147,7 +147,7 @@ keywords = ["break", "case", "catch", "continue", "default", "delete", "do", "el
             "instanceof", "new", "return", "switch", "this", "throw", "try", "typeof", "var", "void", "while", "with", "ometa"]
 for (var idx = 0; idx < keywords.length; idx++)
   BSJSParser.keywords[keywords[idx]] = true
-BSJSParser._isKeyword = function(k) { return this.keywords.hasProperty(k) && !Object.prototype.hasProperty(k) }
+BSJSParser._isKeyword = function(k) { return this.keywords.hasOwnProperty(k) }
 
 
 ometa BSSemActionParser <: BSJSParser {

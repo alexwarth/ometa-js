@@ -39,28 +39,26 @@ String.prototype.writeStream      = function() { return new StringBuffer(this) }
 printOn = function(x, ws) {
   if (x === undefined || x === null)
     ws.nextPutAll("" + x)
-  else
-    x.printOn(ws)
-}
-
-Object.prototype.printOn = function(ws) { ws.nextPutAll(this.toString()) }
-
-Array.prototype.toString = function() { var ws = "".writeStream(); this.printOn(ws); return ws.contents() }
-Array.prototype.printOn = function(ws) {
-  ws.nextPutAll("[")
-  for (var idx = 0; idx < this.length; idx++) {
-    if (idx > 0)
-      ws.nextPutAll(", ")
-    printOn(this[idx], ws)
+  else if (x.constructor === Array) {
+    ws.nextPutAll("[")
+    for (var idx = 0; idx < x.length; idx++) {
+      if (idx > 0)
+        ws.nextPutAll(", ")
+      printOn(x[idx], ws)
+    }
+    ws.nextPutAll("]")
   }
-  ws.nextPutAll("]")
+  else
+    ws.nextPutAll(x.toString())
 }
+
+Array.prototype.toString = function() { var ws = "".writeStream(); printOn(this, ws); return ws.contents() }
 
 // delegation
 
-Object.prototype.delegated = function(props) {
+objectThatDelegatesTo = function(x, props) {
   var f = function() { }
-  f.prototype = this
+  f.prototype = x
   var r = new f()
   for (var p in props)
     if (props.hasOwnProperty(p))
@@ -70,41 +68,21 @@ Object.prototype.delegated = function(props) {
 
 // some reflective stuff
 
-Object.prototype.ownPropertyNames = function() {
+ownPropertyNames = function(x) {
   var r = []
-  for (name in this)
-    if (this.hasOwnProperty(name))
+  for (name in x)
+    if (x.hasOwnProperty(name))
       r.push(name)
   return r
 }
 
-Object.prototype.hasProperty = function(p) { return this[p] != undefined }
+isImmutable = function(x) {
+   return x === null || x === undefined || typeof x === "boolean" || typeof x === "number" || typeof x === "string"
+}
 
-isImmutable = function(x) { return x === null || x === undefined || x.isImmutable() }
-Object.prototype.isImmutable  = function() { return false }
-Boolean.prototype.isImmutable = function() { return true }
-Number.prototype.isImmutable  = function() { return true }
-String.prototype.isImmutable  = function() { return true }
-
-Object.prototype.isNumber    = function() { return false }
-Number.prototype.isNumber    = function() { return true }
-
-Object.prototype.isString    = function() { return false }
-String.prototype.isString    = function() { return true }
-
-Object.prototype.isCharacter = function() { return false }
-
-String.prototype.isCharacter = function() { return this.length == 1 }
-String.prototype.isSpace     = function() { return this.isCharacter() && this.charCodeAt(0) <= 32   }
-String.prototype.isDigit     = function() { return this.isCharacter() && this >= "0" && this <= "9" }
-String.prototype.isLower     = function() { return this.isCharacter() && this >= "a" && this <= "z" }
-String.prototype.isUpper     = function() { return this.isCharacter() && this >= "A" && this <= "Z" }
-  
 String.prototype.digitValue  = function() { return this.charCodeAt(0) - "0".charCodeAt(0) }
 
-Object.prototype.isSequenceable = false
-Array.prototype.isSequenceable  = true
-String.prototype.isSequenceable = true
+isSequenceable = function(x) { return typeof x == "string" || x.constructor === Array }
 
 // some functional programming stuff
 
@@ -186,12 +164,17 @@ tempnam.n = 0
 
 // unique tags for objects (useful for making "hash tables")
 
-getTag = function(x) { return (x === null || x === undefined) ? x : x.getTag() }
-Object.prototype.getTag = (function() {
-  var numIds = 0
-  return function() { return this.hasOwnProperty("_id_") ? this._id_ : this._id_ = "R" + numIds++ }
+getTag = (function() {
+  var numIdx = 0
+  return function(x) {
+    if (x === null || x === undefined)
+      return x
+    switch (typeof x) {
+      case "boolean": return x == true ? "Btrue" : "Bfalse"
+      case "string":  return "S" + x
+      case "number":  return "N" + x
+      default:        return x.hasOwnProperty("_id_") ? this._id_ : this._id_ = "R" + numIdx++
+    }
+  }
 })()
-Boolean.prototype.getTag = function() { return this == true ? "Btrue" : "Bfalse" }
-String.prototype.getTag  = function() { return "S" + this }
-Number.prototype.getTag  = function() { return "N" + this }
 

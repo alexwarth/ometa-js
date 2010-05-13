@@ -134,6 +134,8 @@ OMeta = {
     if (memoRec == undefined) {
       var origInput = this.input,
           failer    = new Failer()
+      if (this[rule] === undefined)
+        throw 'tried to apply undefined rule "' + rule + '"'
       this.input.memo[rule] = failer
       this.input.memo[rule] = memoRec = {ans: this[rule].call(this), nextInput: this.input}
       if (failer.used) {

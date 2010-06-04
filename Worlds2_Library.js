@@ -1,125 +1,178 @@
-/*
-  Copyright (c) 2008 Alessandro Warth <awarth@cs.ucla.edu>
-*/
+// Copyright (c) 2008, 2010 Alessandro Warth <awarth@cs.ucla.edu>
 
-DEBUG = false
+DEBUG = false;
 
-// object -> unique id
-// Note: one good thing about this funny object hashing scheme is that it makes worlds a bit like weak arrays, i.e., they
-// don't get in the way of proper GC.
+// getTag: object -> unique id
+// tagToRef: unique id -> object
 
-Object.prototype.getTag = (function() {
-  var numIds = 0
-  return function() { return this.hasOwnProperty("_id_") ? this._id_ : this._id_ = "R" + numIds++ }
+// Note: this hashing scheme causes a huge memory leak (all b/c JS doesn't support weak references)
+
+(function() {
+  var numIdx = 0, tagToRef = {}
+  var _getTag = function(r) {
+    if (r === null || r === undefined)
+      return r
+    switch (typeof r) {
+      case "boolean": return r == true ? "Btrue" : "Bfalse"
+      case "string":  return "S" + r
+      case "number":  return "N" + r
+      default:        return r.hasOwnProperty("_id_") ? r._id_ : r._id_ = "R" + numIdx++
+    }
+  }
+  getTag = function(r) {
+    var tag = _getTag(r)
+    tagToRef[tag] = r
+    return tag
+  }
+  getRef = function(t) {
+    return tagToRef[t]
+  }
 })()
-Boolean.prototype.getTag = function() { return this ? "Btrue" : "Bfalse" }
-String.prototype.getTag  = function() { return "S" + this }
-Number.prototype.getTag  = function() { return "N" + this }
-
-getTag = function(x) { return x === null || x === undefined ? x : x.getTag() }
 
 // implementation of possible worlds
 
 worldProto = {}
 
 baseWorld = thisWorld = (function() {
-  var deltas = {}
+  var writes = {}
   return {
     parent: worldProto,
-    deltas: deltas,
+    writes: writes,
     hasOwn: function(r, p) {
       var id = getTag(r)
-      return deltas.hasOwnProperty(id) && deltas[id].hasOwnProperty(p)
+      return writes.hasOwnProperty(id) && writes[id].hasOwnProperty(p)
     },
     has: function(r, p) {
-      var id = getTag(r)
-      return deltas.hasOwnProperty(id) && deltas[id].hasOwnProperty(p)
+      return this.hasOwn(r, p) ||
+             r !== Object.prototype && this.has(r === null || r === undefined ? Object.prototype : r.parent, p)
     },
-    props: function(x, ps) {
-      var id = getTag(x)
-      if (deltas.hasOwnProperty(id))
-        for (var p in deltas[id])
-          if (deltas[id].hasOwnProperty(p))
+    props: function(r, ps) {
+      var id = getTag(r)
+      if (writes.hasOwnProperty(id))
+        for (var p in writes[id])
+          if (writes[id].hasOwnProperty(p))
             ps[p] = true
-      if (x !== Object.prototype)
-        this.props(x === null || x === undefined ? Object.prototype : x.parent, ps)
+      if (r !== Object.prototype)
+        this.props(r === null || r === undefined ? Object.prototype : r.parent, ps)
       return ps
     },
-    get: function(r, p) {
-      if (r && r.constructor === String && (p === 0 || p && p.constructor === Number || p === "length"))
-        return r[p]
+    _get: function(r, p) {
       var id = getTag(r)
-      if (DEBUG) console.log("? parent world looking up " + id + "." + p)
-      if (deltas.hasOwnProperty(id) && deltas[id].hasOwnProperty(p))
-        return deltas[id][p]
-      else if (r === Object.prototype)
-        return undefined
+      if (DEBUG) console.log("? top-level world looking up " + id + "." + p)
+      if (writes.hasOwnProperty(id) && writes[id].hasOwnProperty(p))
+        return writes[id][p]
+      else if (r !== Object.prototype)
+        return thisWorld._get(r === null || r === undefined ? Object.prototype : r.parent, p)
       else
-        return this.get(r === null || r === undefined ? Object.prototype : r.parent, p)
+        return undefined
+    },
+    get: function(r, p) {
+      // the top-level world's commit operation is a no-op, so reads don't have to be recorded
+      if (typeof r === "string" && (typeof p === "number" || p === "length"))
+        return r[p]
+      else
+        return this._get(r, p)
     },
     set: function(r, p, v) {
+      if (typeof r === "string" && (typeof p === "number" || p === "length"))
+        throw "the indices and length of a string are immutable, and you tried to change them!"
       var id = getTag(r)
-      if (DEBUG) console.log("! parent world assigning to " + id + "." + p)
-      if (!deltas.hasOwnProperty(id))
-        deltas[id] = {}
-      deltas[id][p] = v
+      if (DEBUG) console.log("! top-level world assigning to " + id + "." + p)
+      if (!writes.hasOwnProperty(id))
+        writes[id] = {}
+      writes[id][p] = v
       return v
     },
     commit: function() { },
     sprout: function() {
-      var parentWorld = this, deltas = {}
+      var parentWorld = this, writes = {}, reads = {}
       return {
-        parent: parentWorld,
-        deltas: deltas,
+        parent: worldProto,
+        writes: writes,
+        reads:  reads,
         hasOwn: function(r, p) {
           var id = getTag(r)
-          return deltas.hasOwnProperty(id) && deltas[id].hasOwnProperty(p)
+          return writes.hasOwnProperty(id) && writes[id].hasOwnProperty(p) ||
+                 reads.hasOwnProperty(id)  && reads[id].hasOwnProperty(p)  ||
+                 parentWorld.hasOwn(r, p)
         },
         has: function(r, p) {
-          return this.hasOwn(r, p) || parentWorld.has(r, p)
+          return this.hasOwn(r, p) ||
+                 r !== Object.prototype && this.has(r === null || r === undefined ? Object.prototype : r.parent, p)
         },
-        props: function(x, ps) {
-          var id = getTag(x)
-          if (deltas.hasOwnProperty(id))
-            for (var p in deltas[id])
-              if (deltas[id].hasOwnProperty(p))
+        props: function(r, ps) {
+          var id = getTag(r)
+          if (writes.hasOwnProperty(id))
+            for (var p in writes[id])
+              if (writes[id].hasOwnProperty(p))
                 ps[p] = true
-          if (x !== Object.prototype)
-            this.props(x === null || x === undefined ? Object.prototype : x.parent, ps)
-          parentWorld.props(x, ps)
+          if (reads.hasOwnProperty(id))
+            for (var p in reads[id])
+              if (reads[id].hasOwnProperty(p))
+                ps[p] = true
+          if (r !== Object.prototype)
+            this.props(r === null || r === undefined ? Object.prototype : r.parent, ps)
+          parentWorld.props(r, ps)
           return ps
         },
-        get: function(r, p) {
-          if (r && r.constructor === String && (p === 0 || p && p.constructor === Number || p === "length"))
-            return r[p]
+        _get: function(r, p) {
           var id = getTag(r)
           if (DEBUG) console.log("? child world looking up " + id + "." + p)
-          return deltas.hasOwnProperty(id) && deltas[id].hasOwnProperty(p) ?
-                   deltas[id][p] :
-                   parentWorld.get.call(this, r, p)
+          if      (writes.hasOwnProperty(id) && writes[id].hasOwnProperty(p))
+            return writes[id][p]
+          else if (reads.hasOwnProperty(id)  && reads[id].hasOwnProperty(p))
+            return reads[id][p]
+          else
+            return parentWorld._get(r, p)
+        },
+        get: function(r, p) {
+          if (typeof r === "string" && (typeof p === "number" || p === "length"))
+            return r[p]
+          var id = getTag(r), ans = this._get(r, p)
+          if (!reads.hasOwnProperty(id)) {
+            reads[id] = {}
+            if (!reads[id].hasOwnProperty(p))
+              reads[id][p] = ans
+          }
+          return ans
         },
         set: function(r, p, v) {
+          if (typeof r === "string" && (typeof p === "number" || p === "length"))
+            throw "the indices and length of a string are immutable, and you tried to change them!"
           var id = getTag(r)
           if (DEBUG) console.log("! child world assigning to " + id + "." + p)
-          if (!deltas.hasOwnProperty(id))
-            deltas[id] = {}
-          deltas[id][p] = v
+          if (!writes.hasOwnProperty(id))
+            writes[id] = {}
+          writes[id][p] = v
           return v
         },
         commit: function() {
-          for (var i in deltas) {
-            if (!deltas.hasOwnProperty(i))
+          // serializability check
+          for (var id in reads) {
+            if (!reads.hasOwnProperty(id))
               continue
-            for (var p in deltas[i]) {
-              if (!deltas[i].hasOwnProperty(p))
+            for (var p in reads[id]) {
+              if (!reads[id].hasOwnProperty(p))
                 continue
-              if (!parentWorld.deltas.hasOwnProperty(i))
-                parentWorld.deltas[i] = {}
-              if (DEBUG) console.log("committing " + i + "." + p)
-              parentWorld.deltas[i][p] = deltas[i][p]
+              else if (reads[id][p] !== parentWorld._get(getRef(id), p))
+                throw "commit failed"
             }
           }
-          deltas = {}
+          // propagation of side effects
+          for (var id in writes) {
+            if (!writes.hasOwnProperty(id))
+              continue
+            for (var p in writes[id]) {
+              if (!writes[id].hasOwnProperty(p))
+                continue
+              if (!parentWorld.writes.hasOwnProperty(id))
+                parentWorld.writes[id] = {}
+              if (DEBUG) console.log("committing " + id + "." + p)
+              parentWorld.writes[id][p] = writes[id][p]
+            }
+          }
+          writes = {}
+          reads  = {}
         },
         sprout: parentWorld.sprout
       }
@@ -129,11 +182,6 @@ baseWorld = thisWorld = (function() {
 worldStack = [thisWorld]
 
 // Lexical scopes
-
-// TODO: look into the following (old) comment, which I think is no longer true
-// Note: I'm not very happy about using undefined to denote that a variable is not declared, since it allows programmers to
-//   dynamically undeclare variables via assignment. One solution might be to make "undefined" only accessible at the impl. level,
-//   but it would be even better to actually solve this problem.
 
 GlobalScope = function() { }
 GlobalScope.prototype = {

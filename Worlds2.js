@@ -1,16 +1,15 @@
+/*
+  Copyright (c) 2008, 2010 Alessandro Warth <awarth@cs.ucla.edu>
+
+  Limitations:
+    * assignments into the properties of "arguments" (e.g., arguments[5] = 1234) don't modify their respective variables 
+    * for-in doesn't work when the loop variable is a property access (e.g., for (x.y in ys) ...)
+*/
+
 Array.prototype.each = function(f) {
   for (var idx = 0; idx < this.length; idx++)
     f(this[idx], idx)
 }
-
-
-
-/*
-  Copyright (c) 2008 Alessandro Warth <awarth@cs.ucla.edu>
-
-  TODO: make assignment into properties of argument work, e.g., arguments[5] = 1234
-  TODO: make for-in work when variable is a property access, e.g., for (x.y in ys) ...
-*/
 
 ometa WJSParser <: BSJSParser {
   isKeyword :x = ?(x == 'thisWorld')
@@ -26,11 +25,9 @@ makeFunction = function(fs, body) {
                       ' var r = function() {'                                                                    +
                         ' var oldScope = thisScope;'                                                             +
                         ' thisScope = staticScope.makeChild();'                                                  +
-/*
                         ' thisScope.set("arguments", arguments);'                                                +
                         ' thisWorld.set(arguments, "length", arguments.length);'                                 +
                         ' for (var i = 0; i < arguments.length; i++) thisWorld.set(arguments, i, arguments[i]);' +
-*/
                         ' try { ' + fs + body + '}'                                                              +
                         ' finally { thisScope = oldScope }};'                                                    +
                       ' baseWorld.set(r, "prototype", {parent: Object.prototype});'                              +

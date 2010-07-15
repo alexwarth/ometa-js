@@ -173,7 +173,7 @@ getTag = (function() {
       case "boolean": return x == true ? "Btrue" : "Bfalse"
       case "string":  return "S" + x
       case "number":  return "N" + x
-      default:        return x.hasOwnProperty("_id_") ? this._id_ : this._id_ = "R" + numIdx++
+      default:        return x.hasOwnProperty("_id_") ? x._id_ : x._id_ = "R" + numIdx++
     }
   }
 })()

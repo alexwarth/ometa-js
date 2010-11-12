@@ -493,6 +493,15 @@ OMeta = {
   },
   matchAll: function(listyObj, rule, args, matchFailed) {
     return this._genericMatch(listyObj.toOMInputStream(), rule, args, matchFailed)
+  },
+  createInstance: function() {
+    var m = objectThatDelegatesTo(this)
+    m.initialize()
+    m.matchAll = function(listyObj, aRule) {
+      m.input = listyObj.toOMInputStream()
+      return m._apply(aRule)
+    }
+    return m
   }
 }
 

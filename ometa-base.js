@@ -117,7 +117,8 @@ function makeOMInputStreamProxy(target) {
   return objectThatDelegatesTo(target, {
     memo:   { },
     target: target,
-    tail:   function() { return this.hasOwnProperty("tl") ? this.tl : (this.tl = makeOMInputStreamProxy(target.tail())) }
+    tl: undefined,
+    tail:   function() { return this.tl || (this.tl = makeOMInputStreamProxy(target.tail())) }
   })
 }
 

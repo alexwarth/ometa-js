@@ -129,7 +129,7 @@ baseWorld = thisWorld = (function() {
           if (typeof r === "string" && (typeof p === "number" || p === "length"))
             return r[p]
           var id = getTag(r), ans = this._get(r, p)
-          if (!reads.hasOwnProperty(id)) {
+          if (!reads.hasOwnProperty(id) && !(writes.hasOwnProperty(id) && writes[id].hasOwnProperty(p))) {
             reads[id] = {}
             if (!reads[id].hasOwnProperty(p))
               reads[id][p] = ans

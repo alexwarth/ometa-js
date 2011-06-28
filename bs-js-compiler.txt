@@ -1,9 +1,8 @@
-ometa BSJSParser <: Parser {
-  fromTo :x :y = seq(x) (~seq(y) char)* seq(y), 
+ometa BSJSParser {
   space        = ^space | fromTo('//', '\n') | fromTo('/*', '*/'),
   nameFirst    = letter | '$' | '_',
   nameRest     = nameFirst | digit,
-  iName        = firstAndRest(#nameFirst, #nameRest):r                               -> r.join(''),
+  iName        = <nameFirst nameRest*>,
   isKeyword :x = ?BSJSParser._isKeyword(x),
   name         = iName:n ~isKeyword(n)                                               -> [#name, n=='self' ? '$elf' : n],
   keyword      = iName:k isKeyword(k)                                                -> [k, k],
@@ -11,8 +10,7 @@ ometa BSJSParser <: Parser {
   hexLit       = hexLit:n hexDigit:d                                                 -> (n * 16 + d)
                | hexDigit,
   number       = ``0x'' hexLit:n                                                     -> [#number, n]
-               | digit+:ws ('.' digit+ | empty -> []):fs                             -> [#number, parseFloat(ws.join('') + '.' +
-                                                                                                             fs.join(''))],
+               | <digit+ ('.' digit+)?>:f                                            -> [#number, parseFloat(f)],
   escapeChar   = '\\' char:c                                                         -> unescape('\\' + c),
   str          = seq('"""')  (escapeChar | ~seq('"""') char)*:cs seq('"""')          -> [#string, cs.join('')]
                | '\'' (escapeChar | ~'\'' char)*:cs '\''                             -> [#string, cs.join('')]

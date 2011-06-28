@@ -1,9 +1,8 @@
-ometa BSOMetaParser <: Parser {
-  fromTo :x :y   = seq(x) (~seq(y) char)* seq(y), 
+ometa BSOMetaParser {
   space          = ^space | fromTo('//', '\n') | fromTo('/*', '*/'),
   nameFirst      = '_' | '$' | letter,
   nameRest       = nameFirst | digit,
-  tsName         = firstAndRest(#nameFirst, #nameRest):xs              -> xs.join(''),
+  tsName         = <nameFirst nameRest*>,
   name           = spaces tsName,
   eChar          = '\\' char:c                                         -> unescape('\\' +c)
                  | char,
@@ -11,7 +10,7 @@ ometa BSOMetaParser <: Parser {
   characters     = '`' '`' (~('\'' '\'') eChar)*:xs '\'' '\''          -> [#App, #seq,     xs.join('').toProgramString()],
   sCharacters    = '"'     (~'"'         eChar)*:xs '"'                -> [#App, #token,   xs.join('').toProgramString()],
   string         = (('#' | '`') tsName | tsString):xs                  -> [#App, #exactly, xs.toProgramString()],
-  number         = ('-' | empty -> ''):sign digit+:ds                  -> [#App, #exactly, sign + ds.join('')],
+  number         = <'-'? digit+>:n                                     -> [#App, #exactly, n],
   keyword :xs    = token(xs) ~letterOrDigit                            -> xs,
   args           = '(' listOf(#hostExpr, ','):xs ")"                   -> xs
                  | empty                                               -> [],

@@ -464,6 +464,36 @@ OMeta = {
     this._lookahead(function() { return this._apply(rule) })
     return r
   },
+  listOf: function() {
+    var rule  = this._apply("anything"),
+        delim = this._apply("anything")
+    return this._or(function() {
+                      var r = this._apply(rule)
+                      return this._many(function() {
+                                          this._applyWithArgs("token", delim)
+                                          return this._apply(rule)
+                                        },
+                                        r)
+                    },
+                    function() { return [] })
+  },
+  token: function() {
+    var cs = this._apply("anything")
+    this._apply("spaces")
+    return this._applyWithArgs("seq", cs)
+  },
+  fromTo: function () {
+    var x = this._apply("anything"),
+        y = this._apply("anything")
+    return this._consumedBy(function() {
+                              this._applyWithArgs("seq", x)
+                              this._many(function() {
+                                this._not(function() { this._applyWithArgs("seq", y) })
+                                this._apply("char")
+                              })
+                              this._applyWithArgs("seq", y)
+                            })
+  },
 
   initialize: function() { },
   // match and matchAll are a grammar's "public interface"

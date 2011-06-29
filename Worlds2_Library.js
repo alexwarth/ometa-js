@@ -1,4 +1,4 @@
-// Copyright (c) 2008, 2010 Alessandro Warth <awarth@cs.ucla.edu>
+// Copyright (c) 2008, 2010, 2011 Alessandro Warth <awarth@cs.ucla.edu>
 
 DEBUG = false;
 
@@ -240,9 +240,9 @@ thisWorld.set(wObject, "prototype", Object.prototype)
 thisWorld.set(Object.prototype, "hasOwn", function(p) { return thisWorld.has(this, p) })
 thisWorld.set(Object.prototype, "toString", function() { return "" + this })
 
-thisWorld.set(worldProto, "sprout",   function() { return this.sprout()                   })
-thisWorld.set(worldProto, "commit",   function() { return this.commit()                   })
-thisWorld.set(worldProto, "toString", function() { return "[World " + this.getTag() + "]" })
+thisWorld.set(worldProto, "sprout",   function() { return this.sprout()                  })
+thisWorld.set(worldProto, "commit",   function() { return this.commit()                  })
+thisWorld.set(worldProto, "toString", function() { return "[World " + getTag(this) + "]" })
 
 wWorld    = function() { }; thisScope.decl("World",    wWorld);    thisWorld.set(wWorld,    "prototype", worldProto)
 wBoolean  = function() { }; thisScope.decl("Boolean",  wBoolean);  thisWorld.set(wBoolean,  "prototype", {parent: Object.prototype})

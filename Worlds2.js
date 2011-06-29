@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008, 2010 Alessandro Warth <awarth@cs.ucla.edu>
+  Copyright (c) 2008, 2010, 2011 Alessandro Warth <awarth@cs.ucla.edu>
 
   Limitations:
     * assignments into the properties of "arguments" (e.g., arguments[5] = 1234) don't modify their respective variables 
@@ -96,7 +96,7 @@ ometa WJSTranslator <: BSJSTranslator {
 }
 
 compileWJS = function(code) {
-  var tree = WJSParser.matchAll(code, "topLevel", undefined, function(m, i) { throw fail.delegated({errorPos: i}) })
+  var tree = WJSParser.matchAll(code, "topLevel", undefined, function(m, i) { throw objectThatDelegatesTo(fail, {errorPos: i}) })
   //print("parsed: " + tree)
   var code = WJSTranslator.match(tree, 'trans')
   //print("compiled: " + code)

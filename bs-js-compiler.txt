@@ -22,23 +22,10 @@ ometa BSJSParser {
                  | '+'   | ``--'' | ``-='' | '-'     | ``*='' | '*'     | ``/=''
                  | '/'   | ``%='' | '%'    | ``&&='' | ``&&'' | ``||='' | ``||''
                  | '.'   | '!'                                                   ):s -> [s, s],
-  tok          = spaces (name | keyword | number | str | rexp | special),
+  tok          = spaces (name | keyword | number | str | special),
   toks         = token*:ts spaces end                                                -> ts,
   token :tt    = tok:t ?(t[0] == tt)                                                 -> t[1],
   spacesNoNl   = (~'\n' space)*,
-
-  rexp         = '/' rexpBody:x '/' rexpFlag*:y                                      -> [#rexp, '/' + x + '/' + y.join('')],
-  rexpFlag     = 'g' | 'i' | 'm',
-  rexpBody     = rexpFChar:x rexpChar*:y                                             -> (x + y.join('')),
-  rexpFChar    = ~'*' rexpChar,
-  rexpChar     = ~'\\' ~'/' ~'[' rexpNoTerm
-               | escapeChar
-               | rexpClass,
-  rexpNoTerm   = ~'\n' ~'\r' char,
-  rexpClass    = '[' rexpClChar*:x ']'                                               -> ('[' + x.join('') + ']'),
-  rexpClChar   = ~']' ~'\\' rexpNoTerm
-               | escapeChar,
-
   expr         = orExpr:e ( "?"   expr:t   ":" expr:f                                -> [#condExpr, e, t, f]
                           | "="   expr:rhs                                           -> [#set,  e, rhs]
                           | "+="  expr:rhs                                           -> [#mset, e, "+",  rhs]
@@ -101,10 +88,21 @@ ometa BSJSParser {
                | "function" funcRest
                | "new" "name":n "(" listOf(#expr, ','):as ")"                        -> [#new, n].concat(as)
                | "[" listOf(#expr, ','):es "]"                                       -> [#arr].concat(es)
-               | json,
+               | json
+               | re,
   json         = "{" listOf(#jsonBinding, ','):bs "}"                                -> [#json].concat(bs),
   jsonBinding  = jsonPropName:n ":" expr:v                                           -> [#binding, n, v],
   jsonPropName = "name" | "number" | "string",
+  re           = spaces <'/' reBody '/' reFlag*>:x                                   -> [#regExp, x],
+  reBody       = re1stChar reChar*,
+  re1stChar    = ~('*' || '\\' || '/' || '[') reNonTerm
+               | escapeChar
+               | reClass,
+  reChar       = re1stChar | '*',
+  reNonTerm    = ~('\n' || '\r') char,
+  reClass      = '[' reClassChar* ']',
+  reClassChar  = ~('[' || ']') reChar,
+  reFlag       = nameFirst,
   formal       = spaces "name",
   funcRest     = "(" listOf(#formal, ','):fs ")" "{" srcElems:body "}"               -> [#func, fs, body],
   sc           = spacesNoNl ('\n' | &'}' | end)
@@ -113,7 +111,6 @@ ometa BSJSParser {
                           | empty -> [#get, 'undefined'] ):v                         -> [#var, n, v],
   block        = "{" srcElems:ss "}"                                                 -> ss,
   stmt         = block
-               | rexp
                | "var" listOf(#binding, ','):bs sc                                   -> [#begin].concat(bs)
                | "if" "(" expr:c ")" stmt:t ( "else" stmt
                                             | empty -> [#get, 'undefined'] ):f       -> [#if, c, t, f]
@@ -183,7 +180,7 @@ ometa BSJSTranslator {
   continue                                              -> 'continue',
   number   :n                                           -> ('(' + n + ')'),
   string   :s                                           -> s.toProgramString(),
-  rexp     :x                                           -> x,
+  regExpr  :x                                           -> x,
   arr      trans*:xs                                    -> ('[' + xs.join(',') + ']'),
   unop     :op trans:x                                  -> ('(' + op + ' ' + x + ')'),
   getp     trans:fd trans:x                             -> (x + '[' + fd + ']'),

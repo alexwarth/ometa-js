@@ -22,10 +22,22 @@ ometa BSJSParser {
                  | '+'   | ``--'' | ``-='' | '-'     | ``*='' | '*'     | ``/=''
                  | '/'   | ``%='' | '%'    | ``&&='' | ``&&'' | ``||='' | ``||''
                  | '.'   | '!'                                                   ):s -> [s, s],
-  tok          = spaces (name | keyword | number | str | special),
+  tok          = spaces (name | keyword | number | str | rexp | special),
   toks         = token*:ts spaces end                                                -> ts,
   token :tt    = tok:t ?(t[0] == tt)                                                 -> t[1],
   spacesNoNl   = (~'\n' space)*,
+
+  rexp         = '/' rexpBody:x '/' rexpFlag*:y                                      -> [#rexp, '/' + x + '/' + y.join('')],
+  rexpFlag     = 'g' | 'i' | 'm',
+  rexpBody     = rexpFChar:x rexpChar*:y                                             -> (x + y.join('')),
+  rexpFChar    = ~'*' rexpChar,
+  rexpChar     = ~'\\' ~'/' ~'[' rexpNoTerm
+               | escapeChar
+               | rexpClass,
+  rexpNoTerm   = ~'\n' ~'\r' char,
+  rexpClass    = '[' rexpClChar*:x ']'                                               -> ('[' + x.join('') + ']'),
+  rexpClChar   = ~']' ~'\\' rexpNoTerm
+               | escapeChar,
 
   expr         = orExpr:e ( "?"   expr:t   ":" expr:f                                -> [#condExpr, e, t, f]
                           | "="   expr:rhs                                           -> [#set,  e, rhs]
@@ -101,6 +113,7 @@ ometa BSJSParser {
                           | empty -> [#get, 'undefined'] ):v                         -> [#var, n, v],
   block        = "{" srcElems:ss "}"                                                 -> ss,
   stmt         = block
+               | rexp
                | "var" listOf(#binding, ','):bs sc                                   -> [#begin].concat(bs)
                | "if" "(" expr:c ")" stmt:t ( "else" stmt
                                             | empty -> [#get, 'undefined'] ):f       -> [#if, c, t, f]
@@ -170,6 +183,7 @@ ometa BSJSTranslator {
   continue                                              -> 'continue',
   number   :n                                           -> ('(' + n + ')'),
   string   :s                                           -> s.toProgramString(),
+  rexp     :x                                           -> x,
   arr      trans*:xs                                    -> ('[' + xs.join(',') + ']'),
   unop     :op trans:x                                  -> ('(' + op + ' ' + x + ')'),
   getp     trans:fd trans:x                             -> (x + '[' + fd + ']'),

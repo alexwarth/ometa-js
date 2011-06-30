@@ -131,6 +131,8 @@ escapeStringFor["'".charCodeAt(0)]  = "\\'"
 escapeStringFor["\r".charCodeAt(0)] = "\\r"
 escapeStringFor["\n".charCodeAt(0)] = "\\n"
 escapeStringFor["\t".charCodeAt(0)] = "\\t"
+escapeStringFor["u".charCodeAt(0)]  = "\\u"
+escapeStringFor["x".charCodeAt(0)]  = "\\x"
 escapeChar = function(c) {
   var charCode = c.charCodeAt(0)
   return charCode > 255 ? String.fromCharCode(charCode) : escapeStringFor[charCode]
@@ -143,6 +145,8 @@ function unescape(s) {
       case 'r':  return '\r'
       case 'n':  return '\n'
       case 't':  return '\t'
+      case 'u':  return 'u'
+      case 'x':  return 'x'
       default:   return s.charAt(1)
     }
   else

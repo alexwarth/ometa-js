@@ -93,7 +93,7 @@ ometa BSJSParser {
   json         = "{" listOf(#jsonBinding, ','):bs "}"                                -> [#json].concat(bs),
   jsonBinding  = jsonPropName:n ":" expr:v                                           -> [#binding, n, v],
   jsonPropName = "name" | "number" | "string",
-  re           = spaces <'/' reBody '/' reFlag*>:x                                   -> [#regExp, x],
+  re           = spaces <'/' reBody '/' reFlag*>:x                                   -> [#regExpr, x],
   reBody       = re1stChar reChar*,
   re1stChar    = ~('*' || '\\' || '/' || '[') reNonTerm
                | escapeChar

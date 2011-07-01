@@ -1,6 +1,4 @@
 /*
-  Copyright (c) 2008, 2010, 2011 Alessandro Warth <awarth@cs.ucla.edu>
-
   Limitations:
     * assignments into the properties of "arguments" (e.g., arguments[5] = 1234) don't modify their respective variables 
     * for-in doesn't work when the loop variable is a property access (e.g., for (x.y in ys) ...)

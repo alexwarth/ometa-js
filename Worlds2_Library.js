@@ -1,5 +1,3 @@
-// Copyright (c) 2008, 2010, 2011 Alessandro Warth <awarth@cs.ucla.edu>
-
 DEBUG = false;
 
 // getTag: object -> unique id

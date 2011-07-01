@@ -122,27 +122,49 @@ ReadStream.prototype.next  = function() { return this.src.at(this.pos++) }
 
 // escape characters
 
+String.prototype.pad = function(s, len) {
+  var r = this
+  while (r.length < len)
+    r = s + r
+  return r
+}
+
 escapeStringFor = new Object()
-for (var c = 0; c < 256; c++)
+for (var c = 0; c < 128; c++)
   escapeStringFor[c] = String.fromCharCode(c)
-escapeStringFor["\\".charCodeAt(0)] = "\\\\"
-escapeStringFor['"'.charCodeAt(0)]  = '\\"'
 escapeStringFor["'".charCodeAt(0)]  = "\\'"
-escapeStringFor["\r".charCodeAt(0)] = "\\r"
+escapeStringFor['"'.charCodeAt(0)]  = '\\"'
+escapeStringFor["\\".charCodeAt(0)] = "\\\\"
+escapeStringFor["\b".charCodeAt(0)] = "\\b"
+escapeStringFor["\f".charCodeAt(0)] = "\\f"
 escapeStringFor["\n".charCodeAt(0)] = "\\n"
+escapeStringFor["\r".charCodeAt(0)] = "\\r"
 escapeStringFor["\t".charCodeAt(0)] = "\\t"
+escapeStringFor["\v".charCodeAt(0)] = "\\v"
 escapeChar = function(c) {
   var charCode = c.charCodeAt(0)
-  return charCode > 255 ? String.fromCharCode(charCode) : escapeStringFor[charCode]
+  if (charCode < 128)
+    return escapeStringFor[charCode]
+  else if (128 <= charCode && charCode < 256)
+    return "\\x" + charCode.toString(16).pad("0", 2)
+  else
+    return "\\u" + charCode.toString(16).pad("0", 4)
 }
 
 function unescape(s) {
   if (s.charAt(0) == '\\')
     switch (s.charAt(1)) {
+      case "'":  return "'"
+      case '"':  return '"'
       case '\\': return '\\'
-      case 'r':  return '\r'
+      case 'b':  return '\b'
+      case 'f':  return '\f'
       case 'n':  return '\n'
+      case 'r':  return '\r'
       case 't':  return '\t'
+      case 'v':  return '\v'
+      case 'x':  return String.fromCharCode(parseInt(s.substring(2, 4), 16))
+      case 'u':  return String.fromCharCode(parseInt(s.substring(2, 6), 16))
       default:   return s.charAt(1)
     }
   else
@@ -150,10 +172,10 @@ function unescape(s) {
 }
 
 String.prototype.toProgramString = function() {
-  var ws = "\"".writeStream()
+  var ws = '"'.writeStream()
   for (var idx = 0; idx < this.length; idx++)
     ws.nextPutAll(escapeChar(this.charAt(idx)))
-  ws.nextPutAll("\"")
+  ws.nextPutAll('"')
   return ws.contents()
 }
 

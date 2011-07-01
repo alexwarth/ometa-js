@@ -95,13 +95,13 @@ ometa BSJSParser {
   jsonPropName = "name" | "number" | "string",
   re           = spaces <'/' reBody '/' reFlag*>:x                                   -> [#regExpr, x],
   reBody       = re1stChar reChar*,
-  re1stChar    = ~('*' || '\\' || '/' || '[') reNonTerm
+  re1stChar    = ~('*' | '\\' | '/' | '[') reNonTerm
                | escapeChar
                | reClass,
   reChar       = re1stChar | '*',
-  reNonTerm    = ~('\n' || '\r') char,
+  reNonTerm    = ~('\n' | '\r') char,
   reClass      = '[' reClassChar* ']',
-  reClassChar  = ~('[' || ']') reChar,
+  reClassChar  = ~('[' | ']') reChar,
   reFlag       = nameFirst,
   formal       = spaces "name",
   funcRest     = "(" listOf(#formal, ','):fs ")" "{" srcElems:body "}"               -> [#func, fs, body],

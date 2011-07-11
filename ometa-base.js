@@ -504,8 +504,8 @@ OMeta = {
     var m = objectThatDelegatesTo(this)
     m.initialize()
     m.matchAll = function(listyObj, aRule) {
-      m.input = listyObj.toOMInputStream()
-      return m._apply(aRule)
+      this.input = listyObj.toOMInputStream()
+      return this._apply(aRule)
     }
     return m
   }

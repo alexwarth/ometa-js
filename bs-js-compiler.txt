@@ -11,7 +11,12 @@ ometa BSJSParser {
                | hexDigit,
   number       = ``0x'' hexLit:n                                                     -> [#number, n]
                | <digit+ ('.' digit+)?>:f                                            -> [#number, parseFloat(f)],
-  escapeChar   = '\\' char:c                                                         -> unescape('\\' + c),
+  escapeChar   = '\\' (
+                     '"' | "'" | '\\'
+                   | 'n' | 'r' | 't'
+                   | 'b' | 'f'
+                   | <'u' digit digit digit digit> | <'x' digit digit>
+                   | char ):c                                                        -> unescape('\\' + c),
   str          = seq('"""')  (escapeChar | ~seq('"""') char)*:cs seq('"""')          -> [#string, cs.join('')]
                | '\'' (escapeChar | ~'\'' char)*:cs '\''                             -> [#string, cs.join('')]
                | '"'  (escapeChar | ~'"'  char)*:cs '"'                              -> [#string, cs.join('')]

@@ -15,7 +15,7 @@ ometa BSJSParser {
                      '"' | "'" | '\\'
                    | 'n' | 'r' | 't'
                    | 'b' | 'f'
-                   | <'u' digit digit digit digit> | <'x' digit digit>
+                   | <'u' char char char char> | <'x' char char>
                    | char ):c                                                        -> unescape('\\' + c),
   str          = seq('"""')  (escapeChar | ~seq('"""') char)*:cs seq('"""')          -> [#string, cs.join('')]
                | '\'' (escapeChar | ~'\'' char)*:cs '\''                             -> [#string, cs.join('')]

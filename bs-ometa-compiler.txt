@@ -43,9 +43,9 @@ ometa BSOMetaParser {
                  | '+'                                                 -> [#Many1, x]
                  | '?'                                                 -> [#Opt,   x]
                  | empty                                               -> x,
-  optBind :x     = ':' name:n                                          -> { this.locals.push(n); [#Set, n, x] }
+  optBind :x     = ':' name:n                                          -> { this.locals[n] = true; [#Set, n, x] }
                  | empty                                               -> x,
-  expr3          = ":" name:n                                          -> { this.locals.push(n); [#Set, n, [#App, #anything]] }
+  expr3          = ":" name:n                                          -> { this.locals[n] = true; [#Set, n, [#App, #anything]] }
                  | (expr2:x optIter(x) | semAction):e optBind(e)
                  | semPred,
   expr2          = "~" expr2:x                                         -> [#Not,       x]
@@ -61,8 +61,8 @@ ometa BSOMetaParser {
                  | "("  expr:x ")"                                     -> x,
   ruleName       = name
                  | spaces tsString,
-  rule           = &(ruleName:n) !(this.locals = ['$elf=this', '_fromIdx=this.input.idx'])
-                     rulePart(n):x ("," rulePart(n))*:xs               -> [#Rule, n, this.locals, [#Or, x].concat(xs)],
+  rule           = &(ruleName:n) !(this.locals = {'$elf=this':true, '_fromIdx=this.input.idx':true})
+                     rulePart(n):x ("," rulePart(n))*:xs               -> [#Rule, n, Object.keys(this.locals), [#Or, x].concat(xs)],
   rulePart :rn   = ruleName:n ?(n == rn) expr4:b1 ( "=" expr:b2        -> [#And, b1, b2]
                                                   | empty              -> b1
                                                   ),

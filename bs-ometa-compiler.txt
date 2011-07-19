@@ -4,7 +4,11 @@ ometa BSOMetaParser {
   nameRest       = nameFirst | digit,
   tsName         = <nameFirst nameRest*>,
   name           = spaces tsName,
-  eChar          = '\\' char:c                                         -> unescape('\\' +c)
+  hexDigit       = char:x {this.hexDigits.indexOf(x.toLowerCase())}:v
+                                                             ?(v >= 0) -> v,
+  eChar          = <'\\' ( 'u' hexDigit hexDigit hexDigit hexDigit
+                         | 'x' hexDigit hexDigit
+                         | char                                   )>:s -> unescape(s)
                  | char,
   tsString       = '\'' (~'\'' eChar)*:xs '\''                         -> xs.join(''),
   characters     = '`' '`' (~('\'' '\'') eChar)*:xs '\'' '\''          -> [#App, #seq,     xs.join('').toProgramString()],
@@ -72,6 +76,7 @@ ometa BSOMetaParser {
                                                                             [#Grammar, n, sn].concat(rs)
                                                                           )
 }
+BSOMetaParser.hexDigits = "0123456789abcdef"
 
 // By dispatching on the head of a list, the following idiom allows translators to avoid doing a linear search.
 // (Note that the "=" in a rule definition is optional, so you can give your rules an "ML feel".)

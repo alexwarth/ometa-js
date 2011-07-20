@@ -45,7 +45,7 @@ objectThatDelegatesTo = function(x, props) {
 
 ownPropertyNames = function(x) {
   var r = []
-  for (name in x)
+  for (var name in x)
     if (x.hasOwnProperty(name))
       r.push(name)
   return r

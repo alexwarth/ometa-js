@@ -143,14 +143,20 @@ OMeta = {
 
   // note: _applyWithArgs and _superApplyWithArgs are not memoized, so they can't be left-recursive
   _applyWithArgs: function(rule) {
-    for (var idx = arguments.length - 1; idx > 0; idx--)
+    var args = [], idx = Math.min(arguments.length, this[rule].length+1), argsIdx = 1
+    for (; argsIdx < idx; argsIdx++) //Add parameters passed via Function.apply in-order
+      args[args.length-1] = arguments[argsIdx]
+    for (idx = arguments.length - 1; idx >= argsIdx; idx--) // Add parameters passed via input in reverse order
       this._prependInput(arguments[idx])
-    return this[rule].call(this)
+    return this[rule].apply(this,args)
   },
   _superApplyWithArgs: function(recv, rule) {
-    for (var idx = arguments.length - 1; idx > 1; idx--)
+    var args = [], idx = Math.min(arguments.length, this[rule].length+1), argsIdx = 2
+    for (; argsIdx < idx; argsIdx++) //Add parameters passed via Function.apply in-order
+      args[args.length-1] = arguments[argsIdx]
+    for (idx = arguments.length - 1; idx >= argsIdx; idx--) // Add parameters passed via input in reverse order
       recv._prependInput(arguments[idx])
-    return this[rule].call(recv)
+    return this[rule].apply(recv,args)
   },
   _prependInput: function(v) {
     this.input = new OMInputStream(v, this.input)

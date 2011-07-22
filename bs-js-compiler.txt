@@ -14,7 +14,7 @@ ometa BSJSParser {
   escapeChar   = <'\\' ( 'u' hexDigit hexDigit hexDigit hexDigit
                        | 'x' hexDigit hexDigit
                        | char                                    )>:s                -> unescape(s),
-  str          = seq('"""')  (escapeChar | ~seq('"""') char)*:cs seq('"""')          -> [#string, cs.join('')]
+  str          = seq('"""')  (~seq('"""') char)*:cs seq('"""')                       -> [#string, cs.join('')]
                | '\'' (escapeChar | ~'\'' char)*:cs '\''                             -> [#string, cs.join('')]
                | '"'  (escapeChar | ~'"'  char)*:cs '"'                              -> [#string, cs.join('')]
                | ('#' | '`') iName:n                                                 -> [#string, n],

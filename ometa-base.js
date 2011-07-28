@@ -343,22 +343,18 @@ OMeta = {
     return this.input.idx
   },
   empty: function() { return true },
-  apply: function() {
-    var r = this._apply("anything")
+  apply: function(r) {
     return this._apply(r)
   },
-  foreign: function() {
-    var g   = this._apply("anything"),
-        r   = this._apply("anything"),
-        gi  = objectThatDelegatesTo(g, {input: makeOMInputStreamProxy(this.input)})
-    var ans = gi._apply(r)
+  foreign: function(g, r) {
+    var gi  = objectThatDelegatesTo(g, {input: makeOMInputStreamProxy(this.input)}),
+        ans = gi._apply(r)
     this.input = gi.input.target
     return ans
   },
 
   //  some useful "derived" rules
-  exactly: function() {
-    var wanted = this._apply("anything")
+  exactly: function(wanted) {
     if (wanted === this._apply("anything"))
       return wanted
     throw fail
@@ -424,26 +420,20 @@ OMeta = {
     return this._or(function() { return this._apply("letter") },
                     function() { return this._apply("digit")  })
   },
-  firstAndRest: function()  {
-    var first = this._apply("anything"),
-        rest  = this._apply("anything")
+  firstAndRest: function(first, rest)  {
      return this._many(function() { return this._apply(rest) }, this._apply(first))
   },
-  seq: function() {
-    var xs = this._apply("anything")
+  seq: function(xs) {
     for (var idx = 0; idx < xs.length; idx++)
       this._applyWithArgs("exactly", xs.at(idx))
     return xs
   },
-  notLast: function() {
-    var rule = this._apply("anything"),
-        r    = this._apply(rule)
+  notLast: function(rule) {
+    var r = this._apply(rule)
     this._lookahead(function() { return this._apply(rule) })
     return r
   },
-  listOf: function() {
-    var rule  = this._apply("anything"),
-        delim = this._apply("anything")
+  listOf: function(rule, delim) {
     return this._or(function() {
                       var r = this._apply(rule)
                       return this._many(function() {
@@ -454,14 +444,11 @@ OMeta = {
                     },
                     function() { return [] })
   },
-  token: function() {
-    var cs = this._apply("anything")
+  token: function(cs) {
     this._apply("spaces")
     return this._applyWithArgs("seq", cs)
   },
-  fromTo: function () {
-    var x = this._apply("anything"),
-        y = this._apply("anything")
+  fromTo: function (x, y) {
     return this._consumedBy(function() {
                               this._applyWithArgs("seq", x)
                               this._many(function() {

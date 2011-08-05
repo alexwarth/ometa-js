@@ -143,16 +143,22 @@ OMeta = {
 
   // note: _applyWithArgs and _superApplyWithArgs are not memoized, so they can't be left-recursive
   _applyWithArgs: function(rule) {
-    var argsIdx = this[rule].length+1
-    for (var idx = arguments.length - 1; idx >= argsIdx; idx--) // Add parameters passed via input in reverse order
+    var ruleFn = this[rule]
+    var ruleFnArity = ruleFn.length
+    for (var idx = arguments.length - 1; idx >= ruleFnArity + 1; idx--) // prepend "extra" arguments in reverse order
       this._prependInput(arguments[idx])
-    return argsIdx>1 ? this[rule].apply(this,Array.prototype.slice.call(arguments,1,argsIdx)) : this[rule].call(this)
+    return ruleFnArity == 0 ?
+             ruleFn.call(this) :
+             ruleFn.apply(this, Array.prototype.slice.call(arguments, 1, ruleFnArity + 1))
   },
   _superApplyWithArgs: function(recv, rule) {
-    var argsIdx = this[rule].length+2
-    for (var idx = arguments.length - 1; idx >= argsIdx; idx--) // Add parameters passed via input in reverse order
+    var ruleFn = this[rule]
+    var ruleFnArity = ruleFn.length
+    for (var idx = arguments.length - 1; idx > ruleFnArity + 2; idx--) // prepend "extra" arguments in reverse order
       recv._prependInput(arguments[idx])
-    return argsIdx>2 ? this[rule].apply(recv,Array.prototype.slice.call(arguments,2,argsIdx)) : this[rule].call(recv)
+    return ruleFnArity == 0 ?
+             ruleFn.call(recv) :
+             ruleFn.apply(recv, Array.prototype.slice.call(arguments, 2, ruleFnArity + 2))
   },
   _prependInput: function(v) {
     this.input = new OMInputStream(v, this.input)
@@ -173,9 +179,12 @@ OMeta = {
       this.input = newInput
     }
     this._applyWithArgs = function(rule) {
-      for (var idx = arguments.length - 1; idx > 0; idx--)
+      var ruleFnArity = this[rule].length
+      for (var idx = arguments.length - 1; idx >= ruleFnArity + 1; idx--) // prepend "extra" arguments in reverse order
         this._prependInput(arguments[idx])
-      return this._apply(rule)
+      return ruleFnArity == 0 ?
+               this._apply(rule) :
+               this[rule].apply(this, Array.prototype.slice.call(arguments, 1, ruleFnArity + 1))
     }
   },
 
@@ -235,16 +244,7 @@ OMeta = {
       throw fail
   },
   disableXORs: function() {
-    this._xor = function(ruleName) {
-      var origInput = this.input
-      for (var idx = 1; idx < arguments.length; idx++)
-        try { this.input = origInput; return arguments[idx].call(this) }
-        catch (f) {
-          if (f != fail)
-            throw f
-        }
-      throw fail
-    }
+    this._xor = this._or
   },
   _opt: function(x) {
     var origInput = this.input, ans

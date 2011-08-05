@@ -68,9 +68,9 @@ ometa BSOMetaParser {
   rule           = &(ruleName:n) !(this.locals = {'$elf=this': true, '_fromIdx=this.input.idx': true})
                      rulePart(n):x ("," rulePart(n))*:xs               -> [#Rule, n, ownPropertyNames(this.locals),
                                                                             [#Or, x].concat(xs)],
-  rulePart :rn   = ruleName:n ?(n == rn) expr4:b1 ( "=" expr:b2        -> [#And, b1, b2]
-                                                  | empty              -> b1
-                                                  ),
+  rulePart :rn   = ruleName:n ?(n == rn) expr4(false):b1 ( "=" expr:b2 -> [#And, b1, b2]
+                                                         | empty       -> b1
+                                                         ),
   grammar        = keyword('ometa') name:n
                      ( "<:" name | empty -> 'OMeta' ):sn
                      "{" listOf(#rule, ','):rs "}"                        BSOMetaOptimizer.optimizeGrammar(

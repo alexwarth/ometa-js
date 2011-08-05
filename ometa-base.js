@@ -105,6 +105,22 @@ Failer.prototype.used = false
 // the OMeta "class" and basic functionality
 
 OMeta = {
+  _addToken: function(startIdx,endIdx,rule) {
+    if(this.keyTokens != undefined) {
+      if(startIdx != endIdx) {
+	    if(this.keyTokens.indexOf(rule)!=-1) {
+          if(this._tokens == undefined) {
+            this._tokens = []
+          }
+          if(this._tokens[startIdx] == undefined) {
+            this._tokens[startIdx] = []
+          }
+          this._tokens[startIdx].push([endIdx,rule])
+		}
+      }
+	}
+  },
+  
   _apply: function(rule) {
     var memoRec = this.input.memo[rule]
     if (memoRec == undefined) {
@@ -132,6 +148,7 @@ OMeta = {
           }
         }
       }
+      this._addToken(origInput.idx, this.input.idx, rule);
     }
     else if (memoRec instanceof Failer) {
       memoRec.used = true
@@ -147,23 +164,29 @@ OMeta = {
     var ruleFnArity = ruleFn.length
     for (var idx = arguments.length - 1; idx >= ruleFnArity + 1; idx--) // prepend "extra" arguments in reverse order
       this._prependInput(arguments[idx])
-    return ruleFnArity == 0 ?
+    var origIdx = this.input.idx
+    var ans = ruleFnArity == 0 ?
              ruleFn.call(this) :
              ruleFn.apply(this, Array.prototype.slice.call(arguments, 1, ruleFnArity + 1))
+    this._addToken(origIdx, this.input.idx, rule)
+	return ans
   },
   _superApplyWithArgs: function(recv, rule) {
     var ruleFn = this[rule]
     var ruleFnArity = ruleFn.length
     for (var idx = arguments.length - 1; idx > ruleFnArity + 2; idx--) // prepend "extra" arguments in reverse order
       recv._prependInput(arguments[idx])
-    return ruleFnArity == 0 ?
+    var origIdx = recv.input.idx
+    var ans = ruleFnArity == 0 ?
              ruleFn.call(recv) :
              ruleFn.apply(recv, Array.prototype.slice.call(arguments, 2, ruleFnArity + 2))
+    this._addToken(origIdx, recv.input.idx, rule)
+	return ans
   },
   _prependInput: function(v) {
     this.input = new OMInputStream(v, this.input)
   },
-
+  
   // if you want your grammar (and its subgrammars) to memoize parameterized rules, invoke this method on it:
   memoizeParameterizedRules: function() {
     this._prependInput = function(v) {
@@ -217,7 +240,7 @@ OMeta = {
       catch (f) {
         if (f != fail)
           throw f
-      }
+        }
     throw fail
   },
   _xor: function(ruleName) {

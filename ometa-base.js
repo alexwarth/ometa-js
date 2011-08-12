@@ -121,6 +121,19 @@ OMeta = {
 	}
   },
   
+  _storePossibility: function(rule) {
+    if(this.possMap != undefined && this.possMap.hasOwnProperty(rule)) {
+      if(this.__possibilities == undefined) {
+        this.__possibilities = []
+      }
+	  var idx = this.input.idx;
+      if(this.__possibilities[idx] == undefined) {
+        this.__possibilities[idx] = []
+      }
+      this.__possibilities[idx].push(rule)
+	  }
+  },
+  
   _apply: function(rule) {
     var memoRec = this.input.memo[rule]
     if (memoRec == undefined) {
@@ -129,6 +142,7 @@ OMeta = {
       if (this[rule] === undefined)
         throw 'tried to apply undefined rule "' + rule + '"'
       this.input.memo[rule] = failer
+      this._storePossibility(rule)
       this.input.memo[rule] = memoRec = {ans: this[rule].call(this), nextInput: this.input}
       if (failer.used) {
         var sentinel = this.input

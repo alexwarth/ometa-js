@@ -156,8 +156,10 @@ OMeta = {
             memoRec.nextInput = this.input
           }
           catch (f) {
-            if (f != fail)
+            if (f != fail) {
+              console.log(f.stack)
               throw f
+            }
             break
           }
         }
@@ -234,8 +236,10 @@ OMeta = {
     var origInput = this.input
     try { x.call(this) }
     catch (f) {
-      if (f != fail)
+      if (f != fail) {
+        console.log(f.stack)
         throw f
+      }
       this.input = origInput
       return true
     }
@@ -252,9 +256,11 @@ OMeta = {
     for (var idx = 0; idx < arguments.length; idx++)
       try { this.input = origInput; return arguments[idx].call(this) }
       catch (f) {
-        if (f != fail)
+        if (f != fail) {
+          console.log(f.stack)
           throw f
         }
+      }
     throw fail
   },
   _xor: function(ruleName) {
@@ -268,8 +274,10 @@ OMeta = {
         newInput = this.input
       }
       catch (f) {
-        if (f != fail)
+        if (f != fail) {
+          console.log(f.stack)
           throw f
+      }
       }
       idx++
     }
@@ -287,8 +295,10 @@ OMeta = {
     var origInput = this.input, ans
     try { ans = x.call(this) }
     catch (f) {
-      if (f != fail)
+      if (f != fail) {
+        console.log(f.stack)
         throw f
+      }
       this.input = origInput
     }
     return ans
@@ -299,8 +309,10 @@ OMeta = {
       var origInput = this.input
       try { ans.push(x.call(this)) }
       catch (f) {
-        if (f != fail)
+        if (f != fail) {
+          console.log(f.stack)
           throw f
+        }
         this.input = origInput
         break
       }
@@ -350,8 +362,10 @@ OMeta = {
             break
           }
           catch (f) {
-            if (f != fail)
+            if (f != fail) {
+              console.log(f.stack)
               throw f
+            }
             // if this (failed) part's mode is "1" or "+", we're not done yet
             allDone = allDone && (arguments[idx] == "*" || arguments[idx] == "?")
           }
@@ -517,6 +531,7 @@ OMeta = {
         }
         return matchFailed(m, input.idx)
       }
+      console.log(f.stack)
       throw f
     }
   },

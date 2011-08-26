@@ -11,6 +11,8 @@ function readFile(name) {
 }
 
 function writeFile(name, text) {
+  if (name == "Sample_Project")
+    return;
   var ok = true
   new Ajax.Request("projects/" + name + ".txt", {
     method:       "put",

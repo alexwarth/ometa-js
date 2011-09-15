@@ -108,7 +108,7 @@ OMeta = {
   _addToken: function(startIdx,endIdx,rule) {
     if(this.keyTokens != undefined) {
       if(startIdx != endIdx) {
-	    if(this.keyTokens.indexOf(rule)!=-1) {
+        if(this.keyTokens.indexOf(rule)!=-1) {
           if(this._tokens == undefined) {
             this._tokens = []
           }
@@ -116,9 +116,9 @@ OMeta = {
             this._tokens[startIdx] = []
           }
           this._tokens[startIdx].push([endIdx,rule])
-		}
+        }
       }
-	}
+    }
   },
   
   _storePossibility: function(rule) {
@@ -126,12 +126,12 @@ OMeta = {
       if(this.__possibilities == undefined) {
         this.__possibilities = []
       }
-	  var idx = this.input.idx;
+      var idx = this.input.idx;
       if(this.__possibilities[idx] == undefined) {
         this.__possibilities[idx] = []
       }
       this.__possibilities[idx].push(rule)
-	  }
+      }
   },
   
   _apply: function(rule) {
@@ -185,7 +185,7 @@ OMeta = {
              ruleFn.call(this) :
              ruleFn.apply(this, Array.prototype.slice.call(arguments, 1, ruleFnArity + 1))
     this._addToken(origIdx, this.input.idx, rule)
-	return ans
+    return ans
   },
   _superApplyWithArgs: function(recv, rule) {
     var ruleFn = this[rule]
@@ -197,7 +197,7 @@ OMeta = {
              ruleFn.call(recv) :
              ruleFn.apply(recv, Array.prototype.slice.call(arguments, 2, ruleFnArity + 2))
     this._addToken(origIdx, recv.input.idx, rule)
-	return ans
+    return ans
   },
   _prependInput: function(v) {
     this.input = new OMInputStream(v, this.input)
@@ -234,6 +234,8 @@ OMeta = {
   },
   _not: function(x) {
     var origInput = this.input
+    var origPoss = this.__possibilities
+    this.__possibilities = []
     try { x.call(this) }
     catch (f) {
       if (f != fail) {
@@ -241,6 +243,7 @@ OMeta = {
         throw f
       }
       this.input = origInput
+      this.__possibilities = origPoss
       return true
     }
     throw fail

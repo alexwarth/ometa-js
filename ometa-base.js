@@ -138,6 +138,7 @@ OMeta = {
     var memoRec = this.input.memo[rule]
     if (memoRec == undefined) {
       var origInput = this.input,
+          origState = $.extend(true,{},this.state),
           failer    = new Failer()
       if (this[rule] === undefined)
         throw 'tried to apply undefined rule "' + rule + '"'
@@ -149,6 +150,7 @@ OMeta = {
         while (true) {
           try {
             this.input = origInput
+            this.state = origState
             var ans = this[rule].call(this)
             if (this.input == sentinel)
               throw fail
@@ -233,8 +235,9 @@ OMeta = {
     throw fail
   },
   _not: function(x) {
-    var origInput = this.input
-    var origPoss = this.__possibilities
+    var origInput = this.input,
+        origState = $.extend(true,{},this.state),
+        origPoss = this.__possibilities
     this.__possibilities = []
     try { x.call(this) }
     catch (f) {
@@ -243,6 +246,7 @@ OMeta = {
         throw f
       }
       this.input = origInput
+      this.state = origState
       this.__possibilities = origPoss
       return true
     }
@@ -250,14 +254,17 @@ OMeta = {
   },
   _lookahead: function(x) {
     var origInput = this.input,
+        origState = $.extend(true,{},this.state),
         r         = x.call(this)
     this.input = origInput
+    this.state = origState
     return r
   },
   _or: function() {
-    var origInput = this.input
+    var origInput = this.input,
+        origState = $.extend(true,{},this.state)
     for (var idx = 0; idx < arguments.length; idx++)
-      try { this.input = origInput; return arguments[idx].call(this) }
+      try { this.input = origInput; this.state = origState; return arguments[idx].call(this) }
       catch (f) {
         if (f != fail) {
           console.log(f.stack)
@@ -267,10 +274,12 @@ OMeta = {
     throw fail
   },
   _xor: function(ruleName) {
-    var origInput = this.input, idx = 1, newInput, ans
+    var origInput = this.input, idx = 1, newInput, ans,
+        origState = $.extend(true,{},this.state)
     while (idx < arguments.length) {
       try {
         this.input = origInput
+        this.state = origState
         ans = arguments[idx].call(this)
         if (newInput)
           throw 'more than one choice matched by "exclusive-OR" in ' + ruleName
@@ -295,7 +304,8 @@ OMeta = {
     this._xor = this._or
   },
   _opt: function(x) {
-    var origInput = this.input, ans
+    var origInput = this.input, ans,
+        origState = $.extend(true,{},this.state)
     try { ans = x.call(this) }
     catch (f) {
       if (f != fail) {
@@ -303,13 +313,15 @@ OMeta = {
         throw f
       }
       this.input = origInput
+      this.state = origState
     }
     return ans
   },
   _many: function(x) {
     var ans = arguments[1] != undefined ? [arguments[1]] : []
     while (true) {
-      var origInput = this.input
+      var origInput = this.input,
+          origState = $.extend(true,{},this.state)
       try { ans.push(x.call(this)) }
       catch (f) {
         if (f != fail) {
@@ -317,6 +329,7 @@ OMeta = {
           throw f
         }
         this.input = origInput
+        this.state = origState
         break
       }
     }
@@ -327,11 +340,13 @@ OMeta = {
     var v = this._apply("anything")
     if (!isSequenceable(v))
       throw fail
-    var origInput = this.input
+    var origInput = this.input,
+        origState = $.extend(true,{},this.state)
     this.input = v.toOMInputStream()
     var r = x.call(this)
     this._apply("end")
     this.input = origInput
+    this.state = origState
     return v
   },
   _consumedBy: function(x) {

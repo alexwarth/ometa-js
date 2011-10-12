@@ -138,7 +138,7 @@ OMeta = {
     var memoRec = this.input.memo[rule]
     if (memoRec == undefined) {
       var origInput = this.input,
-          origState = $.extend(true,{},this.state),
+          origState = JSON.parse(JSON.stringify(this.state)),
           failer    = new Failer()
       if (this[rule] === undefined)
         throw 'tried to apply undefined rule "' + rule + '"'
@@ -236,7 +236,7 @@ OMeta = {
   },
   _not: function(x) {
     var origInput = this.input,
-        origState = $.extend(true,{},this.state),
+        origState = JSON.parse(JSON.stringify(this.state)),
         origPoss = this.__possibilities
     this.__possibilities = []
     try { x.call(this) }
@@ -254,7 +254,7 @@ OMeta = {
   },
   _lookahead: function(x) {
     var origInput = this.input,
-        origState = $.extend(true,{},this.state),
+        origState = JSON.parse(JSON.stringify(this.state)),
         r         = x.call(this)
     this.input = origInput
     this.state = origState
@@ -262,7 +262,7 @@ OMeta = {
   },
   _or: function() {
     var origInput = this.input,
-        origState = $.extend(true,{},this.state)
+        origState = JSON.parse(JSON.stringify(this.state))
     for (var idx = 0; idx < arguments.length; idx++)
       try { this.input = origInput; this.state = origState; return arguments[idx].call(this) }
       catch (f) {
@@ -275,7 +275,7 @@ OMeta = {
   },
   _xor: function(ruleName) {
     var origInput = this.input, idx = 1, newInput, ans,
-        origState = $.extend(true,{},this.state)
+        origState = JSON.parse(JSON.stringify(this.state))
     while (idx < arguments.length) {
       try {
         this.input = origInput
@@ -305,7 +305,7 @@ OMeta = {
   },
   _opt: function(x) {
     var origInput = this.input, ans,
-        origState = $.extend(true,{},this.state)
+        origState = JSON.parse(JSON.stringify(this.state))
     try { ans = x.call(this) }
     catch (f) {
       if (f != fail) {
@@ -321,7 +321,7 @@ OMeta = {
     var ans = arguments[1] != undefined ? [arguments[1]] : []
     while (true) {
       var origInput = this.input,
-          origState = $.extend(true,{},this.state)
+          origState = JSON.parse(JSON.stringify(this.state))
       try { ans.push(x.call(this)) }
       catch (f) {
         if (f != fail) {
@@ -341,7 +341,7 @@ OMeta = {
     if (!isSequenceable(v))
       throw fail
     var origInput = this.input,
-        origState = $.extend(true,{},this.state)
+        origState = JSON.parse(JSON.stringify(this.state))
     this.input = v.toOMInputStream()
     var r = x.call(this)
     this._apply("end")
@@ -416,7 +416,7 @@ OMeta = {
     return this._apply(r)
   },
   foreign: function(g, r) {
-    var gi  = objectThatDelegatesTo(g, {input: makeOMInputStreamProxy(this.input)}),
+    var gi  = objectThatDelegatesTo(g, {input: makeOMInputStreamProxy(this.input), state: {}}),
         ans = gi._apply(r)
     this.input = gi.input.target
     return ans
@@ -536,7 +536,7 @@ OMeta = {
     var realArgs = [rule]
     for (var idx = 0; idx < args.length; idx++)
       realArgs.push(args[idx])
-    var m = objectThatDelegatesTo(this, {input: input})
+    var m = objectThatDelegatesTo(this, {input: input, state: {}})
     m.initialize()
     try { return realArgs.length == 1 ? m._apply.call(m, realArgs[0]) : m._applyWithArgs.apply(m, realArgs) }
     catch (f) {
@@ -560,7 +560,7 @@ OMeta = {
     return this._genericMatch(listyObj.toOMInputStream(), rule, args, matchFailed)
   },
   createInstance: function() {
-    var m = objectThatDelegatesTo(this)
+    var m = objectThatDelegatesTo(this, {state: {}})
     m.initialize()
     m.matchAll = function(listyObj, aRule) {
       this.input = listyObj.toOMInputStream()

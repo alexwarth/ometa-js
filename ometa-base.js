@@ -105,7 +105,7 @@ Failer.prototype.used = false
 // the OMeta "class" and basic functionality
 
 OMeta = {
-  _addToken: function(startIdx,endIdx,rule,ruleArgs) {
+  _addToken: function(startIdx, endIdx, rule, ruleArgs) {
     if(this.keyTokens != undefined) {
       if(startIdx != endIdx) {
         if(this.keyTokens.indexOf(rule)!=-1) {
@@ -115,22 +115,22 @@ OMeta = {
           if(this._tokens[startIdx] == undefined) {
             this._tokens[startIdx] = []
           }
-          this._tokens[startIdx].push([endIdx,rule,ruleArgs])
+          this._tokens[startIdx].push([endIdx, rule, ruleArgs])
         }
       }
     }
   },
   
-  _storePossibility: function(rule) {
+  _storePossibility: function(rule, ruleArgs) {
     if(this.possMap != undefined && this.possMap.hasOwnProperty(rule)) {
       if(this.__possibilities == undefined) {
         this.__possibilities = []
       }
       var idx = this.input.idx;
       if(this.__possibilities[idx] == undefined) {
-        this.__possibilities[idx] = []
+        this.__possibilities[idx] = {}
       }
-      this.__possibilities[idx].push(rule)
+      this.__possibilities[idx][rule] = ruleArgs
       }
   },
   
@@ -143,7 +143,7 @@ OMeta = {
       if (this[rule] === undefined)
         throw 'tried to apply undefined rule "' + rule + '"'
       this.input.memo[rule] = failer
-      this._storePossibility(rule)
+      this._storePossibility(rule, [])
       this.input.memo[rule] = memoRec = {ans: this[rule].call(this), nextInput: this.input}
       if (failer.used) {
         var sentinel = this.input
@@ -178,28 +178,30 @@ OMeta = {
 
   // note: _applyWithArgs and _superApplyWithArgs are not memoized, so they can't be left-recursive
   _applyWithArgs: function(rule) {
-    var ruleArgs = []
     var ruleFn = this[rule]
     var ruleFnArity = ruleFn.length
+    var ruleArgs = Array.prototype.slice.call(arguments, 1, ruleFnArity + 1)
+    this._storePossibility(rule, ruleArgs)
     for (var idx = arguments.length - 1; idx >= ruleFnArity + 1; idx--) // prepend "extra" arguments in reverse order
       this._prependInput(arguments[idx])
     var origIdx = this.input.idx
     var ans = ruleFnArity == 0 ?
              ruleFn.call(this) :
-             ruleFn.apply(this, ruleArgs = Array.prototype.slice.call(arguments, 1, ruleFnArity + 1))
+             ruleFn.apply(this, ruleArgs)
     this._addToken(origIdx, this.input.idx, rule, ruleArgs)
     return ans
   },
   _superApplyWithArgs: function(recv, rule) {
-    var ruleArgs = []
     var ruleFn = this[rule]
     var ruleFnArity = ruleFn.length
+    var ruleArgs = Array.prototype.slice.call(arguments, 2, ruleFnArity + 2)
+    this._storePossibility(rule, ruleArgs)
     for (var idx = arguments.length - 1; idx > ruleFnArity + 2; idx--) // prepend "extra" arguments in reverse order
       recv._prependInput(arguments[idx])
     var origIdx = recv.input.idx
     var ans = ruleFnArity == 0 ?
              ruleFn.call(recv) :
-             ruleFn.apply(recv, ruleArgs = Array.prototype.slice.call(arguments, 2, ruleFnArity + 2))
+             ruleFn.apply(recv, ruleArgs)
     this._addToken(origIdx, recv.input.idx, rule, ruleArgs)
     return ans
   },

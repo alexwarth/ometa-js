@@ -105,7 +105,7 @@ Failer.prototype.used = false
 // the OMeta "class" and basic functionality
 
 OMeta = {
-  _addToken: function(startIdx,endIdx,rule) {
+  _addToken: function(startIdx,endIdx,rule,ruleArgs) {
     if(this.keyTokens != undefined) {
       if(startIdx != endIdx) {
         if(this.keyTokens.indexOf(rule)!=-1) {
@@ -115,7 +115,7 @@ OMeta = {
           if(this._tokens[startIdx] == undefined) {
             this._tokens[startIdx] = []
           }
-          this._tokens[startIdx].push([endIdx,rule])
+          this._tokens[startIdx].push([endIdx,rule,ruleArgs])
         }
       }
     }
@@ -166,7 +166,7 @@ OMeta = {
           }
         }
       }
-      this._addToken(origInput.idx, this.input.idx, rule);
+      this._addToken(origInput.idx, this.input.idx, rule, []);
     }
     else if (memoRec instanceof Failer) {
       memoRec.used = true
@@ -178,6 +178,7 @@ OMeta = {
 
   // note: _applyWithArgs and _superApplyWithArgs are not memoized, so they can't be left-recursive
   _applyWithArgs: function(rule) {
+    var ruleArgs = []
     var ruleFn = this[rule]
     var ruleFnArity = ruleFn.length
     for (var idx = arguments.length - 1; idx >= ruleFnArity + 1; idx--) // prepend "extra" arguments in reverse order
@@ -185,11 +186,12 @@ OMeta = {
     var origIdx = this.input.idx
     var ans = ruleFnArity == 0 ?
              ruleFn.call(this) :
-             ruleFn.apply(this, Array.prototype.slice.call(arguments, 1, ruleFnArity + 1))
-    this._addToken(origIdx, this.input.idx, rule)
+             ruleFn.apply(this, ruleArgs = Array.prototype.slice.call(arguments, 1, ruleFnArity + 1))
+    this._addToken(origIdx, this.input.idx, rule, ruleArgs)
     return ans
   },
   _superApplyWithArgs: function(recv, rule) {
+    var ruleArgs = []
     var ruleFn = this[rule]
     var ruleFnArity = ruleFn.length
     for (var idx = arguments.length - 1; idx > ruleFnArity + 2; idx--) // prepend "extra" arguments in reverse order
@@ -197,8 +199,8 @@ OMeta = {
     var origIdx = recv.input.idx
     var ans = ruleFnArity == 0 ?
              ruleFn.call(recv) :
-             ruleFn.apply(recv, Array.prototype.slice.call(arguments, 2, ruleFnArity + 2))
-    this._addToken(origIdx, recv.input.idx, rule)
+             ruleFn.apply(recv, ruleArgs = Array.prototype.slice.call(arguments, 2, ruleFnArity + 2))
+    this._addToken(origIdx, recv.input.idx, rule, ruleArgs)
     return ans
   },
   _prependInput: function(v) {

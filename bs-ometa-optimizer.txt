@@ -41,6 +41,12 @@ ometa BSAssociativeOptimization <: BSNullOptimization {
                  |                                                            -> []
 }
 
+ometa BSPushDownSet <: BSNullOptimization {
+  Set  :n ['And' notLast('trans')*:xs trans:y]
+                            setHelped -> ['And'].concat(xs).concat([['Set', n, y]]),
+  Set  :n trans:v                     -> ['Set', n, v]
+}
+
 ometa BSSeqInliner <: BSNullOptimization {
   App        = 'seq' :s end seqString(s):cs setHelped -> ['And'].concat(cs).concat([['Act', s]])
              | :rule anything*:args                   -> ['App', rule].concat(args),
@@ -88,6 +94,7 @@ ometa BSOMetaOptimizer {
   optimizeRule    = :r (BSSeqInliner.optimize(r):r | empty)
                        ( BSAssociativeOptimization.optimize(r):r
                        | BSJumpTableOptimization.optimize(r):r
+                       | BSPushDownSet.optimize(r):r
                        )*                                        -> r
 }
 

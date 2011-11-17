@@ -292,7 +292,7 @@ OMeta = {
     x.call(this)
     return {fromIdx: origInput.idx, toIdx: this.input.idx}
   },
-  _interleave: function(mode1, part1, mode2, part2 /* ..., moden, partn */) {
+  _interleave: function(/* mode1, part1, mode2, part2, ..., moden, partn */) {
     var currInput = this.input, ans = []
     for (var idx = 0; idx < arguments.length; idx += 2)
       ans[idx / 2] = (arguments[idx] == "*" || arguments[idx] == "+") ? [] : undefined

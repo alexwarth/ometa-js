@@ -90,9 +90,10 @@ ometa BSOMetaTranslator {
   Or         transFn*:xs                   -> ['this._or(',  xs.join(','), ')']                                    .join(''),
   XOr        transFn*:xs                       {xs.unshift((this.name + "." + this.rName).toProgramString())}
                                            -> ['this._xor(', xs.join(','), ')']                                    .join(''),
-  And        notLast(#trans)*:xs trans:y
-             {xs.push('return ' + y)}      -> ['(function(){', xs.join(';'), '}).call(this)']                      .join(''),
-  And                                      -> 'undefined',
+  Seq        notLast(#trans)*:xs trans:y
+             {xs.push('return ' + y)}      -> xs.join(';'),
+  Seq                                      -> 'undefined',
+  And        Seq:xs                        -> ['(function(){', xs, '}).call(this)']                                .join(''),
   Opt        transFn:x                     -> ['this._opt(',           x, ')']                                     .join(''),
   Many       transFn:x                     -> ['this._many(',          x, ')']                                     .join(''),
   Many1      transFn:x                     -> ['this._many1(',         x, ')']                                     .join(''),
@@ -119,7 +120,9 @@ ometa BSOMetaTranslator {
   params   = [string+:vs]                  -> vs.join(',')
            | []                            -> '',
   trans    = [:t apply(t):ans]             -> ans,
-  transFn  = trans:x                       -> ['(function(){return ', x, '})']                                     .join('')
+  transFn  = ( ['And' Seq:x]
+             | trans:x {['return ', x].join('')}:x
+             )                             -> ['(function(){', x, '})']                                            .join('')
 }
 BSOMetaTranslator.jumpTableCode = function(cases) {
   var buf = new StringBuffer()

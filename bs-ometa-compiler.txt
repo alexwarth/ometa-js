@@ -107,7 +107,10 @@ ometa BSOMetaTranslator {
   Interleave intPart*:xs                   -> ['this._interleave(', xs.join(','), ')']                             .join(''),
   
   Rule       :name {this.rName = name}
-             locals:ls trans:body          -> ['\n"', name, '":function(){', ls, 'return ', body, '}']             .join(''),
+             locals:ls
+             ( ['And' Seq:body]
+             | trans:body {['return ', body].join('')}:body
+             )                             -> ['\n"', name, '":function(){', ls, body, '}']             .join(''),
   Grammar    :name :sName
              {this.name = name}
              {this.sName = sName}

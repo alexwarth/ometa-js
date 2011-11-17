@@ -108,7 +108,9 @@ ometa BSOMetaTranslator {
   
   Rule       :name {this.rName = name}
              params:ps locals:ls
-			 trans:body                    -> ['\n"', name, '":function(', ps, '){', ls, 'return ', body, '}']             .join(''),
+             ( ['And' Seq:body]
+             | trans:body {['return ', body].join('')}:body
+             )                             -> ['\n"', name, '":function(', ps, '){', ls, body, '}']             .join(''),
   Grammar    :name :sName
              {this.name = name}
              {this.sName = sName}

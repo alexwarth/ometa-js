@@ -496,6 +496,9 @@ OMeta = {
       this.input = listyObj.toOMInputStream()
       return this._apply(aRule)
     }
+    m.match = function(obj, aRule) {
+      return this.matchAll([obj], aRule)
+    }
     return m
   }
 }

@@ -37,7 +37,7 @@ ometa Calc {
   expr     = addExpr
 }
 
-Calc.matchAll('6**(4+3)', 'expr')
+Calc.matchAll('6*(4+3)', 'expr')
 
 
 

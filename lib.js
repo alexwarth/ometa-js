@@ -29,18 +29,6 @@ printOn = function(x, ws) {
 
 Array.prototype.toString = function() { var ws = "".writeStream(); printOn(this, ws); return ws.contents() }
 
-// delegation
-
-objectThatDelegatesTo = function(x, props) {
-  var f = function() { }
-  f.prototype = x
-  var r = new f()
-  for (var p in props)
-    if (props.hasOwnProperty(p))
-      r[p] = props[p]
-  return r
-}
-
 // some reflective stuff
 
 ownPropertyNames = function(x) {
@@ -51,13 +39,6 @@ ownPropertyNames = function(x) {
   return r
 }
 
-isImmutable = function(x) {
-   return x === null || x === undefined || typeof x === "boolean" || typeof x === "number" || typeof x === "string"
-}
-
-String.prototype.digitValue  = function() { return this.charCodeAt(0) - "0".charCodeAt(0) }
-
-isSequenceable = function(x) { return typeof x == "string" || x.constructor === Array }
 
 // some functional programming stuff
 
@@ -158,20 +139,3 @@ String.prototype.toProgramString = function() {
 
 function tempnam(s) { return (s ? s : "_tmpnam_") + tempnam.n++ }
 tempnam.n = 0
-
-// unique tags for objects (useful for making "hash tables")
-
-getTag = (function() {
-  var numIdx = 0
-  return function(x) {
-    if (x === null || x === undefined)
-      return x
-    switch (typeof x) {
-      case "boolean": return x == true ? "Btrue" : "Bfalse"
-      case "string":  return "S" + x
-      case "number":  return "N" + x
-      default:        return x.hasOwnProperty("_id_") ? x._id_ : x._id_ = "R" + numIdx++
-    }
-  }
-})()
-

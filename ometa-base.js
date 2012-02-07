@@ -35,6 +35,50 @@ M = objectThatDelegatesTo(OMeta, {
 M.matchAll("123456789", "number")
 */
 
+
+
+
+
+// delegation
+
+objectThatDelegatesTo = function(x, props) {
+  var f = function() { }
+  f.prototype = x
+  var r = new f()
+  for (var p in props)
+    if (props.hasOwnProperty(p))
+      r[p] = props[p]
+  return r
+}
+
+// some reflective stuff
+
+isImmutable = function(x) {
+   return x === null || x === undefined || typeof x === "boolean" || typeof x === "number" || typeof x === "string"
+}
+
+isSequenceable = function(x) { return typeof x == "string" || x.constructor === Array }
+
+// This is not technically required by ometa-base, however it is documented as the way to do certain things in OMeta - so is commonly used.
+String.prototype.digitValue  = function() { return this.charCodeAt(0) - "0".charCodeAt(0) }
+
+// unique tags for objects (useful for making "hash tables")
+
+getTag = (function() {
+  var numIdx = 0
+  return function(x) {
+    if (x === null || x === undefined)
+      return x
+    switch (typeof x) {
+      case "boolean": return x == true ? "Btrue" : "Bfalse"
+      case "string":  return "S" + x
+      case "number":  return "N" + x
+      default:        return x.hasOwnProperty("_id_") ? x._id_ : x._id_ = "R" + numIdx++
+    }
+  }
+})()
+
+
 // the failure exception
 
 fail = { toString: function() { return "match failed" } }
@@ -561,44 +605,3 @@ OMeta = {
     return m
   }
 }
-
-
-
-// delegation
-
-objectThatDelegatesTo = function(x, props) {
-  var f = function() { }
-  f.prototype = x
-  var r = new f()
-  for (var p in props)
-    if (props.hasOwnProperty(p))
-      r[p] = props[p]
-  return r
-}
-
-// some reflective stuff
-
-isImmutable = function(x) {
-   return x === null || x === undefined || typeof x === "boolean" || typeof x === "number" || typeof x === "string"
-}
-
-isSequenceable = function(x) { return typeof x == "string" || x.constructor === Array }
-
-// This is not technically required by ometa-base, however it is documented as the way to do certain things in OMeta - so is commonly used.
-String.prototype.digitValue  = function() { return this.charCodeAt(0) - "0".charCodeAt(0) }
-
-// unique tags for objects (useful for making "hash tables")
-
-getTag = (function() {
-  var numIdx = 0
-  return function(x) {
-    if (x === null || x === undefined)
-      return x
-    switch (typeof x) {
-      case "boolean": return x == true ? "Btrue" : "Bfalse"
-      case "string":  return "S" + x
-      case "number":  return "N" + x
-      default:        return x.hasOwnProperty("_id_") ? x._id_ : x._id_ = "R" + numIdx++
-    }
-  }
-})()

@@ -175,7 +175,7 @@ OMeta = {
         this.__possibilities[idx] = {}
       }
       this.__possibilities[idx][rule] = ruleArgs
-      }
+    }
   },
   
   _apply: function(rule) {
@@ -291,9 +291,11 @@ OMeta = {
         throw f
       }
       this.input = origInput
-      this.__possibilities = origPoss
       return true
     }
+	finally {
+      this.__possibilities = origPoss
+	}
     throw fail
   },
   _lookahead: function(x) {

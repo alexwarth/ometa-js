@@ -281,9 +281,11 @@ OMeta = {
     throw fail
   },
   _not: function(x) {
-    var origInput = this.input
-    var origPoss = this.__possibilities
+    var origInput = this.input,
+		origPoss = this.__possibilities,
+		origTokens = this._tokens
     this.__possibilities = []
+    this._tokens = []
     try { x.call(this) }
     catch (f) {
       if (f != fail) {
@@ -295,6 +297,7 @@ OMeta = {
     }
 	finally {
       this.__possibilities = origPoss
+      this._tokens = origTokens
 	}
     throw fail
   },

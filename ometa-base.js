@@ -150,9 +150,12 @@ Failer.prototype.used = false
 
 OMeta = {
   _addToken: function(startIdx, endIdx, rule, ruleArgs) {
-    if(this.keyTokens != undefined) {
-      if(startIdx != endIdx) {
-        if(this.keyTokens.indexOf(rule)!=-1) {
+    if(this.keyTokens == undefined) {
+      this._addToken = function(){}
+    }
+    else {
+      this._addToken = function(startIdx, endIdx, rule, ruleArgs) {
+        if(startIdx != endIdx && this.keyTokens.indexOf(rule)!=-1) {
           if(this._tokens == undefined) {
             this._tokens = []
           }
@@ -162,6 +165,7 @@ OMeta = {
           this._tokens[startIdx].push([endIdx, rule, ruleArgs])
         }
       }
+      this._addToken(startIdx, endIdx, rule, ruleArgs)
     }
   },
   

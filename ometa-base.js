@@ -236,7 +236,7 @@ OMeta = {
     var ruleFnArity = ruleFn.length
     var ruleArgs = Array.prototype.slice.call(arguments, 1, ruleFnArity + 1)
     this._storePossibility(rule, ruleArgs)
-    for (var idx = arguments.length - 1; idx >= ruleFnArity + 1; idx--) // prepend "extra" arguments in reverse order
+    for (var idx = arguments.length - 1; idx > ruleFnArity; idx--) // prepend "extra" arguments in reverse order
       this._prependInput(arguments[idx])
     var origIdx = this.input.idx
     var ans = ruleFnArity == 0 ?

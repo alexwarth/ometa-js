@@ -166,15 +166,23 @@ OMeta = {
   },
   
   _storePossibility: function(rule, ruleArgs) {
-    if(this.possMap != undefined && this.possMap.hasOwnProperty(rule)) {
-      if(this.__possibilities == undefined) {
-        this.__possibilities = []
+    if(this.possMap == undefined) {
+      this._storePossibility = function(){}
+    }
+    else {
+      this._storePossibility = function(rule, ruleArgs) {
+        if(this.possMap.hasOwnProperty(rule)) {
+          if(this.__possibilities == undefined) {
+            this.__possibilities = []
+          }
+          var idx = this.input.idx;
+          if(this.__possibilities[idx] == undefined) {
+            this.__possibilities[idx] = {}
+          }
+          this.__possibilities[idx][rule] = ruleArgs
+        }
       }
-      var idx = this.input.idx;
-      if(this.__possibilities[idx] == undefined) {
-        this.__possibilities[idx] = {}
-      }
-      this.__possibilities[idx][rule] = ruleArgs
+      this._storePossibility(rule, ruleArgs)
     }
   },
   

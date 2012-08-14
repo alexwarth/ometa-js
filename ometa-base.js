@@ -154,11 +154,11 @@ OMeta = {
       this._addToken = function(){}
     }
     else {
+      if(this._tokens == undefined) {
+        this._tokens = []
+      }
       this._addToken = function(startIdx, endIdx, rule, ruleArgs) {
         if(startIdx != endIdx && this.keyTokens.indexOf(rule)!=-1) {
-          if(this._tokens == undefined) {
-            this._tokens = []
-          }
           if(this._tokens[startIdx] == undefined) {
             this._tokens[startIdx] = []
           }
@@ -174,11 +174,11 @@ OMeta = {
       this._storePossibility = function(){}
     }
     else {
+      if(this.__possibilities == undefined) {
+        this.__possibilities = []
+      }
       this._storePossibility = function(rule, ruleArgs) {
         if(this.possMap.hasOwnProperty(rule)) {
-          if(this.__possibilities == undefined) {
-            this.__possibilities = []
-          }
           var idx = this.input.idx;
           if(this.__possibilities[idx] == undefined) {
             this.__possibilities[idx] = {}

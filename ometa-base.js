@@ -35,6 +35,50 @@ M = objectThatDelegatesTo(OMeta, {
 M.matchAll("123456789", "number")
 */
 
+
+
+
+
+// delegation
+
+objectThatDelegatesTo = function(x, props) {
+  var f = function() { }
+  f.prototype = x
+  var r = new f()
+  for (var p in props)
+    if (props.hasOwnProperty(p))
+      r[p] = props[p]
+  return r
+}
+
+// some reflective stuff
+
+isImmutable = function(x) {
+   return x === null || x === undefined || typeof x === "boolean" || typeof x === "number" || typeof x === "string"
+}
+
+isSequenceable = function(x) { return typeof x == "string" || x.constructor === Array }
+
+// This is not technically required by ometa-base, however it is documented as the way to do certain things in OMeta - so is commonly used.
+String.prototype.digitValue  = function() { return this.charCodeAt(0) - "0".charCodeAt(0) }
+
+// unique tags for objects (useful for making "hash tables")
+
+getTag = (function() {
+  var numIdx = 0
+  return function(x) {
+    if (x === null || x === undefined)
+      return x
+    switch (typeof x) {
+      case "boolean": return x == true ? "Btrue" : "Bfalse"
+      case "string":  return "S" + x
+      case "number":  return "N" + x
+      default:        return x.hasOwnProperty("_id_") ? x._id_ : x._id_ = "R" + numIdx++
+    }
+  }
+})()
+
+
 // the failure exception
 
 fail = { toString: function() { return "match failed" } }
@@ -105,6 +149,47 @@ Failer.prototype.used = false
 // the OMeta "class" and basic functionality
 
 OMeta = {
+  _addToken: function(startIdx, endIdx, rule, ruleArgs) {
+    if(this.keyTokens == undefined) {
+      this._addToken = function(){}
+    }
+    else {
+      if(this._tokens == undefined) {
+        this._tokens = []
+      }
+      this._addToken = function(startIdx, endIdx, rule, ruleArgs) {
+        if(startIdx != endIdx && this.keyTokens.indexOf(rule)!=-1) {
+          if(this._tokens[startIdx] == undefined) {
+            this._tokens[startIdx] = []
+          }
+          this._tokens[startIdx].push([endIdx, rule, ruleArgs])
+        }
+      }
+      this._addToken(startIdx, endIdx, rule, ruleArgs)
+    }
+  },
+  
+  _storePossibility: function(rule, ruleArgs) {
+    if(this.possMap == undefined) {
+      this._storePossibility = function(){}
+    }
+    else {
+      if(this.__possibilities == undefined) {
+        this.__possibilities = []
+      }
+      this._storePossibility = function(rule, ruleArgs) {
+        if(this.possMap.hasOwnProperty(rule)) {
+          var idx = this.input.idx;
+          if(this.__possibilities[idx] == undefined) {
+            this.__possibilities[idx] = {}
+          }
+          this.__possibilities[idx][rule] = ruleArgs
+        }
+      }
+      this._storePossibility(rule, ruleArgs)
+    }
+  },
+  
   _apply: function(rule) {
     var memoRec = this.input.memo[rule]
     if (memoRec == undefined) {
@@ -113,6 +198,7 @@ OMeta = {
       if (this[rule] === undefined)
         throw 'tried to apply undefined rule "' + rule + '"'
       this.input.memo[rule] = failer
+      this._storePossibility(rule, [])
       this.input.memo[rule] = memoRec = {ans: this[rule].call(this), nextInput: this.input}
       if (failer.used) {
         var sentinel = this.input
@@ -126,12 +212,15 @@ OMeta = {
             memoRec.nextInput = this.input
           }
           catch (f) {
-            if (f != fail)
+            if (f != fail) {
+              console.log(f.stack)
               throw f
+            }
             break
           }
         }
       }
+      this._addToken(origInput.idx, this.input.idx, rule, []);
     }
     else if (memoRec instanceof Failer) {
       memoRec.used = true
@@ -145,25 +234,35 @@ OMeta = {
   _applyWithArgs: function(rule) {
     var ruleFn = this[rule]
     var ruleFnArity = ruleFn.length
-    for (var idx = arguments.length - 1; idx >= ruleFnArity + 1; idx--) // prepend "extra" arguments in reverse order
+    var ruleArgs = Array.prototype.slice.call(arguments, 1, ruleFnArity + 1)
+    this._storePossibility(rule, ruleArgs)
+    for (var idx = arguments.length - 1; idx > ruleFnArity; idx--) // prepend "extra" arguments in reverse order
       this._prependInput(arguments[idx])
-    return ruleFnArity == 0 ?
+    var origIdx = this.input.idx
+    var ans = ruleFnArity == 0 ?
              ruleFn.call(this) :
-             ruleFn.apply(this, Array.prototype.slice.call(arguments, 1, ruleFnArity + 1))
+             ruleFn.apply(this, ruleArgs)
+    this._addToken(origIdx, this.input.idx, rule, ruleArgs)
+    return ans
   },
   _superApplyWithArgs: function(recv, rule) {
     var ruleFn = this[rule]
     var ruleFnArity = ruleFn.length
+    var ruleArgs = Array.prototype.slice.call(arguments, 2, ruleFnArity + 2)
+    this._storePossibility(rule, ruleArgs)
     for (var idx = arguments.length - 1; idx > ruleFnArity + 2; idx--) // prepend "extra" arguments in reverse order
       recv._prependInput(arguments[idx])
-    return ruleFnArity == 0 ?
+    var origIdx = recv.input.idx
+    var ans = ruleFnArity == 0 ?
              ruleFn.call(recv) :
-             ruleFn.apply(recv, Array.prototype.slice.call(arguments, 2, ruleFnArity + 2))
+             ruleFn.apply(recv, ruleArgs)
+    this._addToken(origIdx, recv.input.idx, rule, ruleArgs)
+    return ans
   },
   _prependInput: function(v) {
     this.input = new OMInputStream(v, this.input)
   },
-
+  
   // if you want your grammar (and its subgrammars) to memoize parameterized rules, invoke this method on it:
   memoizeParameterizedRules: function() {
     this._prependInput = function(v) {
@@ -194,14 +293,24 @@ OMeta = {
     throw fail
   },
   _not: function(x) {
-    var origInput = this.input
+    var origInput = this.input,
+		origPoss = this.__possibilities,
+		origTokens = this._tokens
+    this.__possibilities = []
+    this._tokens = []
     try { x.call(this) }
     catch (f) {
-      if (f != fail)
+      if (f != fail) {
+        console.log(f.stack)
         throw f
+      }
       this.input = origInput
       return true
     }
+	finally {
+      this.__possibilities = origPoss
+      this._tokens = origTokens
+	}
     throw fail
   },
   _lookahead: function(x) {
@@ -215,8 +324,10 @@ OMeta = {
     for (var idx = 0; idx < arguments.length; idx++)
       try { this.input = origInput; return arguments[idx].call(this) }
       catch (f) {
-        if (f != fail)
+        if (f != fail) {
+          console.log(f.stack)
           throw f
+        }
       }
     throw fail
   },
@@ -231,8 +342,10 @@ OMeta = {
         newInput = this.input
       }
       catch (f) {
-        if (f != fail)
+        if (f != fail) {
+          console.log(f.stack)
           throw f
+      }
       }
       idx++
     }
@@ -250,8 +363,10 @@ OMeta = {
     var origInput = this.input, ans
     try { ans = x.call(this) }
     catch (f) {
-      if (f != fail)
+      if (f != fail) {
+        console.log(f.stack)
         throw f
+      }
       this.input = origInput
     }
     return ans
@@ -262,8 +377,10 @@ OMeta = {
       var origInput = this.input
       try { ans.push(x.call(this)) }
       catch (f) {
-        if (f != fail)
+        if (f != fail) {
+          console.log(f.stack)
           throw f
+        }
         this.input = origInput
         break
       }
@@ -313,8 +430,10 @@ OMeta = {
             break
           }
           catch (f) {
-            if (f != fail)
+            if (f != fail) {
+              console.log(f.stack)
               throw f
+            }
             // if this (failed) part's mode is "1" or "+", we're not done yet
             allDone = allDone && (arguments[idx] == "*" || arguments[idx] == "?")
           }
@@ -480,6 +599,7 @@ OMeta = {
         }
         return matchFailed(m, input.idx)
       }
+      console.log(f.stack)
       throw f
     }
   },
@@ -495,6 +615,9 @@ OMeta = {
     m.matchAll = function(listyObj, aRule) {
       this.input = listyObj.toOMInputStream()
       return this._apply(aRule)
+    }
+    m.match = function(obj, aRule) {
+      return this.matchAll([obj], aRule)
     }
     return m
   }

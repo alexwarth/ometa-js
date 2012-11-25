@@ -24,7 +24,7 @@ ometa BSNullOptimization {
   IdxConsBy  trans:x                       -> ['IdxConsBy', x],
   JumpTable  ([:c trans:e] -> [c, e])*:ces -> ['JumpTable'].concat(ces),
   Interleave ([:m trans:p] -> [m, p])*:xs  -> ['Interleave'].concat(xs),
-  Rule       :name :ls trans:body          -> ['Rule', name, ls, body]
+  Rule       :name :ps :ls trans:body       -> ['Rule', name, ps, ls, body]
 }
 BSNullOptimization.initialize = function() { this._didSomething = false }
 
@@ -39,6 +39,12 @@ ometa BSAssociativeOptimization <: BSNullOptimization {
   transInside :t = [exactly(t) transInside(t):xs] transInside(t):ys setHelped -> xs.concat(ys)
                  | trans:x                        transInside(t):xs           -> [x].concat(xs)
                  |                                                            -> []
+}
+
+ometa BSPushDownSet <: BSNullOptimization {
+  Set  :n ['And' notLast('trans')*:xs trans:y]
+                            setHelped -> ['And'].concat(xs).concat([['Set', n, y]]),
+  Set  :n trans:v                     -> ['Set', n, v]
 }
 
 ometa BSSeqInliner <: BSNullOptimization {
@@ -88,6 +94,7 @@ ometa BSOMetaOptimizer {
   optimizeRule    = :r (BSSeqInliner.optimize(r):r | empty)
                        ( BSAssociativeOptimization.optimize(r):r
                        | BSJumpTableOptimization.optimize(r):r
+                       | BSPushDownSet.optimize(r):r
                        )*                                        -> r
 }
 

@@ -154,7 +154,7 @@ OMeta = {
   _superApplyWithArgs: function(recv, rule) {
     var ruleFn = this[rule]
     var ruleFnArity = ruleFn.length
-    for (var idx = arguments.length - 1; idx > ruleFnArity + 2; idx--) // prepend "extra" arguments in reverse order
+    for (var idx = arguments.length - 1; idx >= ruleFnArity + 2; idx--) // prepend "extra" arguments in reverse order
       recv._prependInput(arguments[idx])
     return ruleFnArity == 0 ?
              ruleFn.call(recv) :

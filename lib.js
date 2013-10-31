@@ -61,20 +61,6 @@ isSequenceable = function(x) { return typeof x == "string" || x.constructor === 
 
 // some functional programming stuff
 
-Array.prototype.map = function(f) {
-  var r = []
-  for (var idx = 0; idx < this.length; idx++)
-    r[idx] = f(this[idx])
-  return r
-}
-
-Array.prototype.reduce = function(f, z) {
-  var r = z
-  for (var idx = 0; idx < this.length; idx++)
-    r = f(r, this[idx])
-  return r
-}
-
 Array.prototype.delimWith = function(d) {
   return this.reduce(
     function(xs, x) {
